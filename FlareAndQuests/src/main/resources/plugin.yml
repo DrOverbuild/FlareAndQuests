@@ -1,0 +1,12 @@
+name: FlareAndQuests
+main: com.patrickzhong.main.FlareAndQuests
+version: 1
+author: ShowbizLocket61
+
+commands:
+  rq: 
+    description: Main command for Rank Quests
+    usage: /<command>
+  flare: 
+    description: Main command for Flares
+    usage: /<command>
