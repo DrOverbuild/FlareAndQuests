@@ -15,6 +15,7 @@ import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
@@ -138,6 +139,25 @@ public class RankQuest implements Listener {
 				is.setItemMeta(IM);
 				owner.updateInventory();
 			}
+			kill();
+		}
+	}
+	
+	@EventHandler
+	public void onQuit(PlayerQuitEvent ev){
+		if(ev.getPlayer().equals(owner)){
+			ItemMeta IM = is.getItemMeta();
+			int index = IM.getDisplayName().indexOf("(") - 3;
+			if(index >= 0){
+				IM.setDisplayName(IM.getDisplayName().substring(0, index));
+				is.setItemMeta(IM);
+				owner.updateInventory();
+			}
+			plugin.conf.load();
+			String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("RQ Quit Broadcast")).replace("{player}", owner.getName());
+			if(!message.toLowerCase().equals("none"))
+				for(Player p : Bukkit.getOnlinePlayers())
+					p.sendMessage(message);
 			kill();
 		}
 	}
