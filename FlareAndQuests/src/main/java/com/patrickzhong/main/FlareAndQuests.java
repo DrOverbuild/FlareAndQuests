@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,10 +14,13 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class FlareAndQuests extends JavaPlugin implements Listener {
 	
@@ -29,11 +33,22 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	
 	HashMap<Player, Location> left = new HashMap<Player, Location>();
 	HashMap<Player, Location> right = new HashMap<Player, Location>();
+	HashMap<Player, RankQuest> QIP = new HashMap<Player, RankQuest>();
+	
+	HashMap<Player, Integer> deathsLeft = new HashMap<Player, Integer>();
 	
 	public void onEnable(){
 		this.getServer().getPluginManager().registerEvents(this, this);
 		HashMap<String, Object> defs = new HashMap<String, Object>();
-		defs.put("Broadcast", "&e{player} &7has started a rank quest!");
+		defs.put("RQ Start Broadcast", "&e{player} &7has started a rank quest!");
+		defs.put("RQ Complete Broadcast", "&e{player} &7has completed their rank quest!");
+		defs.put("RQ Lost Broadcast", "&e{player} &7has lost their rank quest!");
+		defs.put("RQ Reset Broadcast", "&e{player} &7has reset their rank quest!");
+		
+		defs.put("Deaths Allowed For Keep-Inv", 1);
+		defs.put("Keep-Inv Duration", 60);
+		
+		defs.put("Rank Quest Duration", 30);
 		conf = new Config(this, defs);
 	}
 	
@@ -45,7 +60,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			if(!(sender instanceof Player))
 				sender.sendMessage(DR+"You must be a player.");
 			else if(args.length < 1) // TODO help page
-				sender.sendMessage(DR+"Missing arguments.");
+				help(sender, a);
 			else if(!sender.hasPermission(cmd.getName().toLowerCase()+"."+args[0].toLowerCase()) && !sender.hasPermission("rq.*"))
 				sender.sendMessage(DR+"You need the permission "+R+"rq."+args[0].toLowerCase());
 			else if(args.length < 2){ // TODO check if command exists
@@ -57,6 +72,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 					((Player)sender).getInventory().addItem(i);
 					((Player)sender).updateInventory();
 				}
+				else if(args[0].equalsIgnoreCase("help"))
+					help(sender, a);
+				else 
+					sender.sendMessage(DR+"Missing arguments.");
 			}
 			else {
 				conf.load();
@@ -74,7 +93,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							player.sendMessage(G+"Successfully created a rank quest named "+Y+args[1]);
 							player.sendMessage(G+"Next step: select a region using "+Y+"/rq wand"+G+" and "+Y+"/rq setregion "+args[1]);
 						}
-						// Successful CREATE (RQ)
+						// End CREATE (RQ)
 					}
 					else if(b){
 						// Start CREATE (FLARE)
@@ -99,7 +118,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							conf.save();
 							player.sendMessage(G+"Successfully deleted "+Y+args[1]);
 						}
-						// Successful DELETE (RQ)
+						// End DELETE (RQ)
 					}
 					else if(b){
 						// Start DELETE (FLARE)
@@ -170,7 +189,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								cmds.add(newCMD);
 								conf.config.set("Quests."+args[1]+".Commands", cmds);
 								conf.save();
-								player.sendMessage(G+"Successfully added "+Y+"/"+newCMD+G+" to the quest "+Y+args[1]);
+								player.sendMessage(G+"Successfully added "+Y+"/"+ChatColor.translateAlternateColorCodes('&', newCMD)+G+" to the quest "+Y+args[1]);
 								player.sendMessage(G+"You're all done setting up the rank quest "+Y+args[1]+G+"!");
 								// End ADDVCOMMAND (RQ)
 							}
@@ -196,12 +215,69 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		return true;
 	}
 	
+	private void help(CommandSender sender, boolean rq){
+		String SEP = ChatColor.WHITE+"- "+ChatColor.GRAY;
+		String BEG = ChatColor.GRAY+"- "+ChatColor.AQUA;
+		sender.sendMessage(ChatColor.GRAY+"==============  [ "+ChatColor.AQUA+"Flares and Quests"+ChatColor.GRAY+" ]  =============");
+		if(rq){
+			sender.sendMessage(BEG+"/rq help "+SEP+"Display this help page.");
+			sender.sendMessage(BEG+"/flare help "+SEP+"Display flare help page.");
+			sender.sendMessage(BEG+"/rq create <name> "+SEP+"Creates a rank quest with the item in your hand.");
+			sender.sendMessage(BEG+"/rq delete <name> "+SEP+"Deletes a rank quest.");
+			sender.sendMessage(BEG+"/rq wand "+SEP+"Gives you a selection wand.");
+			sender.sendMessage(BEG+"/rq setregion <name> "+SEP+"Sets the region to your selection.");
+			sender.sendMessage(BEG+"/rq setvoucher <name> "+SEP+"Sets the voucher.");
+			sender.sendMessage(BEG+"/rq setvitems <name> "+SEP+"Sets the reward items.");
+			sender.sendMessage(BEG+"/rq addvcommand <name> <command> "+SEP+"Adds a reward command (executed by console).");
+		}
+		else {
+			sender.sendMessage(BEG+"/flare help "+SEP+"Display this help page.");
+			sender.sendMessage(BEG+"/rq help "+SEP+"Display rank quest help page.");
+			sender.sendMessage(BEG+"/flare create <name> "+SEP+"Creates a flare with the item in your hand.");
+			sender.sendMessage(BEG+"/flare delete <name> "+SEP+"Deletes a flare.");
+			sender.sendMessage(BEG+"/flare setinventory <name> "+SEP+"Sets the chest inventory of a flare.");
+		}
+	}
+	
+	public void startLull(final Player player){
+		int dA = conf.config.getInt("Deaths Allowed For Keep-Inv");
+		int dD = conf.config.getInt("Keep-Inv Duration");
+		
+		player.sendMessage(G+"You now have "+Y+dD+G+" seconds or "+Y+dA+G+" deaths of keep-inventory.");
+		
+		deathsLeft.put(player, dA);
+		new BukkitRunnable(){
+			public void run(){
+				if(deathsLeft.containsKey(player)){
+					deathsLeft.remove(player);
+					player.sendMessage(G+"Your keep-inventory period has expired.");
+				}
+			}
+		}.runTaskLater(this, dD * 20);
+	}
+	
 	public boolean inside(Location loc, Location one, Location two){
 		boolean worlds = loc.getWorld().equals(one.getWorld()) && loc.getWorld().equals(two.getWorld());
-		boolean x = Math.signum(loc.getX()-one.getX()) == -1 * Math.signum(loc.getX()-two.getX());
+		
+		/*boolean x = Math.signum(loc.getX()-one.getX()) == -1 * Math.signum(loc.getX()-two.getX());
 		boolean y = Math.signum(loc.getY()-one.getY()) == -1 * Math.signum(loc.getY()-two.getY());
-		boolean z = Math.signum(loc.getZ()-one.getZ()) == -1 * Math.signum(loc.getZ()-two.getZ());
+		boolean z = Math.signum(loc.getZ()-one.getZ()) == -1 * Math.signum(loc.getZ()-two.getZ());*/
+		boolean x = inside1D(loc.getX(), one.getBlockX(), two.getBlockX());
+		boolean y = inside1D(loc.getY(), one.getBlockY(), two.getBlockY());
+		boolean z = inside1D(loc.getZ(), one.getBlockZ(), two.getBlockZ());
 		return worlds && x && y && z;
+	}
+	
+	private boolean inside1D(double a, double b, double c){
+		return (b <= c && d(s(b - a), s(c + 1 - a))) || (b > c && d(s(b + 1 - a), s(c - a)));
+	}
+	
+	private boolean d(double x, double y){
+		return x == 0 || y == 0 || x == -1 * y;
+	}
+	
+	private double s(double d){
+		return Math.signum(d);
 	}
 	
 	private String disp(ItemStack i){
@@ -210,6 +286,38 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		}
 		catch (Exception e){
 			return "";
+		}
+	}
+	
+	private boolean almost(ItemStack larger, ItemStack smaller, boolean disp){
+		
+		try {
+			ItemMeta l = larger.getItemMeta();
+			ItemMeta s = smaller.getItemMeta();
+			return larger.getType() == smaller.getType() && 
+					larger.getData().equals(smaller.getData()) && 
+					((disp && l.getDisplayName().contains(s.getDisplayName())) || (!disp && l.getDisplayName().equals(s.getDisplayName()))) && 
+					l.getLore().equals(s.getLore());
+		}
+		catch (Exception e){
+			return false;
+		}
+		
+	}
+	
+	@EventHandler
+	public void onDeath(PlayerDeathEvent ev){
+		if(deathsLeft.containsKey(ev.getEntity())){
+			int num = deathsLeft.get(ev.getEntity());
+			if(num > 0)
+				ev.setKeepInventory(true);
+			num--;
+			if(num <= 0){
+				deathsLeft.remove(ev.getEntity());
+				ev.getEntity().sendMessage(G+"Your keep-inventory period has expired.");
+			}
+			else
+				deathsLeft.put(ev.getEntity(), num);
 		}
 	}
 	
@@ -229,10 +337,52 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 				ev.getPlayer().sendMessage(G+"Set second position to "+Y+loc.getBlockX()+G+", "+Y+loc.getBlockY()+G+", "+Y+loc.getBlockZ()+G+" in "+Y+loc.getWorld().getName());
 			}
 		}
-		else if(disp.contains("Rank Quest")){
-			// TODO Match activation items & check if inside region(s)
-			ev.setCancelled(true);
-			new RankQuest(ev.getItem(), ev.getPlayer(), 30, this);
+		else {
+			if(ev.getItem() != null){
+				conf.load();
+				if(conf.config.contains("Flares")){
+					for(String key : conf.config.getConfigurationSection("Flares").getKeys(false)){
+						if(almost(ev.getItem(), conf.config.getItemStack("Flares."+key+".Activate"), false)){
+							// Matched to flare
+							// TODO launch flare
+							// TODO check warzone
+							ev.getPlayer().sendMessage(G+"Flare will be launched here.");
+							ev.setCancelled(true);
+							return;
+						}
+					}
+				}
+				if(conf.config.contains("Quests")){
+					for(String key : conf.config.getConfigurationSection("Quests").getKeys(false)){
+						ItemStack citem = conf.config.getItemStack("Quests."+key+".Activate");
+						ItemStack vitem;
+						
+						if(almost(ev.getItem(), citem, true)){
+							// Matched to Rank Quest
+							ev.setCancelled(true);
+							if(QIP.containsKey(ev.getPlayer()))
+								ev.getPlayer().sendMessage(DR+"You are already doing a rank quest!");
+							else if(!inside(ev.getPlayer().getLocation(), (Location)conf.config.get("Quests."+key+".First"), (Location)conf.config.get("Quests."+key+".Second")))
+								ev.getPlayer().sendMessage(DR+"You must be inside the proper region!");
+							else
+								QIP.put(ev.getPlayer(), new RankQuest(ev.getItem(), ev.getPlayer(), conf.config.getInt("Rank Quest Duration"), this, key));
+							return;
+						}
+						else if(almost(ev.getItem(), vitem = conf.config.getItemStack("Quests."+key+".Voucher"), false)){
+							// Matched to Voucher
+							ev.setCancelled(true);
+							Inventory inv = ev.getPlayer().getInventory();
+							inv.remove(ev.getItem());
+							for(ItemStack i : (List<ItemStack>)conf.config.getList("Quests."+key+".Rewards", new ArrayList<ItemStack>()))
+								inv.addItem(i);
+							ev.getPlayer().updateInventory();
+							if(conf.config.contains("Quests."+key+".Commands"))
+								for(String str : conf.config.getStringList("Quests."+key+".Commands"))
+									this.getServer().dispatchCommand(Bukkit.getConsoleSender(), ChatColor.translateAlternateColorCodes('&', str).replace("{player}", ev.getPlayer().getName()));
+						}
+					}
+				}
+			}
 		}
 	}
 

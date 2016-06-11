@@ -1,17 +1,23 @@
 package com.patrickzhong.main;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -21,14 +27,18 @@ public class RankQuest implements Listener {
 	Item im;
 	Player owner;
 	int timeLeft;
-	boolean running = true;
 	FlareAndQuests plugin;
 	BukkitTask timer;
+	String name;
 	
-	public RankQuest(final ItemStack item, final Player owner, int duration, FlareAndQuests plugin){
+	Location one;
+	Location two;
+	
+	public RankQuest(final ItemStack item, final Player owner, int duration, final FlareAndQuests plugin, final String name){
 		this.is = item;
 		this.owner = owner;
 		this.plugin = plugin;
+		this.name = name;
 		timeLeft = duration;
 		
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -44,28 +54,49 @@ public class RankQuest implements Listener {
 			timeLeft = Integer.parseInt(str.substring(str.indexOf("(")+1, str.indexOf(")")));
 		}
 		
+		plugin.conf.load();
+		one = (Location)plugin.conf.config.get("Quests."+name+".First");
+		two = (Location)plugin.conf.config.get("Quests."+name+".Second");
+		
+		String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("RQ Start Broadcast")).replace("{player}", owner.getName());
+		if(!message.toLowerCase().equals("none"))
+			for(Player p : Bukkit.getOnlinePlayers())
+				p.sendMessage(message);
+			
 		timer = new BukkitRunnable(){
 			public void run(){
-				if(running){
-					timeLeft--;
-					ItemMeta IM = item.getItemMeta();
-					String snip = IM.getDisplayName().substring(0, IM.getDisplayName().indexOf("(")+1);
-					IM.setDisplayName(snip+ChatColor.YELLOW+timeLeft+ChatColor.GRAY+")");
-					item.setItemMeta(IM);
-					owner.updateInventory();
+				timeLeft--;
+				ItemMeta IM = item.getItemMeta();
+				String snip = IM.getDisplayName().substring(0, IM.getDisplayName().indexOf("(")+1);
+				IM.setDisplayName(snip+ChatColor.YELLOW+timeLeft+ChatColor.GRAY+")");
+				item.setItemMeta(IM);
+				owner.updateInventory();
+				
+				if(timeLeft == 0){
+					plugin.conf.load();
+					owner.getInventory().setItem(owner.getInventory().first(is), plugin.conf.config.getItemStack("Quests."+name+".Voucher"));
 					
-					if(timeLeft == 0){
-						// Voucher
-						owner.sendMessage(ChatColor.GREEN+"Rank quest completed.");
-						this.cancel();
-					}
+					String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("RQ Complete Broadcast")).replace("{player}", owner.getName());
+					if(!message.toLowerCase().equals("none"))
+						for(Player p : Bukkit.getOnlinePlayers())
+							p.sendMessage(message);
+					
+					plugin.startLull(owner);
+					kill();
+					this.cancel();
 				}
 			}
 		}.runTaskTimer(plugin, 20, 20);
 	}
 	
 	public boolean isActive(Player player){
-		return player.equals(owner) && running == true;
+		return player.equals(owner);
+	}
+	
+	public void kill(){
+		timer.cancel();
+		plugin.QIP.remove(owner);
+		HandlerList.unregisterAll(this);
 	}
 	
 	@EventHandler
@@ -76,27 +107,51 @@ public class RankQuest implements Listener {
 			int index = ev.getDrops().indexOf(is);
 			is.setAmount(am);
 			if(index > -1){
-				ev.getDrops().remove(index);
-				is.setAmount(1);
-				im = owner.getWorld().dropItem(owner.getLocation(), is);
+				plugin.conf.load();
+				String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("RQ Lost Broadcast")).replace("{player}", owner.getName());
+				if(!message.toLowerCase().equals("none"))
+					for(Player p : Bukkit.getOnlinePlayers())
+						p.sendMessage(message);
+				kill();
 			}
-			running = false;
+		}
+	}
+	
+	@EventHandler
+	public void onInvClick(InventoryClickEvent ev){
+		if(ev.getWhoClicked().equals(owner) && ev.getCurrentItem() != null && ev.getCurrentItem().equals(is))
+			ev.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void onMove(PlayerMoveEvent ev){
+		if(ev.getPlayer().equals(owner) && !plugin.inside(ev.getTo(), one, two)){
+			plugin.conf.load();
+			String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("RQ Reset Broadcast")).replace("{player}", owner.getName());
+			if(!message.toLowerCase().equals("none"))
+				for(Player p : Bukkit.getOnlinePlayers())
+					p.sendMessage(message);
+			ItemMeta IM = is.getItemMeta();
+			int index = IM.getDisplayName().indexOf("(") - 3;
+			if(index >= 0){
+				IM.setDisplayName(IM.getDisplayName().substring(0, index));
+				is.setItemMeta(IM);
+				owner.updateInventory();
+			}
+			kill();
 		}
 	}
 	
 	@EventHandler
 	public void onDrop(PlayerDropItemEvent ev){
 		if(ev.getPlayer().equals(owner) && ev.getItemDrop().getItemStack().isSimilar(is)){
-			running = false;
-			im = ev.getItemDrop();
+			plugin.conf.load();
+			String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("RQ Lost Broadcast")).replace("{player}", owner.getName());
+			if(!message.toLowerCase().equals("none"))
+				for(Player p : Bukkit.getOnlinePlayers())
+					p.sendMessage(message);
+			kill();
 		}
-			
-	}
-
-	@EventHandler
-	public void onPick(PlayerPickupItemEvent ev){
-		if(ev.getItem().equals(im))
-			owner = ev.getPlayer();
 	}
 	
 }
