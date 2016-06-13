@@ -26,21 +26,32 @@ public class Flare {
 	boolean manual = false;
 	double vel = 0.0;
 	
-	public Flare(Player player, final FlareAndQuests plugin, final String name){
+	public Flare(ItemStack is, Player player, final FlareAndQuests plugin, final String name){
 		
 		double r = plugin.conf.config.getDouble("Flare Drop Radius");
 		Location loc = player.getLocation().add(0, 5, 0);
 		Location rloc = randomLoc(loc, r);
 		int count = 0;
+		int max = plugin.conf.config.getInt("Flare Max Tries");
 		
 		while(!plugin.isWarzone(rloc)){
 			rloc = randomLoc(loc, r);
 			count++;
-			if(count >= 100){
-				player.sendMessage(plugin.DR+"Drop failed.");
+			if(count >= max){
+				String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("Flare Drop Failed Message")).replace("{player}", player.getName());
+				if(!message.toLowerCase().equals("none"))
+					player.sendMessage(message);
+				
+					//player.sendMessage(plugin.DR+"Drop failed.");
 				return;
 			}
 		}
+		
+		if(is.getAmount() == 1)
+			player.getInventory().remove(is);
+		else
+			is.setAmount(is.getAmount()-1);
+		player.updateInventory();
 		
 		double ar = plugin.conf.config.getDouble("Flare Alert Radius");
 		String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("Flare Broadcast")).replace("{player}", player.getName());
@@ -107,7 +118,7 @@ public class Flare {
 		double dZ = (Math.random() * 2 - 1) * Math.sqrt(Math.pow(r, 2) - Math.pow(dX, 2));
 		double dY = Math.random() * Math.sqrt(Math.pow(r, 2) - Math.pow(dX, 2) - Math.pow(dZ, 2));
 		
-		return new Location(loc.getWorld(), (int)(dX + loc.getX())+0.5, (int)(dY + loc.getY())+0.5, (int)(dZ + loc.getZ())+0.5);
+		return new Location(loc.getWorld(), (int)(dX + loc.getX())+0.5, dY + loc.getY(), (int)(dZ + loc.getZ())+0.5);
 	}
 
 }

@@ -11,3 +11,6 @@ commands:
   flare: 
     description: Main command for Flares
     usage: /<command>
+  witem: 
+    description: Main command for Witems
+    usage: /<command>

@@ -73,9 +73,24 @@ public class RankQuest implements Listener {
 				item.setItemMeta(IM);
 				owner.updateInventory();
 				
+				if(owner.getItemInHand() == null || !owner.getItemInHand().equals(is))
+					plugin.sendActionBar(owner, ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("Action Bar Message")).replace("{left}", timeLeft+""));
+				
 				if(timeLeft == 0){
 					plugin.conf.load();
-					owner.getInventory().setItem(owner.getInventory().first(is), plugin.conf.config.getItemStack("Quests."+name+".Voucher"));
+					//if(is.getAmount() == 1)
+						owner.getInventory().remove(is);
+					/*else {
+						is.setAmount(is.getAmount()-1);
+						IM = is.getItemMeta();
+						int index = IM.getDisplayName().indexOf("(") - 3;
+						if(index >= 0){
+							IM.setDisplayName(IM.getDisplayName().substring(0, index));
+							is.setItemMeta(IM);
+						}
+					}*/
+					owner.getInventory().addItem(plugin.conf.config.getItemStack("Quests."+name+".Voucher"));
+					owner.updateInventory();
 					
 					String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("RQ Complete Broadcast")).replace("{player}", owner.getName());
 					if(!message.toLowerCase().equals("none"))

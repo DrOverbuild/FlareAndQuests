@@ -4,6 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+
+import org.apache.commons.lang.exception.ExceptionUtils;
+/*import net.minecraft.server.v1_9_R1.IChatBaseComponent;
+import net.minecraft.server.v1_9_R1.PacketPlayOutChat;
+import net.minecraft.server.v1_9_R1.IChatBaseComponent.ChatSerializer;
+
+import org.bukkit.craftbukkit.v1_9_R1.entity.CraftPlayer;*/
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -15,6 +22,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -41,6 +49,9 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	
 	HashMap<Player, Integer> deathsLeft = new HashMap<Player, Integer>();
 	
+	String CBPATH;
+	String NMSPATH;
+	
 	public void onEnable(){
 		this.getServer().getPluginManager().registerEvents(this, this);
 		HashMap<String, Object> defs = new HashMap<String, Object>();
@@ -49,6 +60,18 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		defs.put("RQ Lost Broadcast", "&e{player} &7has lost their rank quest!");
 		defs.put("RQ Reset Broadcast", "&e{player} &7has reset their rank quest!");
 		defs.put("RQ Quit Broadcast", "&e{player} &7left, so their rank quest was reset!");
+		defs.put("Action Bar Message", "&b&lRank Quest: &e{left} &7seconds");
+		
+		defs.put("Not in Warzone Message", "&4You must be in a Warzone!");
+		defs.put("Already Doing Quest Message", "&4You are already doing a rank quest!");
+		defs.put("Not in Region Message", "&4You must be inside the proper region!");
+		defs.put("Keep-Inventory Start Message", "&7You now have &e{duration} &7seconds or &e{deaths} &7deaths of keep-inventory.");
+		defs.put("Keep-Inventory Expire Message", "&7Your keep-inventory period has expired.");
+		defs.put("Flare Drop Failed Message", "&4Drop failed.");
+		
+		defs.put("Cannot Activate Stacked Rank Quests Message", "&4You cannot activate more than one rank quest at the same time!");
+		
+		defs.put("Flare Max Tries", 100);
 		
 		defs.put("Deaths Allowed For Keep-Inv", 1);
 		defs.put("Keep-Inv Duration", 60);
@@ -59,19 +82,25 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		defs.put("Flare Alert Radius", 10.0);
 		defs.put("Flare Broadcast", "&e{player} &7has used a flare!");
 		conf = new Config(this, defs);
+		
+		String packageName = getServer().getClass().getPackage().getName();
+		String version = packageName.substring(packageName.indexOf(".v")+2);
+		CBPATH = "org.bukkit.craftbukkit.v"+version+".";
+		NMSPATH = "net.minecraft.server.v"+version+".";
 	}
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
 		boolean a = cmd.getName().equalsIgnoreCase("rq");
 		boolean b = cmd.getName().equalsIgnoreCase("flare");
+		boolean c = cmd.getName().equalsIgnoreCase("witem");
 		
-		if(a || b){
-			if(args.length < 1) // TODO help page
-				help(sender, a);
+		if(a || b || c){
+			if(args.length < 1)
+				help(sender, cmd.getName());
 			else if(!(sender instanceof Player) && !args[0].equalsIgnoreCase("give"))
 				sender.sendMessage(DR+"You must be a player.");
-			else if(!sender.hasPermission(cmd.getName().toLowerCase()+"."+args[0].toLowerCase()) && !sender.hasPermission("rq.*"))
-				sender.sendMessage(DR+"You need the permission "+R+"rq."+args[0].toLowerCase());
+			else if(!sender.hasPermission("faq"))
+				sender.sendMessage(DR+"You need the permission "+R+"faq");
 			else if(args.length < 2){ // TODO check if command exists
 				if(args[0].equalsIgnoreCase("wand")){
 					ItemStack i = new ItemStack(Material.IRON_AXE);
@@ -81,8 +110,19 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 					((Player)sender).getInventory().addItem(i);
 					((Player)sender).updateInventory();
 				}
+				else if(args[0].equalsIgnoreCase("list")){
+					String msg = "";
+					conf.load();
+					String sec;
+					if(a) sec = "Quests";
+					else if(b) sec = "Flares";
+					else sec = "Witems";
+					for(String key : conf.config.getConfigurationSection(sec).getKeys(false))
+						msg += (msg.equals("") ? "" : G+", ") + Y + key;
+					sender.sendMessage(G+sec+": "+msg);
+				}
 				else if(args[0].equalsIgnoreCase("help"))
-					help(sender, a);
+					help(sender, cmd.getName());
 				else 
 					sender.sendMessage(DR+"Missing arguments.");
 			}
@@ -116,6 +156,18 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						}
 						// End CREATE (FLARE)
 					}
+					else if(c){
+						// Start CREATE (WITEM)
+						if(conf.config.contains("Witems."+args[1]))
+							player.sendMessage(DR+"There is already a witem named "+R+args[1]);
+						else {
+							conf.config.set("Witems."+args[1]+".Activate", player.getItemInHand());
+							conf.save();
+							player.sendMessage(G+"Successfully created a witem named "+Y+args[1]);
+							player.sendMessage(G+"Next step: select a region using "+Y+"/rq wand"+G+" and "+Y+"/witem setregion "+args[1]);
+						}
+						// End CREATE (WITEM)
+					}
 				}
 				else if(args[0].equalsIgnoreCase("delete")){
 					Player player = (Player)sender;
@@ -141,6 +193,38 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						}
 						// End DELETE (FLARE)
 					}
+					else if(c){
+						// Start DELETE (WITEM)
+						if(!conf.config.contains("Witems."+args[1]))
+							player.sendMessage(DR+"There is no witem named "+R+args[1]);
+						else {
+							conf.config.set("Witems."+args[1], null);
+							conf.save();
+							player.sendMessage(G+"Successfully deleted "+Y+args[1]);
+						}
+						// End DELETE (WITEM)
+					}
+				}
+				else if(args[0].equalsIgnoreCase("listvcommands") || args[0].equalsIgnoreCase("listcommands")){
+					String sec;
+					if(a) sec = "Quests";
+					else if(c) sec = "Witems";
+					else return true;
+					
+					if(!conf.config.contains(sec+"."+args[1]))
+						sender.sendMessage(DR+"Could not find "+R+args[1]);
+					else {
+						String msg = "";
+						conf.load();
+						
+						List<String> cmds = conf.config.getStringList(sec+"."+args[1]+".Commands");
+						if(cmds == null)
+							cmds = new ArrayList<String>();
+						
+						for(String command : cmds)
+							msg += (msg.equals("") ? "" : G+", ") + Y + ChatColor.translateAlternateColorCodes('&', command);
+						sender.sendMessage(ChatColor.GRAY+"Commands: "+msg);
+					}
 				}
 				else {
 					if(a && !conf.config.contains("Quests."+args[1]))
@@ -162,7 +246,13 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						else if(args[0].equalsIgnoreCase("setvitems")){
 							Player player = (Player)sender;
 							// Start SETVITEMS (RQ)
-							List<ItemStack> items = new ArrayList<ItemStack>();
+							
+							List<ItemStack> items = (List<ItemStack>)conf.config.getList("Quests."+args[1]+".Rewards", new ArrayList<ItemStack>());
+							Inventory inv = Bukkit.createInventory(player, 36, "Set Voucher Items For "+args[1]);
+							for(int i = 0; i < items.size(); i++)
+								inv.setItem(i, items.get(i));
+							player.openInventory(inv);
+							/*List<ItemStack> items = new ArrayList<ItemStack>();
 							for(ItemStack i : player.getInventory().getContents())
 								if(i != null && i.getType() != Material.AIR)
 									items.add(i);
@@ -170,6 +260,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							conf.save();
 							player.sendMessage(G+"Successfully set the reward items for "+Y+args[1]);
 							player.sendMessage(G+"Next step: add reward commands using "+Y+"/rq addvcommand "+args[1]+" <command>");
+							*/
 							// End SETVITEMS (RQ)
 						}
 						else if(args[0].equalsIgnoreCase("setregion")){
@@ -208,6 +299,28 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								// End ADDVCOMMAND (RQ)
 							}
 						}
+						else if(args[0].equalsIgnoreCase("delvcommand")){
+							Player player = (Player)sender;
+							if(args.length < 3)
+								sender.sendMessage(DR+"Missing arguments.");
+							else {
+								// Start DELVCOMMAND (RQ)
+								List<String> cmds = conf.config.getStringList("Quests."+args[1]+".Commands");
+								if(cmds == null)
+									cmds = new ArrayList<String>();
+								String newCMD = "";
+								for(int i = 2; i < args.length; i++)
+									newCMD += (i > 2 ? " " : "") + args[i]; 
+								if(cmds.remove(newCMD)){
+									conf.config.set("Quests."+args[1]+".Commands", cmds);
+									conf.save();
+									player.sendMessage(G+"Successfully removed "+Y+"/"+ChatColor.translateAlternateColorCodes('&', newCMD)+G+" from the quest "+Y+args[1]);
+								}
+								else
+									player.sendMessage(DR+"Could not find the command "+R+"/"+ChatColor.translateAlternateColorCodes('&', newCMD));
+								// End DELVCOMMAND (RQ)
+							}
+						}
 						else if(args[0].equalsIgnoreCase("give")){
 							if(args.length < 3)
 								sender.sendMessage(DR+"Missing arguments.");
@@ -231,7 +344,14 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						else if(args[0].equalsIgnoreCase("setinventory")){
 							Player player = (Player)sender;
 							// Start SETINVENTORY (FLARE)
-							List<ItemStack> conts = new ArrayList<ItemStack>();
+							
+							List<ItemStack> items = (List<ItemStack>)conf.config.getList("Flares."+args[1]+".Contents", new ArrayList<ItemStack>());
+							Inventory inv = Bukkit.createInventory(player, 27, "Set Flare Items For "+args[1]);
+							for(int i = 0; i < items.size(); i++)
+								inv.setItem(i, items.get(i));
+							player.openInventory(inv);
+							
+							/*List<ItemStack> conts = new ArrayList<ItemStack>();
 							ItemStack[] iconts = player.getInventory().getStorageContents();
 							for(int i = 0; i < 36; i++)
 								if(iconts[i] != null && iconts[i].getType() != Material.AIR)
@@ -243,7 +363,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								conf.save();
 								player.sendMessage(G+"Successfully set the inventory of "+Y+args[1]);
 								player.sendMessage(G+"You're all done setting up the flare "+Y+args[1]+G+"!");
-							}
+							}*/
 							// End SETINVENTORY (FLARE)
 						}
 						else if(args[0].equalsIgnoreCase("give")){
@@ -263,6 +383,77 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							}
 						}
 					}
+					else if(c){
+						if(!conf.config.contains("Witems."+args[1]))
+							sender.sendMessage(DR+"There is no witem of the name "+R+args[1]);
+						else if(args[0].equalsIgnoreCase("setregion")){
+							Player player = (Player)sender;
+							Location f = left.get(player);
+							Location s = right.get(player);
+							if(f == null || s == null)
+								player.sendMessage(DR+"Please select a region first");
+							else {
+								conf.config.set("Witems."+args[1]+".First", f);
+								conf.config.set("Witems."+args[1]+".Second", s);
+								conf.save();
+								player.sendMessage(G+"Successfully set the region for "+Y+args[1]);
+								player.sendMessage(G+"Next step: add a command using "+Y+"/witem addcommand "+args[1]+" <command>");
+							}
+						}
+						else if(args[0].equalsIgnoreCase("addcommand")){
+							Player player = (Player)sender;
+							if(args.length < 3)
+								sender.sendMessage(DR+"Missing arguments.");
+							else {
+								List<String> cmds = conf.config.getStringList("Witems."+args[1]+".Commands");
+								if(cmds == null)
+									cmds = new ArrayList<String>();
+								String newCMD = "";
+								for(int i = 2; i < args.length; i++)
+									newCMD += (i > 2 ? " " : "") + args[i]; 
+								cmds.add(newCMD);
+								conf.config.set("Witems."+args[1]+".Commands", cmds);
+								conf.save();
+								player.sendMessage(G+"Successfully added "+Y+"/"+ChatColor.translateAlternateColorCodes('&', newCMD)+G+" to the witem "+Y+args[1]);
+								player.sendMessage(G+"You're all done setting up the witem "+Y+args[1]+G+"!");
+							}
+						}
+						else if(args[0].equalsIgnoreCase("delcommand")){
+							Player player = (Player)sender;
+							if(args.length < 3)
+								sender.sendMessage(DR+"Missing arguments.");
+							else {
+								List<String> cmds = conf.config.getStringList("Witems."+args[1]+".Commands");
+								if(cmds == null)
+									cmds = new ArrayList<String>();
+								String newCMD = "";
+								for(int i = 2; i < args.length; i++)
+									newCMD += (i > 2 ? " " : "") + args[i]; 
+								if(cmds.remove(newCMD)){
+									conf.config.set("Witems."+args[1]+".Commands", cmds);
+									conf.save();
+									player.sendMessage(G+"Successfully removed "+Y+"/"+ChatColor.translateAlternateColorCodes('&', newCMD)+G+" from the witem "+Y+args[1]);
+								}
+								else
+									player.sendMessage(DR+"Could not find the command "+R+"/"+ChatColor.translateAlternateColorCodes('&', newCMD));
+									
+							}
+						}
+						else if(args[0].equalsIgnoreCase("give")){
+							if(args.length < 3)
+								sender.sendMessage(DR+"Missing arguments.");
+							else {
+								Player target = Bukkit.getPlayer(args[2]);
+								if(target == null)
+									sender.sendMessage(DR+"Could not find "+R+args[2]);
+								else {
+									target.getInventory().addItem(conf.config.getItemStack("Witems."+args[1]+".Activate"));
+									target.updateInventory();
+									sender.sendMessage(G+"Gave the witem "+Y+args[1]+G+" to "+Y+args[2]);
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -270,13 +461,46 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		return true;
 	}
 	
-	private void help(CommandSender sender, boolean rq){
+	public void sendActionBar(Player player, String message){
+		
+		try {
+			Class CP = Class.forName(CBPATH+"entity.CraftPlayer");
+	        Object p = CP.cast(player);
+			
+	        Class ICBC = Class.forName(NMSPATH+"IChatBaseComponent");
+	        Class CS = ICBC.getDeclaredClasses()[0];
+	        Object cbc = CS.getMethod("a", String.class).invoke(null, "{\"text\": \"" + message + "\"}");
+	        
+	        Class PPOC = Class.forName(NMSPATH+"PacketPlayOutChat");
+	        Object ppoc = PPOC.getConstructor(ICBC, byte.class).newInstance(cbc, (byte)2);
+	        
+	        Class PC = Class.forName(NMSPATH+"PlayerConnection");
+	        Class EP = Class.forName(NMSPATH+"EntityPlayer");
+	        Object ep = CP.getMethod("getHandle").invoke(p);
+	        Object pc = EP.getField("playerConnection").get(ep);
+	        Class P = Class.forName(NMSPATH+"Packet");
+	        
+	        PC.getMethod("sendPacket", P).invoke(pc, P.cast(ppoc));
+	        
+	        //CraftPlayer p = (CraftPlayer) player;
+	        //IChatBaseComponent cbc = ChatSerializer.a("{\"text\": \"" + message + "\"}");
+	        //PacketPlayOutChat ppoc = new PacketPlayOutChat(cbc, (byte)2);
+	        //((CraftPlayer) p).getHandle().playerConnection.sendPacket(ppoc);
+			}
+		catch (Exception e){
+			getLogger().info(ExceptionUtils.getStackTrace(e));
+		}
+        
+    }
+	
+	private void help(CommandSender sender, String name){
 		String SEP = ChatColor.WHITE+"- "+ChatColor.GRAY;
 		String BEG = ChatColor.GRAY+"- "+ChatColor.AQUA;
 		sender.sendMessage(ChatColor.GRAY+"==============  [ "+ChatColor.AQUA+"Flares and Quests"+ChatColor.GRAY+" ]  =============");
-		if(rq){
+		if(name.equalsIgnoreCase("rq")){
 			sender.sendMessage(BEG+"/rq help "+SEP+"Display this help page.");
 			sender.sendMessage(BEG+"/flare help "+SEP+"Display flare help page.");
+			sender.sendMessage(BEG+"/witem help "+SEP+"Display witem help page.");
 			sender.sendMessage(BEG+"/rq create <name> "+SEP+"Creates a rank quest.");
 			sender.sendMessage(BEG+"/rq delete <name> "+SEP+"Deletes a rank quest.");
 			sender.sendMessage(BEG+"/rq wand "+SEP+"Gives you a selection wand.");
@@ -284,15 +508,36 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			sender.sendMessage(BEG+"/rq setvoucher <name> "+SEP+"Sets the voucher.");
 			sender.sendMessage(BEG+"/rq setvitems <name> "+SEP+"Sets the reward items.");
 			sender.sendMessage(BEG+"/rq addvcommand <name> <command> "+SEP+"Adds a command.");
+			sender.sendMessage(BEG+"/rq listvcommands <name> <command> "+SEP+"Lists all commands.");
+			sender.sendMessage(BEG+"/rq delvcommand <name> <command> "+SEP+"Deletes a command.");
 			sender.sendMessage(BEG+"/rq give <name> <player> "+SEP+"Gives a player a rank quest.");
+			sender.sendMessage(BEG+"/rq list "+SEP+"Lists all rank quests.");
+			
 		}
-		else {
+		else if(name.equalsIgnoreCase("flare")){
 			sender.sendMessage(BEG+"/flare help "+SEP+"Display this help page.");
 			sender.sendMessage(BEG+"/rq help "+SEP+"Display rank quest help page.");
+			sender.sendMessage(BEG+"/witem help "+SEP+"Display witem help page.");
 			sender.sendMessage(BEG+"/flare create <name> "+SEP+"Creates a flare.");
 			sender.sendMessage(BEG+"/flare delete <name> "+SEP+"Deletes a flare.");
 			sender.sendMessage(BEG+"/flare setinventory <name> "+SEP+"Sets the chest inventory.");
 			sender.sendMessage(BEG+"/flare give <name> <player> "+SEP+"Gives a player a flare.");
+			sender.sendMessage(BEG+"/flare list "+SEP+"Lists all flares.");
+			
+		}
+		else if(name.equalsIgnoreCase("witem")){
+			sender.sendMessage(BEG+"/witem help "+SEP+"Display this help page.");
+			sender.sendMessage(BEG+"/rq help "+SEP+"Display rank quest help page.");
+			sender.sendMessage(BEG+"/flare help "+SEP+"Display flare help page.");
+			sender.sendMessage(BEG+"/witem create <name> "+SEP+"Creates a witem.");
+			sender.sendMessage(BEG+"/witem delete <name> "+SEP+"Deletes a witem.");
+			sender.sendMessage(BEG+"/witem setregion <name> "+SEP+"Sets the region to your selection.");
+			sender.sendMessage(BEG+"/witem addcommand <name> <command> "+SEP+"Adds a command.");
+			sender.sendMessage(BEG+"/witem listcommands <name> <command> "+SEP+"Lists all commands.");
+			sender.sendMessage(BEG+"/witem delcommand <name> <command> "+SEP+"Deletes a command.");
+			sender.sendMessage(BEG+"/witem give <name> <player> "+SEP+"Gives a player a witem.");
+			sender.sendMessage(BEG+"/witem list "+SEP+"Lists all witems.");
+			
 		}
 	}
 	
@@ -300,14 +545,23 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		int dA = conf.config.getInt("Deaths Allowed For Keep-Inv");
 		int dD = conf.config.getInt("Keep-Inv Duration");
 		
-		player.sendMessage(G+"You now have "+Y+dD+G+" seconds or "+Y+dA+G+" deaths of keep-inventory.");
+		String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Keep-Inventory Start Message")).replace("{player}", player.getName()).replace("{duration}", dD+"").replace("{deaths}", dA+"");
+		if(!message.toLowerCase().equals("none"))
+			player.sendMessage(message);
+		
+		//player.sendMessage(G+"You now have "+Y+dD+G+" seconds or "+Y+dA+G+" deaths of keep-inventory.");
 		
 		deathsLeft.put(player, dA);
 		new BukkitRunnable(){
 			public void run(){
 				if(deathsLeft.containsKey(player)){
 					deathsLeft.remove(player);
-					player.sendMessage(G+"Your keep-inventory period has expired.");
+					
+					String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Keep-Inventory Expire Message")).replace("{player}", player.getName());
+					if(!message.toLowerCase().equals("none"))
+						player.sendMessage(message);
+					
+					//player.sendMessage(G+"Your keep-inventory period has expired.");
 				}
 			}
 		}.runTaskLater(this, dD * 20);
@@ -339,7 +593,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	
 	private String disp(ItemStack i){
 		try {
-			return ChatColor.stripColor(i.getItemMeta().getDisplayName());
+			String disp = ChatColor.stripColor(i.getItemMeta().getDisplayName());
+			return disp == null ? "" : disp;
 		}
 		catch (Exception e){
 			return "";
@@ -353,8 +608,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			ItemMeta s = smaller.getItemMeta();
 			return larger.getType() == smaller.getType() && 
 					larger.getData().equals(smaller.getData()) && 
-					((disp && l.getDisplayName().contains(s.getDisplayName())) || (!disp && l.getDisplayName().equals(s.getDisplayName()))) && 
-					l.getLore().equals(s.getLore());
+					((!l.hasDisplayName() && !s.hasDisplayName()) || (((disp && l.getDisplayName().contains(s.getDisplayName())) || (!disp && l.getDisplayName().equals(s.getDisplayName()))))) && 
+					((!l.hasLore() && !s.hasLore()) || (l.getLore().equals(s.getLore())));
 		}
 		catch (Exception e){
 			return false;
@@ -371,7 +626,12 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			num--;
 			if(num <= 0){
 				deathsLeft.remove(ev.getEntity());
-				ev.getEntity().sendMessage(G+"Your keep-inventory period has expired.");
+				
+				String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Keep-Inventory Expire Message")).replace("{player}", ev.getEntity().getName());
+				if(!message.toLowerCase().equals("none"))
+					ev.getEntity().sendMessage(message);
+				
+				//ev.getEntity().sendMessage(G+"Your keep-inventory period has expired.");
 			}
 			else
 				deathsLeft.put(ev.getEntity(), num);
@@ -381,6 +641,32 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	public boolean isWarzone(Location loc){
 		Faction f = Board.getInstance().getFactionAt(new FLocation(loc));
 		return f == null ? false : f.isWarZone();
+	}
+	
+	@EventHandler
+	public void onClose(InventoryCloseEvent ev){
+		String t = ev.getInventory().getTitle();
+		boolean a = t.contains("Set Voucher Items For ");
+		boolean b = t.contains("Set Flare Items For ");
+		if(a || b){
+			conf.load();
+			List<ItemStack> items = new ArrayList<ItemStack>();
+			for(ItemStack i : ev.getInventory().getContents())
+				if(i != null && i.getType() != Material.AIR)
+					items.add(i);
+			String name = t.substring(t.indexOf("For ")+4);
+			conf.config.set((a ? "Quests." : "Flares.")+name+(a ? ".Rewards" : ".Contents"), items);
+			conf.save();
+			
+			if(a){
+				ev.getPlayer().sendMessage(G+"Successfully set the reward items for "+Y+name);
+				ev.getPlayer().sendMessage(G+"Next step: add reward commands using "+Y+"/rq addvcommand "+name+" <command>");
+			}
+			else {
+				ev.getPlayer().sendMessage(G+"Successfully set the inventory of "+Y+name);
+				ev.getPlayer().sendMessage(G+"You're all done setting up the flare " +Y+name+G+"!");
+			}
+		}
 	}
 	
 	@EventHandler
@@ -406,38 +692,87 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 					for(String key : conf.config.getConfigurationSection("Flares").getKeys(false)){
 						if(almost(ev.getItem(), conf.config.getItemStack("Flares."+key+".Activate"), false)){
 							// Matched to flare
-							// TODO check warzone
-							if(!isWarzone(ev.getPlayer().getLocation()))
-								ev.getPlayer().sendMessage(DR+"You must be in a Warzone");
+							if(!isWarzone(ev.getPlayer().getLocation())){
+								String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Not in Warzone Message")).replace("{player}", ev.getPlayer().getName());
+								if(!message.toLowerCase().equals("none"))
+									ev.getPlayer().sendMessage(message);
+								//ev.getPlayer().sendMessage(DR+"You must be in a Warzone");
+							}
 							else {
-								new Flare(ev.getPlayer(), this, key);
+								new Flare(ev.getItem(), ev.getPlayer(), this, key);
 								ev.setCancelled(true);
 							}
 							return;
 						}
 					}
 				}
+				if(conf.config.contains("Witems")){
+					for(String key : conf.config.getConfigurationSection("Witems").getKeys(false)){
+						if(almost(ev.getItem(), conf.config.getItemStack("Witems."+key+".Activate"), false)){
+							//Matched to Witem
+							ev.setCancelled(true);
+							if(!inside(ev.getPlayer().getLocation(), (Location)conf.config.get("Witems."+key+".First"), (Location)conf.config.get("Witems."+key+".Second"))){
+								String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Not in Region Message")).replace("{player}", ev.getPlayer().getName());
+								if(!message.toLowerCase().equals("none"))
+									ev.getPlayer().sendMessage(message);
+								
+								//ev.getPlayer().sendMessage(DR+"You must be inside the proper region!");
+							}
+							else {
+								if(ev.getItem().getAmount() == 1)
+									ev.getPlayer().getInventory().remove(ev.getItem());
+								else
+									ev.getItem().setAmount(ev.getItem().getAmount()-1);
+								
+								ev.getPlayer().updateInventory();
+								
+								if(conf.config.contains("Witems."+key+".Commands"))
+									for(String str : conf.config.getStringList("Witems."+key+".Commands"))
+										this.getServer().dispatchCommand(Bukkit.getConsoleSender(), ChatColor.translateAlternateColorCodes('&', str).replace("{player}", ev.getPlayer().getName()));
+							}
+						}
+					}
+				}
 				if(conf.config.contains("Quests")){
 					for(String key : conf.config.getConfigurationSection("Quests").getKeys(false)){
 						ItemStack citem = conf.config.getItemStack("Quests."+key+".Activate");
-						ItemStack vitem;
 						
 						if(almost(ev.getItem(), citem, true)){
 							// Matched to Rank Quest
 							ev.setCancelled(true);
-							if(QIP.containsKey(ev.getPlayer()))
-								ev.getPlayer().sendMessage(DR+"You are already doing a rank quest!");
-							else if(!inside(ev.getPlayer().getLocation(), (Location)conf.config.get("Quests."+key+".First"), (Location)conf.config.get("Quests."+key+".Second")))
-								ev.getPlayer().sendMessage(DR+"You must be inside the proper region!");
+							if(ev.getItem().getAmount() > 1){
+								String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Cannot Activate Stacked Rank Quests Message")).replace("{player}", ev.getPlayer().getName());
+								if(!message.toLowerCase().equals("none"))
+									ev.getPlayer().sendMessage(message);
+							}
+							else if(QIP.containsKey(ev.getPlayer())){
+								String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Already Doing Quest Message")).replace("{player}", ev.getPlayer().getName());
+								if(!message.toLowerCase().equals("none"))
+									ev.getPlayer().sendMessage(message);
+								
+								//ev.getPlayer().sendMessage(DR+"You are already doing a rank quest!");
+							}
+							else if(!inside(ev.getPlayer().getLocation(), (Location)conf.config.get("Quests."+key+".First"), (Location)conf.config.get("Quests."+key+".Second"))){
+								String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Not in Region Message")).replace("{player}", ev.getPlayer().getName());
+								if(!message.toLowerCase().equals("none"))
+									ev.getPlayer().sendMessage(message);
+								
+								//ev.getPlayer().sendMessage(DR+"You must be inside the proper region!");
+							}
 							else
 								QIP.put(ev.getPlayer(), new RankQuest(ev.getItem(), ev.getPlayer(), conf.config.getInt("Rank Quest Duration"), this, key));
 							return;
 						}
-						else if(almost(ev.getItem(), vitem = conf.config.getItemStack("Quests."+key+".Voucher"), false)){
+						else if(almost(ev.getItem(), conf.config.getItemStack("Quests."+key+".Voucher"), false)){
 							// Matched to Voucher
 							ev.setCancelled(true);
 							Inventory inv = ev.getPlayer().getInventory();
-							inv.remove(ev.getItem());
+							
+							if(ev.getItem().getAmount() == 1)
+								inv.remove(ev.getItem());
+							else
+								ev.getItem().setAmount(ev.getItem().getAmount()-1);
+							
 							for(ItemStack i : (List<ItemStack>)conf.config.getList("Quests."+key+".Rewards", new ArrayList<ItemStack>()))
 								inv.addItem(i);
 							ev.getPlayer().updateInventory();
