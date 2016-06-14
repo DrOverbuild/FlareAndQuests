@@ -16,10 +16,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
 
-import com.massivecraft.factions.Board;
-import com.massivecraft.factions.FLocation;
-import com.massivecraft.factions.Faction;
-
 public class Flare {
 	
 	FlareAndQuests plugin;
@@ -90,7 +86,7 @@ public class Flare {
 						
 						plugin.partTimers.put(b, new BukkitRunnable(){
 							public void run(){
-								plugin.spawnParticle(24, b.getLocation(), 1, 1, 1, 5, b.getWorld().getEntitiesByClass(Player.class));
+								plugin.spawnParticle(24, b.getLocation().clone().add(0.5, 0.5, 0.5), 1, 1, 1, 5, b.getWorld().getEntitiesByClass(Player.class));
 							}
 						}.runTaskTimer(plugin, 0, 1));
 						
