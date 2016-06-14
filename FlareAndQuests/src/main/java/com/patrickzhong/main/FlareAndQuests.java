@@ -1,10 +1,28 @@
 package com.patrickzhong.main;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
 
+
+
+
+
+
+
+
+
+
+import net.minecraft.server.v1_9_R1.EnumParticle;
+import net.minecraft.server.v1_9_R1.PacketPlayOutWorldParticles;
+
+import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_9_R1.entity.CraftPlayer;
 import org.apache.commons.lang.exception.ExceptionUtils;
 /*import net.minecraft.server.v1_9_R1.IChatBaseComponent;
 import net.minecraft.server.v1_9_R1.PacketPlayOutChat;
@@ -17,18 +35,21 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import com.massivecraft.factions.Board;
 import com.massivecraft.factions.FLocation;
@@ -46,6 +67,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	HashMap<Player, Location> left = new HashMap<Player, Location>();
 	HashMap<Player, Location> right = new HashMap<Player, Location>();
 	HashMap<Player, RankQuest> QIP = new HashMap<Player, RankQuest>();
+	
+	HashMap<Block, BukkitTask> partTimers = new HashMap<Block, BukkitTask>();
 	
 	HashMap<Player, Integer> deathsLeft = new HashMap<Player, Integer>();
 	
@@ -493,6 +516,40 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
         
     }
 	
+	public void spawnParticle(int part, Location loc, double offX, double offY, double offZ, int count, Collection<Player> ents){
+		try {
+			Class PPOP = Class.forName(NMSPATH+"PacketPlayOutWorldParticles");
+			Class EPART = Class.forName(NMSPATH+"EnumParticle");
+			Constructor PPOPCONSTRUCTOR = PPOP.getConstructor(EPART, boolean.class, float.class, float.class, float.class, float.class, float.class, float.class, float.class, int.class, int[].class);
+			Object enumParticle = EPART.getEnumConstants()[part];
+			
+			Class P = Class.forName(NMSPATH+"Packet");
+	        Object packet = P.cast(PPOPCONSTRUCTOR.newInstance(EPART.cast(enumParticle), true, (float)loc.getX(), (float)loc.getY(), (float)loc.getZ(), (float)offX, (float)offY, (float)offZ, 0f, count, new int[0]));
+		
+			Class CP = Class.forName(CBPATH+"entity.CraftPlayer");
+	        
+			Class PC = Class.forName(NMSPATH+"PlayerConnection");
+	        Class EP = Class.forName(NMSPATH+"EntityPlayer");
+	        
+	        Field field = EP.getField("playerConnection");
+	        Method getHandle = CP.getMethod("getHandle");
+	        Method sendPacket = PC.getMethod("sendPacket", P);
+	        
+	        for(Player ent : ents)
+				sendPacket.invoke(field.get(getHandle.invoke(CP.cast(ent))), packet);
+		}
+		catch (Exception e){
+			getLogger().info(ExceptionUtils.getStackTrace(e));
+		}
+		
+		/*PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(part, true, (float)loc.getX(), (float)loc.getY(), (float)loc.getZ(), (float)offX, (float)offY, (float)offZ, 0f, 1);
+		for(Entity ent : ents)
+			if(ent instanceof Player)
+				((CraftPlayer)ent).getHandle().playerConnection.sendPacket(packet);*/
+		
+	}
+	
+	
 	private void help(CommandSender sender, String name){
 		String SEP = ChatColor.WHITE+"- "+ChatColor.GRAY;
 		String BEG = ChatColor.GRAY+"- "+ChatColor.AQUA;
@@ -670,8 +727,24 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	}
 	
 	@EventHandler
+	public void onOpen(InventoryOpenEvent ev){
+		if(ev.getInventory().getHolder() instanceof Block){
+			BukkitTask t = partTimers.remove(((Block)ev.getInventory().getHolder()).getLocation());
+			if(t != null)
+				t.cancel();
+		}
+	}
+	
+	@EventHandler
 	public void onClick(PlayerInteractEvent ev){
 		String disp = disp(ev.getItem());
+		
+		if(ev.getClickedBlock() != null){
+			BukkitTask t = partTimers.remove(ev.getClickedBlock());
+			if(t != null)
+				t.cancel();
+		}
+		
 		if(disp.equals("Rank Quest Region Selector")){
 			ev.setCancelled(true);
 			if(ev.getAction() == Action.LEFT_CLICK_BLOCK){

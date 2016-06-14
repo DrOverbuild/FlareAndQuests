@@ -77,7 +77,7 @@ public class Flare {
 					Location head = armor.getLocation().add(0, 1.5, 0);
 					if(head.getBlock().getType().isSolid()){
 						armor.remove();
-						Block b = head.add(0, 1, 0).getBlock();
+						final Block b = head.add(0, 1, 0).getBlock();
 						b.setType(Material.CHEST);
 						Chest c = (Chest)b.getState();
 						plugin.conf.load();
@@ -87,6 +87,12 @@ public class Flare {
 							conts[i] = list.get(i);
 						c.getBlockInventory().setContents(conts);
 						c.update(true);
+						
+						plugin.partTimers.put(b, new BukkitRunnable(){
+							public void run(){
+								plugin.spawnParticle(24, b.getLocation(), 1, 1, 1, 5, b.getWorld().getEntitiesByClass(Player.class));
+							}
+						}.runTaskTimer(plugin, 0, 1));
 						
 						this.cancel();
 					}
