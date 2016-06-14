@@ -81,8 +81,6 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		defs.put("Deaths Allowed For Keep-Inv", 1);
 		defs.put("Keep-Inv Duration", 60);
 		
-		defs.put("Rank Quest Duration", 30);
-		
 		defs.put("Flare Drop Radius", 10.0);
 		defs.put("Flare Alert Radius", 10.0);
 		defs.put("Flare Broadcast", "&e{player} &7has used a flare!");
@@ -280,9 +278,28 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								conf.config.set("Quests."+args[1]+".Second", s);
 								conf.save();
 								player.sendMessage(G+"Successfully set the region for "+Y+args[1]);
-								player.sendMessage(G+"Next step: set the voucher item using "+Y+"/rq setvoucher "+args[1]);
+								//38.47
+								player.sendMessage(G+"Next step: set the duration using "+Y+"/rq settime "+args[1]+" <seconds>");
 							}
 							// End SETREGION (RQ)
+						}
+						else if(args[0].equalsIgnoreCase("settime")){
+							Player player = (Player)sender;
+							if(args.length < 3)
+								sender.sendMessage(DR+"Missing arguments.");
+							else {
+								// Start SETTIME (RQ)
+								
+								int seconds = Integer.parseInt(args[2]);
+								
+								conf.config.set("Quests."+args[1]+".Duration", seconds);
+								conf.save();
+								
+								player.sendMessage(G+"Successfully set the duration of "+Y+args[1]+G+" to "+Y+seconds+G+" seconds.");
+								player.sendMessage(G+"Next step: set the voucher item using "+Y+"/rq setvoucher "+args[1]);
+								
+								// End SETTIME (RQ)
+							}
 						}
 						else if(args[0].equalsIgnoreCase("addvcommand")){
 							Player player = (Player)sender;
@@ -545,6 +562,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			sender.sendMessage(BEG+"/rq wand "+SEP+"Gives you a selection wand.");
 			sender.sendMessage(BEG+"/rq setregion <name> "+SEP+"Sets the region to your selection.");
 			sender.sendMessage(BEG+"/rq setvoucher <name> "+SEP+"Sets the voucher.");
+			sender.sendMessage(BEG+"/rq settime <name> <seconds> "+SEP+"Sets the duration.");
 			sender.sendMessage(BEG+"/rq setvitems <name> "+SEP+"Sets the reward items.");
 			sender.sendMessage(BEG+"/rq addvcommand <name> <command> "+SEP+"Adds a command.");
 			sender.sendMessage(BEG+"/rq listvcommands <name> <command> "+SEP+"Lists all commands.");
@@ -815,7 +833,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								//ev.getPlayer().sendMessage(DR+"You must be inside the proper region!");
 							}
 							else
-								QIP.put(ev.getPlayer(), new RankQuest(ev.getItem(), ev.getPlayer(), conf.config.getInt("Rank Quest Duration"), this, key));
+								QIP.put(ev.getPlayer(), new RankQuest(ev.getItem(), ev.getPlayer(), conf.config.getInt("Quests."+key+".Duration"), this, key));
 							return;
 						}
 						else if(almost(ev.getItem(), conf.config.getItemStack("Quests."+key+".Voucher"), false)){
