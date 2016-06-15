@@ -1,10 +1,13 @@
 name: FlareAndQuests
 main: com.patrickzhong.main.FlareAndQuests
-version: 1
+version: 3
 author: ShowbizLocket61
 depend: [Factions]
 
 commands:
+  faq:
+    description: Main command for FlareAndQuests
+    usage: /<command>
   rq: 
     description: Main command for Rank Quests
     usage: /<command>

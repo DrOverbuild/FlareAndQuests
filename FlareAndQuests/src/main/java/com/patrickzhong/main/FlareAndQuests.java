@@ -96,15 +96,16 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		boolean a = cmd.getName().equalsIgnoreCase("rq");
 		boolean b = cmd.getName().equalsIgnoreCase("flare");
 		boolean c = cmd.getName().equalsIgnoreCase("witem");
+		boolean d = cmd.getName().equalsIgnoreCase("faq");
 		
-		if(a || b || c){
-			if(args.length < 1)
+		if(a || b || c || d){
+			if(!sender.hasPermission("faq"))
+				sender.sendMessage(DR+"You need the permission "+R+"faq");
+			else if(args.length < 1)
 				help(sender, cmd.getName());
 			else if(!(sender instanceof Player) && !args[0].equalsIgnoreCase("give"))
 				sender.sendMessage(DR+"You must be a player.");
-			else if(!sender.hasPermission("faq"))
-				sender.sendMessage(DR+"You need the permission "+R+"faq");
-			else if(args.length < 2){ // TODO check if command exists
+			else if(args.length < 2){
 				if(args[0].equalsIgnoreCase("wand")){
 					ItemStack i = new ItemStack(Material.IRON_AXE);
 					ItemMeta im = i.getItemMeta();
@@ -142,6 +143,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						else {
 							conf.config.set("Quests."+args[1]+".Activate", player.getItemInHand());
 							conf.save();
+							player.getInventory().remove(player.getItemInHand());
+							player.updateInventory();
 							player.sendMessage(G+"Successfully created a rank quest named "+Y+args[1]);
 							player.sendMessage(G+"Next step: select a region using "+Y+"/rq wand"+G+" and "+Y+"/rq setregion "+args[1]);
 						}
@@ -154,6 +157,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						else {
 							conf.config.set("Flares."+args[1]+".Activate", player.getItemInHand());
 							conf.save();
+							player.getInventory().remove(player.getItemInHand());
+							player.updateInventory();
 							player.sendMessage(G+"Successfully created a flare named "+Y+args[1]);
 							player.sendMessage(G+"Next step: set the items using "+Y+"/flare setinventory "+args[1]);
 						}
@@ -166,6 +171,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						else {
 							conf.config.set("Witems."+args[1]+".Activate", player.getItemInHand());
 							conf.save();
+							player.getInventory().remove(player.getItemInHand());
+							player.updateInventory();
 							player.sendMessage(G+"Successfully created a witem named "+Y+args[1]);
 							player.sendMessage(G+"Next step: select a region using "+Y+"/rq wand"+G+" and "+Y+"/witem setregion "+args[1]);
 						}
@@ -241,6 +248,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							else {
 								conf.config.set("Quests."+args[1]+".Voucher", player.getItemInHand());
 								conf.save();
+								player.getInventory().remove(player.getItemInHand());
+								player.updateInventory();
 								player.sendMessage(G+"Successfully set the voucher for "+Y+args[1]);
 								player.sendMessage(G+"Next step: set the rewards using "+Y+"/rq setvitems "+args[1]);
 							}
@@ -553,10 +562,12 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		String SEP = ChatColor.WHITE+"- "+ChatColor.GRAY;
 		String BEG = ChatColor.GRAY+"- "+ChatColor.AQUA;
 		sender.sendMessage(ChatColor.GRAY+"==============  [ "+ChatColor.AQUA+"Flares and Quests"+ChatColor.GRAY+" ]  =============");
-		if(name.equalsIgnoreCase("rq")){
-			sender.sendMessage(BEG+"/rq help "+SEP+"Display this help page.");
+		if(name.equalsIgnoreCase("faq")){
+			sender.sendMessage(BEG+"/rq help "+SEP+"Display rank quest help page.");
 			sender.sendMessage(BEG+"/flare help "+SEP+"Display flare help page.");
 			sender.sendMessage(BEG+"/witem help "+SEP+"Display witem help page.");
+		}
+		else if(name.equalsIgnoreCase("rq")){
 			sender.sendMessage(BEG+"/rq create <name> "+SEP+"Creates a rank quest.");
 			sender.sendMessage(BEG+"/rq delete <name> "+SEP+"Deletes a rank quest.");
 			sender.sendMessage(BEG+"/rq wand "+SEP+"Gives you a selection wand.");
@@ -565,16 +576,13 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			sender.sendMessage(BEG+"/rq settime <name> <seconds> "+SEP+"Sets the duration.");
 			sender.sendMessage(BEG+"/rq setvitems <name> "+SEP+"Sets the reward items.");
 			sender.sendMessage(BEG+"/rq addvcommand <name> <command> "+SEP+"Adds a command.");
-			sender.sendMessage(BEG+"/rq listvcommands <name> <command> "+SEP+"Lists all commands.");
+			sender.sendMessage(BEG+"/rq listvcommands <name> "+SEP+"Lists all commands.");
 			sender.sendMessage(BEG+"/rq delvcommand <name> <command> "+SEP+"Deletes a command.");
 			sender.sendMessage(BEG+"/rq give <name> <player> "+SEP+"Gives a player a rank quest.");
 			sender.sendMessage(BEG+"/rq list "+SEP+"Lists all rank quests.");
 			
 		}
 		else if(name.equalsIgnoreCase("flare")){
-			sender.sendMessage(BEG+"/flare help "+SEP+"Display this help page.");
-			sender.sendMessage(BEG+"/rq help "+SEP+"Display rank quest help page.");
-			sender.sendMessage(BEG+"/witem help "+SEP+"Display witem help page.");
 			sender.sendMessage(BEG+"/flare create <name> "+SEP+"Creates a flare.");
 			sender.sendMessage(BEG+"/flare delete <name> "+SEP+"Deletes a flare.");
 			sender.sendMessage(BEG+"/flare setinventory <name> "+SEP+"Sets the chest inventory.");
@@ -583,14 +591,11 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			
 		}
 		else if(name.equalsIgnoreCase("witem")){
-			sender.sendMessage(BEG+"/witem help "+SEP+"Display this help page.");
-			sender.sendMessage(BEG+"/rq help "+SEP+"Display rank quest help page.");
-			sender.sendMessage(BEG+"/flare help "+SEP+"Display flare help page.");
 			sender.sendMessage(BEG+"/witem create <name> "+SEP+"Creates a witem.");
 			sender.sendMessage(BEG+"/witem delete <name> "+SEP+"Deletes a witem.");
 			sender.sendMessage(BEG+"/witem setregion <name> "+SEP+"Sets the region to your selection.");
 			sender.sendMessage(BEG+"/witem addcommand <name> <command> "+SEP+"Adds a command.");
-			sender.sendMessage(BEG+"/witem listcommands <name> <command> "+SEP+"Lists all commands.");
+			sender.sendMessage(BEG+"/witem listcommands <name> "+SEP+"Lists all commands.");
 			sender.sendMessage(BEG+"/witem delcommand <name> <command> "+SEP+"Deletes a command.");
 			sender.sendMessage(BEG+"/witem give <name> <player> "+SEP+"Gives a player a witem.");
 			sender.sendMessage(BEG+"/witem list "+SEP+"Lists all witems.");

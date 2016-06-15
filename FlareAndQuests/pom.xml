@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.patrickzhong</groupId>
   <artifactId>FlareAndQuests</artifactId>
-  <version>0.0.1</version>
+  <version>3.0.0</version>
   <build>
       <plugins>
           <plugin>
