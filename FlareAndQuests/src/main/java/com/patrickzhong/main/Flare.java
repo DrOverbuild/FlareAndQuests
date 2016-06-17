@@ -2,6 +2,7 @@ package com.patrickzhong.main;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -13,6 +14,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
 
@@ -21,6 +23,7 @@ public class Flare {
 	FlareAndQuests plugin;
 	boolean manual = false;
 	double vel = 0.0;
+	Random rand = new Random();
 	
 	public Flare(ItemStack is, Player player, final FlareAndQuests plugin, final String name){
 		
@@ -79,8 +82,19 @@ public class Flare {
 						plugin.conf.load();
 						List<ItemStack> list = (List<ItemStack>)plugin.conf.config.getList("Flares."+name+".Contents", new ArrayList<ItemStack>());
 						ItemStack[] conts = new ItemStack[27];
-						for(int i = 0; i < list.size(); i++)
-							conts[i] = list.get(i);
+						for(int i = 0; i < list.size(); i++){
+							ItemStack is = list.get(i);
+							double percent = 100;
+							if(is != null && is.hasItemMeta() && is.getItemMeta().hasLore()){
+								ItemMeta im = is.getItemMeta();
+								List<String> lore = im.getLore();
+								percent = Double.parseDouble(ChatColor.stripColor(lore.remove(lore.size()-1)));
+								im.setLore(lore);
+								is.setItemMeta(im);
+							}
+							if(rand.nextDouble() * 100 < percent)
+								conts[i] = is;
+						}
 						c.getBlockInventory().setContents(conts);
 						c.update(true);
 						

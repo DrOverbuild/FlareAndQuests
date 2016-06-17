@@ -9,23 +9,46 @@ import java.util.HashMap;
 import java.util.List;
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+import net.minecraft.server.v1_9_R1.ChatMessage;
+import net.minecraft.server.v1_9_R1.EntityPlayer;
+import net.minecraft.server.v1_9_R1.PacketPlayOutOpenWindow;
+
 import org.bukkit.block.Block;
 import org.apache.commons.lang.exception.ExceptionUtils;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_9_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -53,6 +76,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	HashMap<Block, BukkitTask> partTimers = new HashMap<Block, BukkitTask>();
 	
 	HashMap<Player, Integer> deathsLeft = new HashMap<Player, Integer>();
+	
+	HashMap<Inventory, Group<ItemStack, String>> anvils = new HashMap<Inventory, Group<ItemStack, String>>();
 	
 	String CBPATH;
 	String NMSPATH;
@@ -376,11 +401,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							Player player = (Player)sender;
 							// Start SETINVENTORY (FLARE)
 							
-							List<ItemStack> items = (List<ItemStack>)conf.config.getList("Flares."+args[1]+".Contents", new ArrayList<ItemStack>());
-							Inventory inv = Bukkit.createInventory(player, 27, "Set Flare Items For "+args[1]);
-							for(int i = 0; i < items.size(); i++)
-								inv.setItem(i, items.get(i));
-							player.openInventory(inv);
+							openFlareInventory(player, args[1]);
 							
 							/*List<ItemStack> conts = new ArrayList<ItemStack>();
 							ItemStack[] iconts = player.getInventory().getStorageContents();
@@ -490,6 +511,14 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		}
 		
 		return true;
+	}
+	
+	private void openFlareInventory(Player player, String name){
+		List<ItemStack> items = (List<ItemStack>)conf.config.getList("Flares."+name+".Contents", new ArrayList<ItemStack>());
+		Inventory inv = Bukkit.createInventory(player, 27, "Set Flare Items For "+name);
+		for(int i = 0; i < items.size(); i++)
+			inv.setItem(i, items.get(i));
+		player.openInventory(inv);
 	}
 	
 	public void sendActionBar(Player player, String message){
@@ -729,6 +758,11 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 				ev.getPlayer().sendMessage(G+"You're all done setting up the flare " +Y+name+G+"!");
 			}
 		}
+		else if(ev.getInventory() instanceof AnvilInventory && anvils.containsKey(ev.getInventory())){
+			AnvilInventory inv = (AnvilInventory)ev.getInventory();
+			inv.setContents(new ItemStack[3]);
+			anvils.remove(ev.getInventory());
+		}
 	}
 	
 	@EventHandler
@@ -741,6 +775,103 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	}
 	
 	@EventHandler
+	public void onInvClick(final InventoryClickEvent ev){
+		if(ev.getInventory().getTitle().contains("Set Flare Items For ")){
+			ItemStack cursor = ev.getCursor();
+			ItemStack clicked = ev.getCurrentItem();
+			boolean clBAD = clicked == null || clicked.getType() == Material.AIR;
+			boolean cuBAD = cursor == null || cursor.getType() == Material.AIR;
+			
+			int slot = ev.getRawSlot();
+			
+			final ItemStack target;
+			if(ev.getClick() == ClickType.SHIFT_LEFT && slot >= 27 && !clBAD)
+				target = clicked;
+			else if(slot < 27 && !cuBAD)
+				target = cursor;
+			else
+				target = null;
+			
+			if(target != null){
+				final ItemStack targetClone = target.clone();
+				String t = ev.getInventory().getTitle();
+				final String name = t.substring(t.indexOf("For ")+4);
+				
+				new BukkitRunnable(){
+					public void run(){
+						FAnvil anvil = new FAnvil(ev.getWhoClicked());
+						anvil.a("Set Chance");
+						
+						ItemMeta im = target.getItemMeta();
+						List<String> lore = im.getLore();
+						double chance = 100.0;
+						if(lore != null){
+							String str = ChatColor.stripColor(lore.get(lore.size()-1));
+							try {
+								chance = Double.parseDouble(str);
+								lore.remove(lore.size()-1);
+								im.setLore(lore);
+								target.setItemMeta(im);
+							}
+							catch (Exception e){
+								chance = 100;
+							}
+						}
+						
+						ItemStack tag = new ItemStack(Material.NAME_TAG);
+						im = tag.getItemMeta();
+						im.setDisplayName(chance+"");
+						tag.setItemMeta(im);
+						
+						anvil.setItem(0, CraftItemStack.asNMSCopy(tag));
+						EntityPlayer ep = ((CraftPlayer)ev.getWhoClicked()).getHandle();
+						int containerId = ep.nextContainerCounter();
+						ep.playerConnection.sendPacket(new PacketPlayOutOpenWindow(containerId, "minecraft:anvil", new ChatMessage("Set Chance", new Object[]{}), 0));
+						ep.activeContainer = anvil;
+						ep.activeContainer.windowId = containerId;
+						ep.activeContainer.addSlotListener(ep);
+						
+						anvils.put(ev.getWhoClicked().getOpenInventory().getTopInventory(), new Group<ItemStack, String>(targetClone, name));
+						
+						//ev.getWhoClicked().openInventory(Bukkit.createInventory(null, InventoryType.ANVIL, "Set Chance"));
+					}
+				}.runTaskLater(this, 1);
+			}
+		}
+		else if(ev.getInventory() instanceof AnvilInventory){
+			ItemStack clicked = ev.getCurrentItem();
+			if(clicked == null || ev.getRawSlot() > 3)
+				return;
+			Group<ItemStack, String> g = anvils.remove(ev.getInventory());
+			if(g == null)
+				return;
+			
+			ev.setCancelled(true);
+			
+			ItemStack target = g.a;
+			String name = g.b;
+			
+			ItemMeta im = target.getItemMeta();
+			List<String> lore = im.getLore();
+			if(lore == null)
+				lore = new ArrayList<String>();
+			lore.add(clicked.getItemMeta().getDisplayName());
+			im.setLore(lore);
+			target.setItemMeta(im);
+			
+			conf.load();
+			List<ItemStack> items = (List<ItemStack>)conf.config.getList("Flares."+name+".Contents", new ArrayList<ItemStack>());
+			items.add(target);
+			conf.config.set("Flares."+name+".Contents", items);
+			conf.save();
+			
+			ev.getInventory().setContents(new ItemStack[3]);
+			
+			openFlareInventory((Player)ev.getWhoClicked(), name);
+		}
+	}
+	
+	@EventHandler (priority = EventPriority.HIGHEST)
 	public void onClick(PlayerInteractEvent ev){
 		String disp = disp(ev.getItem());
 		
@@ -770,16 +901,15 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 					for(String key : conf.config.getConfigurationSection("Flares").getKeys(false)){
 						if(almost(ev.getItem(), conf.config.getItemStack("Flares."+key+".Activate"), false)){
 							// Matched to flare
+							ev.setCancelled(true);
 							if(!isWarzone(ev.getPlayer().getLocation())){
 								String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Not in Warzone Message")).replace("{player}", ev.getPlayer().getName());
 								if(!message.toLowerCase().equals("none"))
 									ev.getPlayer().sendMessage(message);
 								//ev.getPlayer().sendMessage(DR+"You must be in a Warzone");
 							}
-							else {
+							else
 								new Flare(ev.getItem(), ev.getPlayer(), this, key);
-								ev.setCancelled(true);
-							}
 							return;
 						}
 					}
@@ -815,7 +945,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 					for(String key : conf.config.getConfigurationSection("Quests").getKeys(false)){
 						ItemStack citem = conf.config.getItemStack("Quests."+key+".Activate");
 						
-						if(almost(ev.getItem(), citem, true)){
+						if(almost(ev.getItem(), citem, false)){
 							// Matched to Rank Quest
 							ev.setCancelled(true);
 							if(ev.getItem().getAmount() > 1){
@@ -838,7 +968,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								//ev.getPlayer().sendMessage(DR+"You must be inside the proper region!");
 							}
 							else
-								QIP.put(ev.getPlayer(), new RankQuest(ev.getItem(), ev.getPlayer(), conf.config.getInt("Quests."+key+".Duration"), this, key));
+								QIP.put(ev.getPlayer(), new RankQuest(ev.getPlayer().getInventory().getHeldItemSlot(), ev.getPlayer(), conf.config.getInt("Quests."+key+".Duration"), this, key));
 							return;
 						}
 						else if(almost(ev.getItem(), conf.config.getItemStack("Quests."+key+".Voucher"), false)){
@@ -864,4 +994,25 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		}
 	}
 
+}
+
+class Group<K, V> {
+	public K a;
+	public V b;
+	
+	public Group(K a, V b){
+		this.a = a;
+		this.b = b;
+	}
+
+	@Override
+	public boolean equals(Object other){
+		Group ot = ((Group)other);
+		return (a.equals(ot.a) && b.equals(ot.b)) || (a.equals(ot.b) && b.equals(ot.a));
+	}
+	
+	@Override
+	public int hashCode(){
+		return 0;
+	}
 }

@@ -20,10 +20,10 @@ import org.bukkit.scheduler.BukkitTask;
 
 public class RankQuest implements Listener {
 	
-	ItemStack is;
 	Item im;
 	Player owner;
 	int timeLeft;
+	int slot;
 	FlareAndQuests plugin;
 	BukkitTask timer;
 	String name;
@@ -31,8 +31,8 @@ public class RankQuest implements Listener {
 	Location one;
 	Location two;
 	
-	public RankQuest(final ItemStack item, final Player owner, int duration, final FlareAndQuests plugin, final String name){
-		this.is = item;
+	public RankQuest(final int slot, final Player owner, int duration, final FlareAndQuests plugin, final String name){
+		ItemStack is = owner.getInventory().getItem(slot);
 		this.owner = owner;
 		this.plugin = plugin;
 		this.name = name;
@@ -40,10 +40,10 @@ public class RankQuest implements Listener {
 		
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 		
-		ItemMeta IM = item.getItemMeta();
+		ItemMeta IM = is.getItemMeta();
 		if(!IM.getDisplayName().contains("(") || !IM.getDisplayName().contains(")")){
 			IM.setDisplayName(IM.getDisplayName()+ChatColor.GRAY+" ("+ChatColor.YELLOW+timeLeft+ChatColor.GRAY+")");
-			item.setItemMeta(IM);
+			is.setItemMeta(IM);
 			owner.updateInventory();
 		}
 		else {
@@ -63,19 +63,20 @@ public class RankQuest implements Listener {
 		timer = new BukkitRunnable(){
 			public void run(){
 				timeLeft--;
-				ItemMeta IM = item.getItemMeta();
+				ItemStack is = owner.getInventory().getItem(slot);
+				ItemMeta IM = is.getItemMeta();
 				String snip = IM.getDisplayName().substring(0, IM.getDisplayName().indexOf("(")+1);
 				IM.setDisplayName(snip+ChatColor.YELLOW+timeLeft+ChatColor.GRAY+")");
-				item.setItemMeta(IM);
+				is.setItemMeta(IM);
 				owner.updateInventory();
 				
-				if(owner.getItemInHand() == null || !owner.getItemInHand().equals(is))
+				if(owner.getInventory().getHeldItemSlot() != slot)
 					plugin.sendActionBar(owner, ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("Action Bar Message")).replace("{left}", timeLeft+""));
 				
 				if(timeLeft == 0){
 					plugin.conf.load();
 					//if(is.getAmount() == 1)
-						owner.getInventory().remove(is);
+						owner.getInventory().setItem(slot, null);
 					/*else {
 						is.setAmount(is.getAmount()-1);
 						IM = is.getItemMeta();
@@ -114,11 +115,19 @@ public class RankQuest implements Listener {
 	@EventHandler
 	public void onDeath(final PlayerDeathEvent ev){
 		if(ev.getEntity().equals(owner)){
+			ItemStack is = owner.getInventory().getItem(slot);
 			int am = is.getAmount();
 			is.setAmount(1);
 			int index = ev.getDrops().indexOf(is);
 			is.setAmount(am);
 			if(index > -1){
+				ItemMeta IM = is.getItemMeta();
+				int ind = IM.getDisplayName().indexOf("(") - 3;
+				if(index >= 0){
+					IM.setDisplayName(IM.getDisplayName().substring(0, ind));
+					is.setItemMeta(IM);
+					owner.updateInventory();
+				}
 				plugin.conf.load();
 				String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("RQ Lost Broadcast")).replace("{player}", owner.getName());
 				if(!message.toLowerCase().equals("none"))
@@ -131,13 +140,14 @@ public class RankQuest implements Listener {
 	
 	@EventHandler
 	public void onInvClick(InventoryClickEvent ev){
-		if(ev.getWhoClicked().equals(owner) && ev.getCurrentItem() != null && ev.getCurrentItem().equals(is))
+		if(ev.getWhoClicked().equals(owner) && ev.getRawSlot() == slot)
 			ev.setCancelled(true);
 	}
 	
 	@EventHandler
 	public void onMove(PlayerMoveEvent ev){
 		if(ev.getPlayer().equals(owner) && !plugin.inside(ev.getTo(), one, two)){
+			ItemStack is = owner.getInventory().getItem(slot);
 			plugin.conf.load();
 			String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("RQ Reset Broadcast")).replace("{player}", owner.getName());
 			if(!message.toLowerCase().equals("none"))
@@ -157,6 +167,7 @@ public class RankQuest implements Listener {
 	@EventHandler
 	public void onQuit(PlayerQuitEvent ev){
 		if(ev.getPlayer().equals(owner)){
+			ItemStack is = owner.getInventory().getItem(slot);
 			ItemMeta IM = is.getItemMeta();
 			int index = IM.getDisplayName().indexOf("(") - 3;
 			if(index >= 0){
@@ -175,9 +186,17 @@ public class RankQuest implements Listener {
 	
 	@EventHandler
 	public void onDrop(PlayerDropItemEvent ev){
-		if(ev.getPlayer().equals(owner) && ev.getItemDrop().getItemStack().isSimilar(is)){
+		if(ev.getPlayer().equals(owner) && owner.getInventory().getHeldItemSlot() == slot){
+		//if(ev.getPlayer().equals(owner) && ev.getItemDrop().getItemStack().isSimilar(is)){
+			ItemStack is = ev.getItemDrop().getItemStack();
 			plugin.conf.load();
-			String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("RQ Lost Broadcast")).replace("{player}", owner.getName());
+			ItemMeta IM = is.getItemMeta();
+			int index = IM.getDisplayName().indexOf("(") - 3;
+			if(index >= 0){
+				IM.setDisplayName(IM.getDisplayName().substring(0, index));
+				is.setItemMeta(IM);
+				owner.updateInventory();
+			}String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("RQ Lost Broadcast")).replace("{player}", owner.getName());
 			if(!message.toLowerCase().equals("none"))
 				for(Player p : Bukkit.getOnlinePlayers())
 					p.sendMessage(message);
