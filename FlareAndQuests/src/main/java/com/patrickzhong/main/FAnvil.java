@@ -1,9 +1,9 @@
 package com.patrickzhong.main;
 
-import org.bukkit.craftbukkit.v1_9_R2.entity.CraftHumanEntity;
-import net.minecraft.server.v1_9_R2.BlockPosition;
-import net.minecraft.server.v1_9_R2.ContainerAnvil;
-import net.minecraft.server.v1_9_R2.EntityHuman;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftHumanEntity;
+import net.minecraft.server.v1_8_R3.BlockPosition;
+import net.minecraft.server.v1_8_R3.ContainerAnvil;
+import net.minecraft.server.v1_8_R3.EntityHuman;
 
 import org.bukkit.entity.HumanEntity;
 

@@ -8,11 +8,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-import net.minecraft.server.v1_9_R2.ChatMessage;
-import net.minecraft.server.v1_9_R2.EntityPlayer;
-import net.minecraft.server.v1_9_R2.PacketPlayOutOpenWindow;
-import org.bukkit.craftbukkit.v1_9_R2.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
+import net.minecraft.server.v1_8_R3.ChatMessage;
+import net.minecraft.server.v1_8_R3.EntityPlayer;
+import net.minecraft.server.v1_8_R3.PacketPlayOutOpenWindow;
+import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
 
 import org.bukkit.block.Block;
 import org.apache.commons.lang.exception.ExceptionUtils;
