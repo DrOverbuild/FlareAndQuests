@@ -8,22 +8,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-import net.minecraft.server.v1_9_R1.ChatMessage;
-import net.minecraft.server.v1_9_R1.EntityPlayer;
-import net.minecraft.server.v1_9_R1.PacketPlayOutOpenWindow;
+import net.minecraft.server.v1_9_R2.ChatMessage;
+import net.minecraft.server.v1_9_R2.EntityPlayer;
+import net.minecraft.server.v1_9_R2.PacketPlayOutOpenWindow;
+import org.bukkit.craftbukkit.v1_9_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
 
 import org.bukkit.block.Block;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -33,8 +22,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_9_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -550,7 +538,6 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		catch (Exception e){
 			getLogger().info(ExceptionUtils.getStackTrace(e));
 		}
-        
     }
 	
 	public void spawnParticle(int part, Location loc, double offX, double offY, double offZ, int count, Collection<Player> ents){

@@ -1,11 +1,11 @@
 package com.patrickzhong.main;
 
-import org.bukkit.craftbukkit.v1_9_R1.entity.CraftHumanEntity;
-import org.bukkit.entity.HumanEntity;
+import org.bukkit.craftbukkit.v1_9_R2.entity.CraftHumanEntity;
+import net.minecraft.server.v1_9_R2.BlockPosition;
+import net.minecraft.server.v1_9_R2.ContainerAnvil;
+import net.minecraft.server.v1_9_R2.EntityHuman;
 
-import net.minecraft.server.v1_9_R1.BlockPosition;
-import net.minecraft.server.v1_9_R1.ContainerAnvil;
-import net.minecraft.server.v1_9_R1.EntityHuman;
+import org.bukkit.entity.HumanEntity;
 
 public final class FAnvil extends ContainerAnvil {   
 	

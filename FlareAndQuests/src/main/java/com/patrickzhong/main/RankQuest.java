@@ -64,6 +64,8 @@ public class RankQuest implements Listener {
 			public void run(){
 				timeLeft--;
 				ItemStack is = owner.getInventory().getItem(slot);
+				if(is == null)
+					return;
 				ItemMeta IM = is.getItemMeta();
 				String snip = IM.getDisplayName().substring(0, IM.getDisplayName().indexOf("(")+1);
 				IM.setDisplayName(snip+ChatColor.YELLOW+timeLeft+ChatColor.GRAY+")");
