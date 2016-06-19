@@ -12,11 +12,11 @@ public class Config {
 	File configFile;
 	public YamlConfiguration config;
 
-	public Config(Plugin plugin, HashMap<String, Object> defaults){
+	public Config(Plugin plugin, HashMap<String, Object> defaults, String name){
 		
 		if(!plugin.getDataFolder().exists())
 			plugin.getDataFolder().mkdir();
-		configFile = new File(plugin.getDataFolder(), "config.yml");
+		configFile = new File(plugin.getDataFolder(), name+".yml");
 		if(!configFile.exists()){
 			try {
 				configFile.createNewFile();

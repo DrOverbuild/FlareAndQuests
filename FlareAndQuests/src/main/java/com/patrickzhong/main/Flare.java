@@ -37,7 +37,7 @@ public class Flare {
 			rloc = randomLoc(loc, r);
 			count++;
 			if(count >= max){
-				String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("Flare Drop Failed Message")).replace("{player}", player.getName());
+				String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("Flare Drop Failed Message")).replace("{player}", player.getName());
 				if(!message.toLowerCase().equals("none"))
 					player.sendMessage(message);
 				
@@ -47,13 +47,13 @@ public class Flare {
 		}
 		
 		if(is.getAmount() == 1)
-			player.getInventory().remove(is);
+			player.getInventory().setItem(player.getInventory().getHeldItemSlot(), null);
 		else
 			is.setAmount(is.getAmount()-1);
 		player.updateInventory();
 		
 		double ar = plugin.conf.config.getDouble("Flare Alert Radius");
-		String message = ChatColor.translateAlternateColorCodes('&', plugin.conf.config.getString("Flare Broadcast")).replace("{player}", player.getName());
+		String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("Flare Broadcast")).replace("{player}", player.getName());
 		if(!message.toLowerCase().equals("none")){
 			for(Entity ent : player.getNearbyEntities(r, r, r))
 				if(ent instanceof Player && ent.getLocation().distance(loc) <= r)
@@ -66,8 +66,6 @@ public class Flare {
 		armor.setVisible(false);
 		armor.setHelmet(new ItemStack(Material.CHEST));
 		armor.setHeadPose(new EulerAngle(0, Math.PI, 0));
-		
-		plugin.getLogger().info(armor.toString());
 		
 		new BukkitRunnable(){
 			public void run(){
@@ -82,6 +80,18 @@ public class Flare {
 						plugin.conf.load();
 						List<ItemStack> list = (List<ItemStack>)plugin.conf.config.getList("Flares."+name+".Contents", new ArrayList<ItemStack>());
 						ItemStack[] conts = new ItemStack[27];
+						int count = 0;
+						
+						int min = plugin.conf.config.getInt("Minimum Flare Contents");
+						int max = plugin.conf.config.getInt("Maximum Flare Contents");
+						
+						if(list.size() < min)
+							min = list.size();
+						if(list.size() < max)
+							max = list.size();
+						
+						int target = (int)(Math.random() * (max-min)) + min;
+						
 						for(int i = 0; i < list.size(); i++){
 							ItemStack is = list.get(i);
 							double percent = 100;
@@ -92,9 +102,20 @@ public class Flare {
 								im.setLore(lore);
 								is.setItemMeta(im);
 							}
-							if(rand.nextDouble() * 100 < percent)
-								conts[i] = is;
+							if(rand.nextDouble() * 100 < percent){
+								conts[count] = is;
+								count++;
+							}
+							
+							if(count >= target)
+								break;
 						}
+						
+						while(count < target){
+							conts[count] = list.get((int)(Math.random() * list.size()));
+							count++;
+						}
+						
 						c.getBlockInventory().setContents(conts);
 						c.update(true);
 						

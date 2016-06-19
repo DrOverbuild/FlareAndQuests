@@ -8,12 +8,12 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-import net.minecraft.server.v1_8_R3.ChatMessage;
-import net.minecraft.server.v1_8_R3.EntityPlayer;
-import net.minecraft.server.v1_8_R3.PacketPlayOutOpenWindow;
-import org.bukkit.craftbukkit.v1_8_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_8_R3.inventory.CraftItemStack;
+import net.minecraft.server.v1_9_R2.ChatMessage;
+import net.minecraft.server.v1_9_R2.EntityPlayer;
+import net.minecraft.server.v1_9_R2.PacketPlayOutOpenWindow;
 
+import org.bukkit.craftbukkit.v1_9_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
 import org.bukkit.block.Block;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.bukkit.Bukkit;
@@ -22,7 +22,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -39,6 +38,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -51,6 +51,7 @@ import com.massivecraft.factions.Faction;
 public class FlareAndQuests extends JavaPlugin implements Listener {
 	
 	Config conf;
+	Config trans;
 	
 	String DR = ChatColor.DARK_RED+"";
 	String R = ChatColor.RED+"";
@@ -73,21 +74,26 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	public void onEnable(){
 		this.getServer().getPluginManager().registerEvents(this, this);
 		HashMap<String, Object> defs = new HashMap<String, Object>();
-		defs.put("RQ Start Broadcast", "&e{player} &7has started a rank quest!");
-		defs.put("RQ Complete Broadcast", "&e{player} &7has completed their rank quest!");
-		defs.put("RQ Lost Broadcast", "&e{player} &7has lost their rank quest!");
-		defs.put("RQ Reset Broadcast", "&e{player} &7has reset their rank quest!");
-		defs.put("RQ Quit Broadcast", "&e{player} &7left, so their rank quest was reset!");
-		defs.put("Action Bar Message", "&b&lRank Quest: &e{left} &7seconds");
+		HashMap<String, Object> defsT = new HashMap<String, Object>();
 		
-		defs.put("Not in Warzone Message", "&4You must be in a Warzone!");
-		defs.put("Already Doing Quest Message", "&4You are already doing a rank quest!");
-		defs.put("Not in Region Message", "&4You must be inside the proper region!");
-		defs.put("Keep-Inventory Start Message", "&7You now have &e{duration} &7seconds or &e{deaths} &7deaths of keep-inventory.");
-		defs.put("Keep-Inventory Expire Message", "&7Your keep-inventory period has expired.");
-		defs.put("Flare Drop Failed Message", "&4Drop failed.");
+		defsT.put("RQ Start Broadcast", "&e{player} &7has started a rank quest!");
+		defsT.put("RQ Complete Broadcast", "&e{player} &7has completed their rank quest!");
+		defsT.put("RQ Lost Broadcast", "&e{player} &7has lost their rank quest!");
+		defsT.put("RQ Reset Broadcast", "&e{player} &7has reset their rank quest!");
+		defsT.put("RQ Quit Broadcast", "&e{player} &7left, so their rank quest was reset!");
+		defsT.put("Action Bar Message", "&b&lRank Quest: &e{left} &7seconds");
 		
-		defs.put("Cannot Activate Stacked Rank Quests Message", "&4You cannot activate more than one rank quest at the same time!");
+		defsT.put("Not in Warzone Message", "&4You must be in a Warzone!");
+		defsT.put("Already Doing Quest Message", "&4You are already doing a rank quest!");
+		defsT.put("Not in Region Message", "&4You must be inside the proper region!");
+		defsT.put("Keep-Inventory Start Message", "&7You now have &e{duration} &7seconds or &e{deaths} &7deaths of keep-inventory.");
+		defsT.put("Keep-Inventory Expire Message", "&7Your keep-inventory period has expired.");
+		defsT.put("Keep-Inventory Actionbar Message", "&b&lKeep-Inventory: &e{left} &7seconds");
+		defsT.put("Flare Drop Failed Message", "&4Drop failed.");
+		
+		defsT.put("Cannot Activate Stacked Rank Quests Message", "&4You cannot activate more than one rank quest at the same time!");
+		defsT.put("Cannot Activate While in Keep Inv Message", "&4You cannot activate a rank quest while in a keep inventory period!");
+		defsT.put("Flare Broadcast", "&e{player} &7has used a flare!");
 		
 		defs.put("Flare Max Tries", 100);
 		
@@ -96,8 +102,13 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		
 		defs.put("Flare Drop Radius", 10.0);
 		defs.put("Flare Alert Radius", 10.0);
-		defs.put("Flare Broadcast", "&e{player} &7has used a flare!");
-		conf = new Config(this, defs);
+		defs.put("Minimum Flare Contents", 2);
+		defs.put("Maximum Flare Contents", 6);
+		
+		
+		
+		conf = new Config(this, defs, "config");
+		trans = new Config(this, defsT, "translations");
 		
 		String packageName = getServer().getClass().getPackage().getName();
 		String version = packageName.substring(packageName.indexOf(".v")+2);
@@ -134,9 +145,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 					if(a) sec = "Quests";
 					else if(b) sec = "Flares";
 					else sec = "Witems";
-					for(String key : conf.config.getConfigurationSection(sec).getKeys(false))
-						msg += (msg.equals("") ? "" : G+", ") + Y + key;
-					sender.sendMessage(G+sec+": "+msg);
+					if(conf.config.contains(sec))
+						for(String key : conf.config.getConfigurationSection(sec).getKeys(false))
+							msg += (msg.equals("") ? "" : G+", ") + Y + key;
+					sender.sendMessage(G+sec+": "+(msg.equals("") ? Y+"None" : msg));
 				}
 				else if(args[0].equalsIgnoreCase("help"))
 					help(sender, cmd.getName());
@@ -149,6 +161,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 					Player player = (Player)sender;
 					if(player.getItemInHand() == null || player.getItemInHand().getType() == Material.AIR)
 						player.sendMessage(DR+"You must hold an item in your hand.");
+					else if(!player.getItemInHand().hasItemMeta())
+						player.sendMessage(DR+"You cannot use an unnamed/unlored item.");
 					else if(a){
 						// Start CREATE (RQ)
 						if(conf.config.contains("Quests."+args[1]))
@@ -156,7 +170,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						else {
 							conf.config.set("Quests."+args[1]+".Activate", player.getItemInHand());
 							conf.save();
-							player.getInventory().remove(player.getItemInHand());
+							//player.getInventory().remove(player.getItemInHand());
+							player.getInventory().setItem(player.getInventory().getHeldItemSlot(), null);
 							player.updateInventory();
 							player.sendMessage(G+"Successfully created a rank quest named "+Y+args[1]);
 							player.sendMessage(G+"Next step: select a region using "+Y+"/rq wand"+G+" and "+Y+"/rq setregion "+args[1]);
@@ -170,7 +185,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						else {
 							conf.config.set("Flares."+args[1]+".Activate", player.getItemInHand());
 							conf.save();
-							player.getInventory().remove(player.getItemInHand());
+							//player.getInventory().remove(player.getItemInHand());
+							player.getInventory().setItem(player.getInventory().getHeldItemSlot(), null);
 							player.updateInventory();
 							player.sendMessage(G+"Successfully created a flare named "+Y+args[1]);
 							player.sendMessage(G+"Next step: set the items using "+Y+"/flare setinventory "+args[1]);
@@ -184,7 +200,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						else {
 							conf.config.set("Witems."+args[1]+".Activate", player.getItemInHand());
 							conf.save();
-							player.getInventory().remove(player.getItemInHand());
+							//player.getInventory().remove(player.getItemInHand());
+							player.getInventory().setItem(player.getInventory().getHeldItemSlot(), null);
 							player.updateInventory();
 							player.sendMessage(G+"Successfully created a witem named "+Y+args[1]);
 							player.sendMessage(G+"Next step: select a region using "+Y+"/rq wand"+G+" and "+Y+"/witem setregion "+args[1]);
@@ -623,7 +640,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		int dA = conf.config.getInt("Deaths Allowed For Keep-Inv");
 		int dD = conf.config.getInt("Keep-Inv Duration");
 		
-		String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Keep-Inventory Start Message")).replace("{player}", player.getName()).replace("{duration}", dD+"").replace("{deaths}", dA+"");
+		String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Keep-Inventory Start Message")).replace("{player}", player.getName()).replace("{duration}", dD+"").replace("{deaths}", dA+"");
 		if(!message.toLowerCase().equals("none"))
 			player.sendMessage(message);
 		
@@ -635,7 +652,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 				if(deathsLeft.containsKey(player)){
 					deathsLeft.remove(player);
 					
-					String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Keep-Inventory Expire Message")).replace("{player}", player.getName());
+					String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Keep-Inventory Expire Message")).replace("{player}", player.getName());
 					if(!message.toLowerCase().equals("none"))
 						player.sendMessage(message);
 					
@@ -643,9 +660,28 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 				}
 			}
 		}.runTaskLater(this, dD * 20);
+		
+		final int[] t = {dD};
+		
+		new BukkitRunnable(){
+			public void run(){
+				if(!deathsLeft.containsKey(player) || t[0] < 0){
+					this.cancel();
+					return;
+				}
+				
+				String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Keep-Inventory Actionbar Message")).replace("{left}", t[0]+"");
+				if(!message.toLowerCase().equals("none"))
+					sendActionBar(player, message);
+				t[0]--;
+			}
+		}.runTaskTimer(this, 0, 20);
 	}
 	
 	public boolean inside(Location loc, Location one, Location two){
+		if(one == null || two == null)
+			return false;
+		
 		boolean worlds = loc.getWorld().equals(one.getWorld()) && loc.getWorld().equals(two.getWorld());
 		
 		/*boolean x = Math.signum(loc.getX()-one.getX()) == -1 * Math.signum(loc.getX()-two.getX());
@@ -705,7 +741,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			if(num <= 0){
 				deathsLeft.remove(ev.getEntity());
 				
-				String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Keep-Inventory Expire Message")).replace("{player}", ev.getEntity().getName());
+				String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Keep-Inventory Expire Message")).replace("{player}", ev.getEntity().getName());
 				if(!message.toLowerCase().equals("none"))
 					ev.getEntity().sendMessage(message);
 				
@@ -789,7 +825,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						FAnvil anvil = new FAnvil(ev.getWhoClicked());
 						anvil.a("Set Chance");
 						
-						ItemMeta im = target.getItemMeta();
+						ItemMeta im = targetClone.getItemMeta();
 						List<String> lore = im.getLore();
 						double chance = 100.0;
 						if(lore != null){
@@ -798,7 +834,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								chance = Double.parseDouble(str);
 								lore.remove(lore.size()-1);
 								im.setLore(lore);
-								target.setItemMeta(im);
+								targetClone.setItemMeta(im);
 							}
 							catch (Exception e){
 								chance = 100;
@@ -890,7 +926,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							// Matched to flare
 							ev.setCancelled(true);
 							if(!isWarzone(ev.getPlayer().getLocation())){
-								String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Not in Warzone Message")).replace("{player}", ev.getPlayer().getName());
+								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Not in Warzone Message")).replace("{player}", ev.getPlayer().getName());
 								if(!message.toLowerCase().equals("none"))
 									ev.getPlayer().sendMessage(message);
 								//ev.getPlayer().sendMessage(DR+"You must be in a Warzone");
@@ -907,7 +943,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							//Matched to Witem
 							ev.setCancelled(true);
 							if(!inside(ev.getPlayer().getLocation(), (Location)conf.config.get("Witems."+key+".First"), (Location)conf.config.get("Witems."+key+".Second"))){
-								String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Not in Region Message")).replace("{player}", ev.getPlayer().getName());
+								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Not in Region Message")).replace("{player}", ev.getPlayer().getName());
 								if(!message.toLowerCase().equals("none"))
 									ev.getPlayer().sendMessage(message);
 								
@@ -915,7 +951,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							}
 							else {
 								if(ev.getItem().getAmount() == 1)
-									ev.getPlayer().getInventory().remove(ev.getItem());
+									ev.getPlayer().getInventory().setItem(ev.getPlayer().getInventory().getHeldItemSlot(), null);
 								else
 									ev.getItem().setAmount(ev.getItem().getAmount()-1);
 								
@@ -936,23 +972,28 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							// Matched to Rank Quest
 							ev.setCancelled(true);
 							if(ev.getItem().getAmount() > 1){
-								String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Cannot Activate Stacked Rank Quests Message")).replace("{player}", ev.getPlayer().getName());
+								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Cannot Activate Stacked Rank Quests Message")).replace("{player}", ev.getPlayer().getName());
 								if(!message.toLowerCase().equals("none"))
 									ev.getPlayer().sendMessage(message);
 							}
 							else if(QIP.containsKey(ev.getPlayer())){
-								String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Already Doing Quest Message")).replace("{player}", ev.getPlayer().getName());
+								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Already Doing Quest Message")).replace("{player}", ev.getPlayer().getName());
 								if(!message.toLowerCase().equals("none"))
 									ev.getPlayer().sendMessage(message);
 								
 								//ev.getPlayer().sendMessage(DR+"You are already doing a rank quest!");
 							}
 							else if(!inside(ev.getPlayer().getLocation(), (Location)conf.config.get("Quests."+key+".First"), (Location)conf.config.get("Quests."+key+".Second"))){
-								String message = ChatColor.translateAlternateColorCodes('&', conf.config.getString("Not in Region Message")).replace("{player}", ev.getPlayer().getName());
+								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Not in Region Message")).replace("{player}", ev.getPlayer().getName());
 								if(!message.toLowerCase().equals("none"))
 									ev.getPlayer().sendMessage(message);
 								
 								//ev.getPlayer().sendMessage(DR+"You must be inside the proper region!");
+							}
+							else if(deathsLeft.containsKey(ev.getPlayer())){
+								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Cannot Activate While in Keep Inv Message")).replace("{player}", ev.getPlayer().getName());
+								if(!message.toLowerCase().equals("none"))
+									ev.getPlayer().sendMessage(message);
 							}
 							else
 								QIP.put(ev.getPlayer(), new RankQuest(ev.getPlayer().getInventory().getHeldItemSlot(), ev.getPlayer(), conf.config.getInt("Quests."+key+".Duration"), this, key));
@@ -961,10 +1002,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						else if(almost(ev.getItem(), conf.config.getItemStack("Quests."+key+".Voucher"), false)){
 							// Matched to Voucher
 							ev.setCancelled(true);
-							Inventory inv = ev.getPlayer().getInventory();
+							PlayerInventory inv = ev.getPlayer().getInventory();
 							
 							if(ev.getItem().getAmount() == 1)
-								inv.remove(ev.getItem());
+								inv.setItem(inv.getHeldItemSlot(), null);
 							else
 								ev.getItem().setAmount(ev.getItem().getAmount()-1);
 							
