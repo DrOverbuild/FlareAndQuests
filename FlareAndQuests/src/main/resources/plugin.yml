@@ -2,7 +2,6 @@ name: FlareAndQuests
 main: com.patrickzhong.main.FlareAndQuests
 version: 3
 author: ShowbizLocket61
-depend: [Factions]
 
 commands:
   faq:

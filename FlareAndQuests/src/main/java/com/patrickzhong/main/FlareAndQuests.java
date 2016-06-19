@@ -44,10 +44,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import com.massivecraft.factions.Board;
-import com.massivecraft.factions.FLocation;
-import com.massivecraft.factions.Faction;
-
 public class FlareAndQuests extends JavaPlugin implements Listener {
 	
 	Config conf;
@@ -753,8 +749,9 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	}
 	
 	public boolean isWarzone(Location loc){
-		Faction f = Board.getInstance().getFactionAt(new FLocation(loc));
-		return f == null ? false : f.isWarZone();
+		/*Faction f = Board.getInstance().getFactionAt(new FLocation(loc));
+		return f == null ? false : f.isWarZone();*/
+		return true;
 	}
 	
 	@EventHandler

@@ -23,12 +23,5 @@
            <systemPath>C:/Users/Patrick/Downloads/spigot-1.9.4.jar</systemPath>
            <scope>system</scope>
        </dependency>
-       <dependency>
-           <groupId>com.massivecraft</groupId>
-           <artifactId>factions</artifactId>
-           <version>1.8.2-U0.0.1</version>
-           <systemPath>C:/Users/Patrick/Documents/Factions.jar</systemPath>
-           <scope>system</scope>
-       </dependency>
    </dependencies>
 </project>
