@@ -1,4 +1,4 @@
-package com.patrickzhong.main;
+package com.patrickzhong.faq;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -29,11 +29,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
@@ -43,10 +41,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-
-import com.massivecraft.factions.Board;
-import com.massivecraft.factions.FLocation;
-import com.massivecraft.factions.Faction;
 
 public class FlareAndQuests extends JavaPlugin implements Listener {
 	
@@ -753,8 +747,9 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	}
 	
 	public boolean isWarzone(Location loc){
-		Faction f = Board.getInstance().getFactionAt(new FLocation(loc));
-		return f == null ? false : f.isWarZone();
+		/*Faction f = Board.getInstance().getFactionAt(new FLocation(loc));
+		return f == null ? false : f.isWarZone();*/
+		return true;
 	}
 	
 	@EventHandler

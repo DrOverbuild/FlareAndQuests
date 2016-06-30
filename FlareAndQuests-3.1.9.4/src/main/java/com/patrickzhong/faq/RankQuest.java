@@ -1,4 +1,4 @@
-package com.patrickzhong.main;
+package com.patrickzhong.faq;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

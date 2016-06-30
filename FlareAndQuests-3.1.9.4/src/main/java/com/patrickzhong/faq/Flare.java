@@ -1,4 +1,4 @@
-package com.patrickzhong.main;
+package com.patrickzhong.faq;
 
 import java.util.ArrayList;
 import java.util.List;

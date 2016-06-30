@@ -1,4 +1,4 @@
-package com.patrickzhong.main;
+package com.patrickzhong.faq;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,5 +43,4 @@ public class Config {
 	public void load(){
 		config = YamlConfiguration.loadConfiguration(configFile);
 	}
-	
 }

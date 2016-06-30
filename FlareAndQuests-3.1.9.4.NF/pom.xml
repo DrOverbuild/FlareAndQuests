@@ -15,13 +15,27 @@
           </plugin>
       </plugins>
    </build>
-   <dependencies>
-   	   <dependency>
-           <groupId>org.spigotmc</groupId>
-           <artifactId>spigot</artifactId>
-           <version>1.9.4</version>
-           <systemPath>C:/Users/Patrick/Downloads/spigot-1.9.4.jar</systemPath>
-           <scope>system</scope>
-       </dependency>
-   </dependencies>
+
+    <repositories>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/</url>
+        </repository>
+    </repositories>
+    <dependencies>
+        <!--Spigot API-->
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.9.4-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--Bukkit API-->
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>craftbukkit</artifactId>
+            <version>1.9.4-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>
