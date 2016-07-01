@@ -89,8 +89,6 @@ public class RQCommand extends BasePluginCommand {
 			p.updateInventory();
 		} else if (args.length < 2) { // Handling too few arguments.
 			return false;
-		} else if (!getConf().config.contains("Quests." + args[1])) {
-			sender.sendMessage(DR + "There is no quest of the name " + R + args[1]);
 		} else if (args[0].equalsIgnoreCase("create")) {
 			if (playerHasNamedItem(p)) {
 				if (getPlugin().getConf().config.contains("Quests." + args[1]))
@@ -105,6 +103,8 @@ public class RQCommand extends BasePluginCommand {
 					p.sendMessage(G + "Next step: select a region using " + Y + "/rq wand" + G + " and " + Y + "/rq setregion " + args[1]);
 				}
 			}
+		} else if (!getConf().config.contains("Quests." + args[1])) {
+			sender.sendMessage(DR + "There is no quest of the name " + R + args[1]);
 		} else if (args[0].equalsIgnoreCase("setvoucher")) {
 			if (p.getItemInHand() == null)
 				p.sendMessage(DR + "You must hold an item in your hand.");

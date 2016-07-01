@@ -27,11 +27,11 @@ public class ConfigDefaults {
 	public static Config setTranslationsDefaults(FlareAndQuests plugin){
 		HashMap<String, Object> defsT = new HashMap<String, Object>();
 
-		defsT.put("RQ Start Broadcast", "&e{player} &7has started a rank quest!");
-		defsT.put("RQ Complete Broadcast", "&e{player} &7has completed their rank quest!");
-		defsT.put("RQ Lost Broadcast", "&e{player} &7has lost their rank quest!");
-		defsT.put("RQ Reset Broadcast", "&e{player} &7has reset their rank quest!");
-		defsT.put("RQ Quit Broadcast", "&e{player} &7left, so their rank quest was reset!");
+		defsT.put("RQ Start Broadcast", "&e{player} &7has started a rank quest!  ({x}, {y}, {z})");
+		defsT.put("RQ Complete Broadcast", "&e{player} &7has completed their rank quest!  ({x}, {y}, {z})");
+		defsT.put("RQ Lost Broadcast", "&e{player} &7has lost their rank quest!  ({x}, {y}, {z})");
+		defsT.put("RQ Reset Broadcast", "&e{player} &7has reset their rank quest!  ({x}, {y}, {z})");
+		defsT.put("RQ Quit Broadcast", "&e{player} &7left, so their rank quest was reset!  ({x}, {y}, {z})");
 		defsT.put("Action Bar Message", "&b&lRank Quest: &e{left} &7seconds");
 
 		defsT.put("Not in Warzone Message", "&4You must be in a Warzone!");
@@ -44,7 +44,7 @@ public class ConfigDefaults {
 		defsT.put("Flare Arriving In Action Bar Message", "&7Supplies arriving in: {time} seconds");
 		defsT.put("Flare Arrived Message", "&7Your supplies have arrived! ({x}, {y}, {z})");
 		defsT.put("Flare In Use", "&cYou can only use one flare at a time!");
-		defsT.put("Flare Given Upon Join Message", "&7You have been given a flare because  you disconnected whilst waiting for a flare.");
+		defsT.put("Flare Given Upon Join Message", "&7You have been given a flare because you disconnected whilst waiting for a flare.");
 
 		defsT.put("Cannot Activate Stacked Rank Quests Message", "&4You cannot activate more than one rank quest at the same time!");
 		defsT.put("Cannot Activate While in Keep Inv Message", "&4You cannot activate a rank quest while in a keep inventory period!");

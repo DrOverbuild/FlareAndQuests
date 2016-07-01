@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 public class Config {
@@ -42,5 +45,20 @@ public class Config {
 	
 	public void load(){
 		config = YamlConfiguration.loadConfiguration(configFile);
+	}
+
+	public static String format(String message, Location loc, Player player){
+		message = ChatColor.translateAlternateColorCodes('&', message);
+		if(loc != null) {
+			message = message.replace("{x}", loc.getBlockX() + "");
+			message = message.replace("{y}", loc.getBlockY() + "");
+			message = message.replace("{z}", loc.getBlockZ() + "");
+		}
+
+		if(player != null){
+			message = message.replace("{player}", player.getName());
+		}
+
+		return message;
 	}
 }
