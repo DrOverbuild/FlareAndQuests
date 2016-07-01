@@ -1,9 +1,8 @@
 package com.patrickzhong.faq;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
+import com.patrickzhong.faq.util.ActionBar;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,7 +18,9 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.EulerAngle;
 
 public class Flare {
-	
+
+	public static Map<Player, String> playerFlares = new HashMap<>();
+
 	FlareAndQuests plugin;
 	boolean manual = false;
 	double vel = 0.0;
@@ -32,34 +33,26 @@ public class Flare {
 		Location rloc = randomLoc(loc, r);
 		int count = 0;
 		int max = plugin.conf.config.getInt("Flare Max Tries");
+
+
 		
 		while(!plugin.isWarzone(rloc)){
 			rloc = randomLoc(loc, r);
 			count++;
 			if(count >= max){
 				String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("Flare Drop Failed Message")).replace("{player}", player.getName());
-				if(!message.toLowerCase().equals("none"))
+				if(!message.toLowerCase().equals("none")) {
 					player.sendMessage(message);
-				
+					player.getInventory().addItem(is);
+				}
 					//player.sendMessage(plugin.DR+"Drop failed.");
 				return;
 			}
 		}
-		
-		if(is.getAmount() == 1)
-			player.getInventory().setItem(player.getInventory().getHeldItemSlot(), null);
-		else
-			is.setAmount(is.getAmount()-1);
-		player.updateInventory();
-		
-		double ar = plugin.conf.config.getDouble("Flare Alert Radius");
-		String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("Flare Broadcast")).replace("{player}", player.getName());
-		if(!message.toLowerCase().equals("none")){
-			for(Entity ent : player.getNearbyEntities(r, r, r))
-				if(ent instanceof Player && ent.getLocation().distance(loc) <= r)
-					((Player)ent).sendMessage(message);
-			player.sendMessage(message);
-		}
+
+		String arrivedMessage = ChatColor.translateAlternateColorCodes('&', plugin.getTrans().config.getString("Flare Arrived Message"))
+				.replace("{x}", rloc.getBlockX() + "").replace("{y}", rloc.getBlockY() + "").replace("{x}", rloc.getBlockZ() + "");
+		player.sendMessage(arrivedMessage);
 		
 		final ArmorStand armor = (ArmorStand)loc.getWorld().spawnEntity(rloc.clone().subtract(0, 1.5, 0), EntityType.ARMOR_STAND);
 		armor.setGravity(true);
@@ -158,4 +151,55 @@ public class Flare {
 		return new Location(loc.getWorld(), (int)(dX + loc.getX())+0.5, dY + loc.getY(), (int)(dZ + loc.getZ())+0.5);
 	}
 
+	public static void activateFlare(final ItemStack is, final Player player, final FlareAndQuests plugin, final String name){
+		plugin.getConf().load();
+
+		if(playerFlares.containsKey(player)){
+			player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getTrans().config.getString("Flare In Use")));
+		}
+
+		double r = plugin.conf.config.getDouble("Flare Drop Radius");
+		String message = ChatColor.translateAlternateColorCodes('&', plugin.getTrans().config.getString("Flare Broadcast")).replace("{player}", player.getName());
+		if(!message.toLowerCase().equals("none")){
+			for(Entity ent : player.getNearbyEntities(r, r, r))
+				if(ent instanceof Player && ent.getLocation().distance(player.getLocation()) <= r)
+					((Player)ent).sendMessage(message);
+			player.sendMessage(message);
+		}
+
+		if(is.getAmount() == 1)
+			player.getInventory().setItem(player.getInventory().getHeldItemSlot(), null);
+		else
+			is.setAmount(is.getAmount()-1);
+		player.updateInventory();
+
+		final int delay = plugin.getConf().config.getInt("Flare Arrival Delay", 0);
+
+		if(delay <= 0){
+			new Flare(is, player, plugin, name);
+		}else{
+			playerFlares.put(player, name);
+
+			final String message2 = ChatColor.translateAlternateColorCodes('&', plugin.getTrans().config.getString("Flare Arriving In Action Bar Message"));
+
+			new BukkitRunnable(){
+				int secondsLeft = delay;
+
+				@Override
+				public void run() {
+					// TODO: Handle player quit event
+
+					ActionBar.sendActionBar(player, message2.replace("{time}",secondsLeft + ""));
+					secondsLeft--;
+
+					if(secondsLeft <= 0){
+						ActionBar.sendActionBar(player,"");
+						playerFlares.remove(player);
+						new Flare(is, player, plugin, name);
+						this.cancel();
+					}
+				}
+			}.runTaskTimer(plugin, 0, 20);
+		}
+	}
 }

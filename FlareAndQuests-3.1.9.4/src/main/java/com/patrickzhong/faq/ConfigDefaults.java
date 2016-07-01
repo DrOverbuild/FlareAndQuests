@@ -19,6 +19,7 @@ public class ConfigDefaults {
 		defs.put("Flare Alert Radius", 10.0);
 		defs.put("Minimum Flare Contents", 2);
 		defs.put("Maximum Flare Contents", 6);
+		defs.put("Flare Arrival Delay", 0);
 
 		return new Config(plugin, defs, "config");
 	}
@@ -40,6 +41,10 @@ public class ConfigDefaults {
 		defsT.put("Keep-Inventory Expire Message", "&7Your keep-inventory period has expired.");
 		defsT.put("Keep-Inventory Actionbar Message", "&b&lKeep-Inventory: &e{left} &7seconds");
 		defsT.put("Flare Drop Failed Message", "&4Drop failed.");
+		defsT.put("Flare Arriving In Action Bar Message", "&7Supplies arriving in: {time} seconds");
+		defsT.put("Flare Arrived Message", "&7Your supplies have arrived! ({x}, {y}, {z})");
+		defsT.put("Flare In Use", "&cYou can only use one flare at a time!");
+		defsT.put("Flare Given Upon Join Message", "&7You have been given a flare because  you disconnected whilst waiting for a flare.");
 
 		defsT.put("Cannot Activate Stacked Rank Quests Message", "&4You cannot activate more than one rank quest at the same time!");
 		defsT.put("Cannot Activate While in Keep Inv Message", "&4You cannot activate a rank quest while in a keep inventory period!");

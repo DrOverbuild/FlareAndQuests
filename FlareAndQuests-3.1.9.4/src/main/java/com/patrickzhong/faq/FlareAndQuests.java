@@ -12,6 +12,8 @@ import com.patrickzhong.faq.commands.FAQCommand;
 import com.patrickzhong.faq.commands.FLARECommand;
 import com.patrickzhong.faq.commands.RQCommand;
 import com.patrickzhong.faq.commands.WITEMCommand;
+import com.patrickzhong.faq.util.ActionBar;
+import com.patrickzhong.faq.util.ItemStacks;
 import net.minecraft.server.v1_9_R2.ChatMessage;
 import net.minecraft.server.v1_9_R2.EntityPlayer;
 import net.minecraft.server.v1_9_R2.PacketPlayOutOpenWindow;
@@ -24,8 +26,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -37,6 +37,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -54,6 +56,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 	Config conf;
 	Config trans;
+	Config playerData;
 
 	public static final String G = ChatColor.GRAY + "";
 	public static final String Y = ChatColor.YELLOW + "";
@@ -68,14 +71,15 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 	HashMap<Inventory, Group<ItemStack, String>> anvils = new HashMap<Inventory, Group<ItemStack, String>>();
 
-	String CBPATH;
-	String NMSPATH;
+	public static String CBPATH;
+	public static String NMSPATH;
 
 	public void onEnable() {
 		this.getServer().getPluginManager().registerEvents(this, this);
 
 		conf = ConfigDefaults.setConfigDefaults(this);
 		trans = ConfigDefaults.setTranslationsDefaults(this);
+		playerData = new Config(this, null, "players");
 
 		String packageName = getServer().getClass().getPackage().getName();
 		String version = packageName.substring(packageName.indexOf(".v") + 2);
@@ -478,36 +482,6 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		player.openInventory(inv);
 	}
 
-	public void sendActionBar(Player player, String message) {
-
-		try {
-			Class CP = Class.forName(CBPATH + "entity.CraftPlayer");
-			Object p = CP.cast(player);
-
-			Class ICBC = Class.forName(NMSPATH + "IChatBaseComponent");
-			Class CS = ICBC.getDeclaredClasses()[0];
-			Object cbc = CS.getMethod("a", String.class).invoke(null, "{\"text\": \"" + message + "\"}");
-
-			Class PPOC = Class.forName(NMSPATH + "PacketPlayOutChat");
-			Object ppoc = PPOC.getConstructor(ICBC, byte.class).newInstance(cbc, (byte) 2);
-
-			Class PC = Class.forName(NMSPATH + "PlayerConnection");
-			Class EP = Class.forName(NMSPATH + "EntityPlayer");
-			Object ep = CP.getMethod("getHandle").invoke(p);
-			Object pc = EP.getField("playerConnection").get(ep);
-			Class P = Class.forName(NMSPATH + "Packet");
-
-			PC.getMethod("sendPacket", P).invoke(pc, P.cast(ppoc));
-
-			//CraftPlayer p = (CraftPlayer) player;
-			//IChatBaseComponent cbc = ChatSerializer.a("{\"text\": \"" + message + "\"}");
-			//PacketPlayOutChat ppoc = new PacketPlayOutChat(cbc, (byte)2);
-			//((CraftPlayer) p).getHandle().playerConnection.sendPacket(ppoc);
-		} catch (Exception e) {
-			getLogger().info(ExceptionUtils.getStackTrace(e));
-		}
-	}
-
 	public void spawnParticle(int part, Location loc, double offX, double offY, double offZ, int count, Collection<Player> ents) {
 		try {
 			Class PPOP = Class.forName(NMSPATH + "PacketPlayOutWorldParticles");
@@ -538,49 +512,6 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			if(ent instanceof Player)
 				((CraftPlayer)ent).getHandle().playerConnection.sendPacket(packet);*/
 
-	}
-
-
-	private void help(CommandSender sender, String name) {
-		String SEP = ChatColor.WHITE + "- " + ChatColor.GRAY;
-		String BEG = ChatColor.GRAY + "- " + ChatColor.AQUA;
-		sender.sendMessage(ChatColor.GRAY + "==============  [ " + ChatColor.AQUA + "Flares and Quests" + ChatColor.GRAY + " ]  =============");
-		if (name.equalsIgnoreCase("faq")) {
-			sender.sendMessage(BEG + "/rq help " + SEP + "Display rank quest help page.");
-			sender.sendMessage(BEG + "/flare help " + SEP + "Display flare help page.");
-			sender.sendMessage(BEG + "/witem help " + SEP + "Display witem help page.");
-		} else if (name.equalsIgnoreCase("rq")) {
-			sender.sendMessage(BEG + "/rq create <name> " + SEP + "Creates a rank quest.");
-			sender.sendMessage(BEG + "/rq delete <name> " + SEP + "Deletes a rank quest.");
-			sender.sendMessage(BEG + "/rq wand " + SEP + "Gives you a selection wand.");
-			sender.sendMessage(BEG + "/rq setregion <name> " + SEP + "Sets the region to your selection.");
-			sender.sendMessage(BEG + "/rq setvoucher <name> " + SEP + "Sets the voucher.");
-			sender.sendMessage(BEG + "/rq settime <name> <seconds> " + SEP + "Sets the duration.");
-			sender.sendMessage(BEG + "/rq setvitems <name> " + SEP + "Sets the reward items.");
-			sender.sendMessage(BEG + "/rq addvcommand <name> <command> " + SEP + "Adds a command.");
-			sender.sendMessage(BEG + "/rq listvcommands <name> " + SEP + "Lists all commands.");
-			sender.sendMessage(BEG + "/rq delvcommand <name> <command> " + SEP + "Deletes a command.");
-			sender.sendMessage(BEG + "/rq give <name> <player> " + SEP + "Gives a player a rank quest.");
-			sender.sendMessage(BEG + "/rq list " + SEP + "Lists all rank quests.");
-
-		} else if (name.equalsIgnoreCase("flare")) {
-			sender.sendMessage(BEG + "/flare create <name> " + SEP + "Creates a flare.");
-			sender.sendMessage(BEG + "/flare delete <name> " + SEP + "Deletes a flare.");
-			sender.sendMessage(BEG + "/flare setinventory <name> " + SEP + "Sets the chest inventory.");
-			sender.sendMessage(BEG + "/flare give <name> <player> " + SEP + "Gives a player a flare.");
-			sender.sendMessage(BEG + "/flare list " + SEP + "Lists all flares.");
-
-		} else if (name.equalsIgnoreCase("witem")) {
-			sender.sendMessage(BEG + "/witem create <name> " + SEP + "Creates a witem.");
-			sender.sendMessage(BEG + "/witem delete <name> " + SEP + "Deletes a witem.");
-			sender.sendMessage(BEG + "/witem setregion <name> " + SEP + "Sets the region to your selection.");
-			sender.sendMessage(BEG + "/witem addcommand <name> <command> " + SEP + "Adds a command.");
-			sender.sendMessage(BEG + "/witem listcommands <name> " + SEP + "Lists all commands.");
-			sender.sendMessage(BEG + "/witem delcommand <name> <command> " + SEP + "Deletes a command.");
-			sender.sendMessage(BEG + "/witem give <name> <player> " + SEP + "Gives a player a witem.");
-			sender.sendMessage(BEG + "/witem list " + SEP + "Lists all witems.");
-
-		}
 	}
 
 	public void startLull(final Player player) {
@@ -619,7 +550,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 				String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Keep-Inventory Actionbar Message")).replace("{left}", t[0] + "");
 				if (!message.toLowerCase().equals("none"))
-					sendActionBar(player, message);
+					ActionBar.sendActionBar(player, message);
 				t[0]--;
 			}
 		}.runTaskTimer(this, 0, 20);
@@ -650,30 +581,6 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 	private double s(double d) {
 		return Math.signum(d);
-	}
-
-	private String disp(ItemStack i) {
-		try {
-			String disp = ChatColor.stripColor(i.getItemMeta().getDisplayName());
-			return disp == null ? "" : disp;
-		} catch (Exception e) {
-			return "";
-		}
-	}
-
-	private boolean almost(ItemStack larger, ItemStack smaller, boolean disp) {
-
-		try {
-			ItemMeta l = larger.getItemMeta();
-			ItemMeta s = smaller.getItemMeta();
-			return larger.getType() == smaller.getType() &&
-					larger.getData().equals(smaller.getData()) &&
-					((!l.hasDisplayName() && !s.hasDisplayName()) || (((disp && l.getDisplayName().contains(s.getDisplayName())) || (!disp && l.getDisplayName().equals(s.getDisplayName()))))) &&
-					((!l.hasLore() && !s.hasLore()) || (l.getLore().equals(s.getLore())));
-		} catch (Exception e) {
-			return false;
-		}
-
 	}
 
 	public Config getConf() {
@@ -844,7 +751,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onClick(PlayerInteractEvent ev) {
-		String disp = disp(ev.getItem());
+		String disp = ItemStacks.getDisplayName(ev.getItem());
 
 		if (ev.getClickedBlock() != null) {
 			BukkitTask t = partTimers.remove(ev.getClickedBlock());
@@ -868,7 +775,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 				conf.load();
 				if (conf.config.contains("Flares")) {
 					for (String key : conf.config.getConfigurationSection("Flares").getKeys(false)) {
-						if (almost(ev.getItem(), conf.config.getItemStack("Flares." + key + ".Activate"), false)) {
+						if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("Flares." + key + ".Activate"), false)) {
 							// Matched to flare
 							ev.setCancelled(true);
 							if (!isWarzone(ev.getPlayer().getLocation())) {
@@ -877,14 +784,15 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 									ev.getPlayer().sendMessage(message);
 								//ev.getPlayer().sendMessage(DR+"You must be in a Warzone");
 							} else
-								new Flare(ev.getItem(), ev.getPlayer(), this, key);
+								Flare.activateFlare(ev.getItem(), ev.getPlayer(), this, key);
+//								new Flare(ev.getItem(), ev.getPlayer(), this, key);
 							return;
 						}
 					}
 				}
 				if (conf.config.contains("Witems")) {
 					for (String key : conf.config.getConfigurationSection("Witems").getKeys(false)) {
-						if (almost(ev.getItem(), conf.config.getItemStack("Witems." + key + ".Activate"), false)) {
+						if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("Witems." + key + ".Activate"), false)) {
 							//Matched to Witem
 							ev.setCancelled(true);
 							if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Witems." + key + ".First"), (Location) conf.config.get("Witems." + key + ".Second"))) {
@@ -912,7 +820,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 					for (String key : conf.config.getConfigurationSection("Quests").getKeys(false)) {
 						ItemStack citem = conf.config.getItemStack("Quests." + key + ".Activate");
 
-						if (almost(ev.getItem(), citem, false)) {
+						if (ItemStacks.stackIsSimilar(ev.getItem(), citem, false)) {
 							// Matched to Rank Quest
 							ev.setCancelled(true);
 							if (ev.getItem().getAmount() > 1) {
@@ -938,7 +846,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							} else
 								QIP.put(ev.getPlayer(), new RankQuest(ev.getPlayer().getInventory().getHeldItemSlot(), ev.getPlayer(), conf.config.getInt("Quests." + key + ".Duration"), this, key));
 							return;
-						} else if (almost(ev.getItem(), conf.config.getItemStack("Quests." + key + ".Voucher"), false)) {
+						} else if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("Quests." + key + ".Voucher"), false)) {
 							// Matched to Voucher
 							ev.setCancelled(true);
 							PlayerInventory inv = ev.getPlayer().getInventory();
@@ -958,6 +866,28 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 					}
 				}
 			}
+		}
+	}
+
+	@EventHandler
+	public void onQuit(PlayerQuitEvent ev){
+		if(Flare.playerFlares.containsKey(ev.getPlayer())){
+			playerData.config.set("players." + ev.getPlayer().getUniqueId().toString() + ".flare", Flare.playerFlares.get(ev.getPlayer()));
+			playerData.save();
+			Flare.playerFlares.remove(ev.getPlayer());
+		}else{
+			playerData.config.set("players." + ev.getPlayer().getUniqueId().toString() + ".flare", null);
+		}
+	}
+
+	@EventHandler
+	public void onJoin (PlayerJoinEvent ev){
+		String flare = playerData.config.getString("players." + ev.getPlayer().getUniqueId().toString() + ".flare", "");
+		if(!flare.isEmpty()){
+			// This is easier than rewriting the code to give a flare to a player
+			getCommand("flare").getExecutor().onCommand(getServer().getConsoleSender(), getCommand("flare"), "flare",
+					new String[]{"give", flare, ev.getPlayer().getName()});
+			ev.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',getTrans().config.getString("Flare Given Upon Join Message")));
 		}
 	}
 

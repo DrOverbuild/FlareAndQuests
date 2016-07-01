@@ -1,5 +1,6 @@
 package com.patrickzhong.faq;
 
+import com.patrickzhong.faq.util.ActionBar;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -76,7 +77,7 @@ public class RankQuest implements Listener {
 				owner.updateInventory();
 				
 				if(owner.getInventory().getHeldItemSlot() != slot)
-					plugin.sendActionBar(owner, ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("Action Bar Message")).replace("{left}", timeLeft+""));
+					ActionBar.sendActionBar(owner, ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("Action Bar Message")).replace("{left}", timeLeft+""));
 				
 				if(timeLeft == 0){
 					plugin.conf.load();
