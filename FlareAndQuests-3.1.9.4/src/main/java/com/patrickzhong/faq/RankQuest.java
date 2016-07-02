@@ -22,7 +22,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 public class RankQuest implements Listener {
-	
+
 	Item im;
 	Player owner;
 	int timeLeft;
@@ -30,57 +30,56 @@ public class RankQuest implements Listener {
 	FlareAndQuests plugin;
 	BukkitTask timer;
 	String name;
-	
+
 	Location one;
 	Location two;
-	
-	public RankQuest(final int slot, final Player owner, int duration, final FlareAndQuests plugin, final String name){
+
+	public RankQuest(final int slot, final Player owner, int duration, final FlareAndQuests plugin, final String name) {
 		ItemStack is = owner.getInventory().getItem(slot);
 		this.slot = slot;
 		this.owner = owner;
 		this.plugin = plugin;
 		this.name = name;
 		timeLeft = duration;
-		
+
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-		
+
 		ItemMeta IM = is.getItemMeta();
-		if(!IM.getDisplayName().contains("(") || !IM.getDisplayName().contains(")")){
-			IM.setDisplayName(IM.getDisplayName()+ChatColor.GRAY+" ("+ChatColor.YELLOW+timeLeft+ChatColor.GRAY+")");
+		if (!IM.getDisplayName().contains("(") || !IM.getDisplayName().contains(")")) {
+			IM.setDisplayName(IM.getDisplayName() + ChatColor.GRAY + " (" + ChatColor.YELLOW + timeLeft + ChatColor.GRAY + ")");
 			is.setItemMeta(IM);
 			owner.updateInventory();
-		}
-		else {
+		} else {
 			String str = ChatColor.stripColor(IM.getDisplayName());
-			timeLeft = Integer.parseInt(str.substring(str.indexOf("(")+1, str.indexOf(")")));
+			timeLeft = Integer.parseInt(str.substring(str.indexOf("(") + 1, str.indexOf(")")));
 		}
-		
-		plugin.conf.load();
-		one = (Location)plugin.conf.config.get("Quests."+name+".First");
-		two = (Location)plugin.conf.config.get("Quests."+name+".Second");
 
-		String message = Config.format(plugin.trans.config.getString("RQ Start Broadcast"), owner.getLocation(), owner);
+		plugin.conf.load();
+		one = (Location) plugin.conf.config.get("Quests." + name + ".First");
+		two = (Location) plugin.conf.config.get("Quests." + name + ".Second");
+
+		String[] message = plugin.getTrans().format("RQ Start Broadcast", owner.getLocation(), owner);
 //		String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Start Broadcast")).replace("{player}", owner.getName());
-		if(!message.toLowerCase().equals("none"))
-			for(Player p : Bukkit.getOnlinePlayers())
-				p.sendMessage(message);
-			
-		timer = new BukkitRunnable(){
-			public void run(){
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			p.sendMessage(message);
+		}
+
+		timer = new BukkitRunnable() {
+			public void run() {
 				timeLeft--;
 				ItemStack is = owner.getInventory().getItem(slot);
-				if(is == null)
+				if (is == null)
 					return;
 				ItemMeta IM = is.getItemMeta();
-				String snip = IM.getDisplayName().substring(0, IM.getDisplayName().indexOf("(")+1);
-				IM.setDisplayName(snip+ChatColor.YELLOW+timeLeft+ChatColor.GRAY+")");
+				String snip = IM.getDisplayName().substring(0, IM.getDisplayName().indexOf("(") + 1);
+				IM.setDisplayName(snip + ChatColor.YELLOW + timeLeft + ChatColor.GRAY + ")");
 				is.setItemMeta(IM);
 				owner.updateInventory();
-				
-				if(owner.getInventory().getHeldItemSlot() != slot)
-					ActionBar.sendActionBar(owner, ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("Action Bar Message")).replace("{left}", timeLeft+""));
-				
-				if(timeLeft == 0){
+
+				if (owner.getInventory().getHeldItemSlot() != slot)
+					ActionBar.sendActionBar(owner, ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("Action Bar Message")).replace("{left}", timeLeft + ""));
+
+				if (timeLeft == 0) {
 					plugin.conf.load();
 					//if(is.getAmount() == 1)
 					owner.getInventory().setItem(slot, null);
@@ -93,15 +92,14 @@ public class RankQuest implements Listener {
 							is.setItemMeta(IM);
 						}
 					}*/
-					owner.getInventory().addItem(plugin.conf.config.getItemStack("Quests."+name+".Voucher"));
+					owner.getInventory().addItem(plugin.conf.config.getItemStack("Quests." + name + ".Voucher"));
 					owner.updateInventory();
 
-					String message = Config.format(plugin.trans.config.getString("RQ Complete Broadcast"), owner.getLocation(), owner);
-//					String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Complete Broadcast")).replace("{player}", owner.getName());
-					if(!message.toLowerCase().equals("none"))
-						for(Player p : Bukkit.getOnlinePlayers())
-							p.sendMessage(message);
-					
+					String[] message = plugin.getTrans().format("RQ Complete Broadcast", owner.getLocation(), owner);
+					for (Player p : Bukkit.getOnlinePlayers()) {
+						p.sendMessage(message);
+					}
+
 					plugin.startLull(owner);
 					kill();
 					this.cancel();
@@ -109,68 +107,67 @@ public class RankQuest implements Listener {
 			}
 		}.runTaskTimer(plugin, 20, 20);
 	}
-	
-	public boolean isActive(Player player){
+
+	public boolean isActive(Player player) {
 		return player.equals(owner);
 	}
-	
-	public void kill(){
+
+	public void kill() {
 		timer.cancel();
 		plugin.QIP.remove(owner);
 		HandlerList.unregisterAll(this);
 	}
-	
+
 	@EventHandler
-	public void onDeath(final PlayerDeathEvent ev){
-		if(ev.getEntity().equals(owner)){
+	public void onDeath(final PlayerDeathEvent ev) {
+		if (ev.getEntity().equals(owner)) {
 			ItemStack is = owner.getInventory().getItem(slot);
 			int am = is.getAmount();
 			is.setAmount(1);
 			int index = ev.getDrops().indexOf(is);
 			is.setAmount(am);
-			if(index > -1){
+			if (index > -1) {
 				ItemMeta IM = is.getItemMeta();
 				int ind = IM.getDisplayName().indexOf("(") - 3;
-				if(index >= 0){
+				if (index >= 0) {
 					IM.setDisplayName(IM.getDisplayName().substring(0, ind));
 					is.setItemMeta(IM);
 					owner.updateInventory();
 				}
 				plugin.conf.load();
-				String message = Config.format(plugin.trans.config.getString("RQ Lost Broadcast"), owner.getLocation(), owner);
-//				String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Lost Broadcast")).replace("{player}", owner.getName());
-				if(!message.toLowerCase().equals("none"))
-					for(Player p : Bukkit.getOnlinePlayers())
-						p.sendMessage(message);
+				String[] message = plugin.getTrans().format("RQ Lost Broadcast", owner.getLocation(), owner);
+				for (Player p : Bukkit.getOnlinePlayers()) {
+					p.sendMessage(message);
+				}
 				kill();
 			}
 		}
 	}
-	
+
 	@EventHandler
-	public void onInvClick(InventoryClickEvent ev){
+	public void onInvClick(InventoryClickEvent ev) {
 		int s = ev.getInventory().getSize();
-		if(s == 5)
+		if (s == 5)
 			s = 36;
 		else
 			s += 27;
-		if(ev.getWhoClicked().equals(owner) && (ev.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD || ev.getAction() == InventoryAction.HOTBAR_SWAP || ev.getRawSlot() == slot + s))
+		if (ev.getWhoClicked().equals(owner) && (ev.getAction() == InventoryAction.HOTBAR_MOVE_AND_READD || ev.getAction() == InventoryAction.HOTBAR_SWAP || ev.getRawSlot() == slot + s))
 			ev.setCancelled(true);
 	}
-	
+
 	@EventHandler
-	public void onMove(PlayerMoveEvent ev){
-		if(ev.getPlayer().equals(owner) && !plugin.inside(ev.getTo(), one, two)){
+	public void onMove(PlayerMoveEvent ev) {
+		if (ev.getPlayer().equals(owner) && !plugin.inside(ev.getTo(), one, two)) {
 			ItemStack is = owner.getInventory().getItem(slot);
 			plugin.conf.load();
-			String message = Config.format(plugin.trans.config.getString("RQ Reset Broadcast"), owner.getLocation(), owner);
+			String[] message = plugin.getTrans().format("RQ Reset Broadcast", owner.getLocation(), owner);
 //			String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Reset Broadcast")).replace("{player}", owner.getName());
-			if(!message.toLowerCase().equals("none"))
-				for(Player p : Bukkit.getOnlinePlayers())
-					p.sendMessage(message);
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				p.sendMessage(message);
+			}
 			ItemMeta IM = is.getItemMeta();
 			int index = IM.getDisplayName().indexOf("(") - 3;
-			if(index >= 0){
+			if (index >= 0) {
 				IM.setDisplayName(IM.getDisplayName().substring(0, index));
 				is.setItemMeta(IM);
 				owner.updateInventory();
@@ -178,20 +175,20 @@ public class RankQuest implements Listener {
 			kill();
 		}
 	}
-	
+
 	@EventHandler
-	public void onTeleport(PlayerTeleportEvent ev){
-		if(ev.getPlayer().equals(owner) && !plugin.inside(ev.getTo(), one, two)){
+	public void onTeleport(PlayerTeleportEvent ev) {
+		if (ev.getPlayer().equals(owner) && !plugin.inside(ev.getTo(), one, two)) {
 			ItemStack is = owner.getInventory().getItem(slot);
 			plugin.conf.load();
-			String message = Config.format(plugin.trans.config.getString("RQ Reset Broadcast"), owner.getLocation(), owner);
+			String[] message = plugin.getTrans().format("RQ Reset Broadcast", owner.getLocation(), owner);
 //			String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Reset Broadcast")).replace("{player}", owner.getName());
-			if(!message.toLowerCase().equals("none"))
-				for(Player p : Bukkit.getOnlinePlayers())
-					p.sendMessage(message);
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				p.sendMessage(message);
+			}
 			ItemMeta IM = is.getItemMeta();
 			int index = IM.getDisplayName().indexOf("(") - 3;
-			if(index >= 0){
+			if (index >= 0) {
 				IM.setDisplayName(IM.getDisplayName().substring(0, index));
 				is.setItemMeta(IM);
 				owner.updateInventory();
@@ -199,48 +196,47 @@ public class RankQuest implements Listener {
 			kill();
 		}
 	}
-	
+
 	@EventHandler
-	public void onQuit(PlayerQuitEvent ev){
-		if(ev.getPlayer().equals(owner)){
+	public void onQuit(PlayerQuitEvent ev) {
+		if (ev.getPlayer().equals(owner)) {
 			ItemStack is = owner.getInventory().getItem(slot);
 			ItemMeta IM = is.getItemMeta();
 			int index = IM.getDisplayName().indexOf("(") - 3;
-			if(index >= 0){
+			if (index >= 0) {
 				IM.setDisplayName(IM.getDisplayName().substring(0, index));
 				is.setItemMeta(IM);
 				owner.updateInventory();
 			}
 			plugin.conf.load();
-			String message = Config.format(plugin.trans.config.getString("RQ Quit Broadcast"), owner.getLocation(), owner);
-//			String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Quit Broadcast")).replace("{player}", owner.getName());
-			if(!message.toLowerCase().equals("none"))
-				for(Player p : Bukkit.getOnlinePlayers())
-					p.sendMessage(message);
+			String[] message = plugin.getTrans().format("RQ Quit Broadcast", owner.getLocation(), owner);
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				p.sendMessage(message);
+			}
 			kill();
 		}
 	}
-	
+
 	@EventHandler
-	public void onDrop(PlayerDropItemEvent ev){
-		if(ev.getPlayer().equals(owner) && owner.getInventory().getHeldItemSlot() == slot){
-		//if(ev.getPlayer().equals(owner) && ev.getItemDrop().getItemStack().isSimilar(is)){
+	public void onDrop(PlayerDropItemEvent ev) {
+		if (ev.getPlayer().equals(owner) && owner.getInventory().getHeldItemSlot() == slot) {
+			//if(ev.getPlayer().equals(owner) && ev.getItemDrop().getItemStack().isSimilar(is)){
 			ItemStack is = ev.getItemDrop().getItemStack();
 			plugin.conf.load();
 			ItemMeta IM = is.getItemMeta();
 			int index = IM.getDisplayName().indexOf("(") - 3;
-			if(index >= 0){
+			if (index >= 0) {
 				IM.setDisplayName(IM.getDisplayName().substring(0, index));
 				is.setItemMeta(IM);
 				owner.updateInventory();
 			}
-			String message = Config.format(plugin.trans.config.getString("RQ Lost Broadcast"), owner.getLocation(), owner);
+			String[] message = plugin.getTrans().format("RQ Lost Broadcast", owner.getLocation(), owner);
 //			String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Lost Broadcast")).replace("{player}", owner.getName());
-			if(!message.toLowerCase().equals("none"))
-				for(Player p : Bukkit.getOnlinePlayers())
-					p.sendMessage(message);
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				p.sendMessage(message);
+			}
 			kill();
 		}
 	}
-	
+
 }

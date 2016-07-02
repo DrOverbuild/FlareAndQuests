@@ -524,10 +524,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		int dA = conf.config.getInt("Deaths Allowed For Keep-Inv");
 		int dD = conf.config.getInt("Keep-Inv Duration");
 
-		String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Keep-Inventory Start Message")).replace("{player}", player.getName()).replace("{duration}", dD + "").replace("{deaths}", dA + "");
-		if (!message.toLowerCase().equals("none"))
-			player.sendMessage(message);
-
+		player.sendMessage(getTrans().format("Keep-Inventory Start Message", player));
 		//player.sendMessage(G+"You now have "+Y+dD+G+" seconds or "+Y+dA+G+" deaths of keep-inventory.");
 
 		deathsLeft.put(player, dA);
@@ -536,9 +533,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 				if (deathsLeft.containsKey(player)) {
 					deathsLeft.remove(player);
 
-					String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Keep-Inventory Expire Message")).replace("{player}", player.getName());
-					if (!message.toLowerCase().equals("none"))
-						player.sendMessage(message);
+					player.sendMessage(getTrans().format("Keep-Inventory Expire Message", player));
 
 					//player.sendMessage(G+"Your keep-inventory period has expired.");
 				}
@@ -623,11 +618,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			if (num <= 0) {
 				deathsLeft.remove(ev.getEntity());
 
-				String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Keep-Inventory Expire Message")).replace("{player}", ev.getEntity().getName());
-				if (!message.toLowerCase().equals("none"))
-					ev.getEntity().sendMessage(message);
-
-				//ev.getEntity().sendMessage(G+"Your keep-inventory period has expired.");
+				ev.getEntity().sendMessage(getTrans().format("Keep-Inventory Expire Message", null, ev.getEntity()));
 			} else
 				deathsLeft.put(ev.getEntity(), num);
 		}
@@ -797,18 +788,14 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							ev.setCancelled(true);
 
 							if (playerIsActive(ev.getPlayer())) {
-								ev.getPlayer().sendMessage(Config.format(getTrans().config.getString("Cannot Activate Flare While Doing Other Function"), null, ev.getPlayer()));
+								ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Flare While Doing Other Function", null, ev.getPlayer()));
 								return;
 							}
 
 							if (!isWarzone(ev.getPlayer().getLocation())) {
-								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Not in Warzone Message")).replace("{player}", ev.getPlayer().getName());
-								if (!message.toLowerCase().equals("none"))
-									ev.getPlayer().sendMessage(message);
-								//ev.getPlayer().sendMessage(DR+"You must be in a Warzone");
+								ev.getPlayer().sendMessage(getTrans().format("Not in Warzone Message", null, ev.getPlayer()));
 							} else
 								Flare.activateFlare(ev.getItem(), ev.getPlayer(), this, key);
-//								new Flare(ev.getItem(), ev.getPlayer(), this, key);
 							return;
 						}
 					}
@@ -820,24 +807,21 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							ev.setCancelled(true);
 
 							if (playerIsActive(ev.getPlayer())) {
-								ev.getPlayer().sendMessage(Config.format(getTrans().config.getString("Cannot Activate Witem While Doing Other Function"), null, ev.getPlayer()));
+								ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Witem While Doing Other Function", null, ev.getPlayer()));
 								return;
 							}
 
 
 							if (serverHasFactions()) {
 								if (!isWarzone(ev.getPlayer().getLocation())) {
-									String message = Config.format(trans.config.getString("Not in Warzone Message"), ev.getPlayer().getLocation(), ev.getPlayer());
+									String[] message = getTrans().format("Not in Warzone Message", ev.getPlayer().getLocation(), ev.getPlayer());
 									ev.getPlayer().sendMessage(message);
 									return;
 								}
 							}
 
 							if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Witems." + key + ".First"), (Location) conf.config.get("Witems." + key + ".Second"))) {
-								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Not in Region Message")).replace("{player}", ev.getPlayer().getName());
-								if (!message.toLowerCase().equals("none")) {
-									ev.getPlayer().sendMessage(message);
-								}
+								ev.getPlayer().sendMessage(getTrans().format("Not in Region Message", null, ev.getPlayer()));
 
 								return;
 
@@ -869,30 +853,20 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							ev.setCancelled(true);
 
 							if (playerIsActive(ev.getPlayer())) {
-								ev.getPlayer().sendMessage(Config.format(getTrans().config.getString("Cannot Activate Rank Quest While Doing Other Function"), null, ev.getPlayer()));
+								ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Rank Quest While Doing Other Function", null, ev.getPlayer()));
 								return;
 							}
 
 							if (ev.getItem().getAmount() > 1) {
-								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Cannot Activate Stacked Rank Quests Message")).replace("{player}", ev.getPlayer().getName());
-								if (!message.toLowerCase().equals("none"))
-									ev.getPlayer().sendMessage(message);
+								ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Stacked Rank Quests Message", null, ev.getPlayer()));
 							} else if (QIP.containsKey(ev.getPlayer())) {
-								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Already Doing Quest Message")).replace("{player}", ev.getPlayer().getName());
-								if (!message.toLowerCase().equals("none"))
-									ev.getPlayer().sendMessage(message);
-
-								//ev.getPlayer().sendMessage(DR+"You are already doing a rank quest!");
+								ev.getPlayer().sendMessage(getTrans().format("Already Doing Quest Message", null, ev.getPlayer()));
 							} else if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Quests." + key + ".First"), (Location) conf.config.get("Quests." + key + ".Second"))) {
-								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Not in Region Message")).replace("{player}", ev.getPlayer().getName());
-								if (!message.toLowerCase().equals("none"))
-									ev.getPlayer().sendMessage(message);
+								ev.getPlayer().sendMessage(getTrans().format("Not in Region Message", null, ev.getPlayer()));
 
 								//ev.getPlayer().sendMessage(DR+"You must be inside the proper region!");
 							} else if (deathsLeft.containsKey(ev.getPlayer())) {
-								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Cannot Activate While in Keep Inv Message")).replace("{player}", ev.getPlayer().getName());
-								if (!message.toLowerCase().equals("none"))
-									ev.getPlayer().sendMessage(message);
+								ev.getPlayer().sendMessage(getTrans().format("Cannot Activate While in Keep Inv Message", null, ev.getPlayer()));
 							} else
 								QIP.put(ev.getPlayer(), new RankQuest(ev.getPlayer().getInventory().getHeldItemSlot(), ev.getPlayer(), conf.config.getInt("Quests." + key + ".Duration"), this, key));
 							return;
@@ -923,29 +897,23 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								ev.setCancelled(true);
 
 								if (playerIsActive(ev.getPlayer())) {
-									ev.getPlayer().sendMessage(Config.format(getTrans().config.getString("Cannot Activate Warzone Quest While Doing Other Function"), null, ev.getPlayer()));
+									ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Warzone Quest While Doing Other Function", null, ev.getPlayer()));
 									return;
 								}
 
 								if (!isWarzone(ev.getPlayer().getLocation())) {
-									String message = Config.format(trans.config.getString("Not in Warzone Message"), null, ev.getPlayer());
-									if (!message.toLowerCase().equals("none")) {
-										ev.getPlayer().sendMessage(message);
-									}
+									String[] message = getTrans().format("Not in Warzone Message", null, ev.getPlayer());
+									ev.getPlayer().sendMessage(message);
 								} else if (ev.getItem().getAmount() > 1) {
-									String message = Config.format(trans.config.getString("Cannot Activate Stacked Warzone Quests Message"), null, ev.getPlayer());
-									if (!message.toLowerCase().equals("none"))
-										ev.getPlayer().sendMessage(message);
+									String[] message = getTrans().format("Cannot Activate Stacked Warzone Quests Message", null, ev.getPlayer());
+									ev.getPlayer().sendMessage(message);
 								} else if (WQIP.containsKey(ev.getPlayer())) {
-									String message = Config.format(trans.config.getString("Already Doing Warzone Quest Message"), null, ev.getPlayer());
-									if (!message.toLowerCase().equals("none"))
-										ev.getPlayer().sendMessage(message);
+									String[] message = getTrans().format("Already Doing Warzone Quest Message", null, ev.getPlayer());
+									ev.getPlayer().sendMessage(message);
 
 									//ev.getPlayer().sendMessage(DR+"You are already doing a rank quest!");
 								} else if (deathsLeft.containsKey(ev.getPlayer())) {
-									String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Cannot Activate While in Keep Inv Message")).replace("{player}", ev.getPlayer().getName());
-									if (!message.toLowerCase().equals("none"))
-										ev.getPlayer().sendMessage(message);
+									ev.getPlayer().sendMessage(getTrans().format("Cannot Activate While in Keep Inv Message", null, ev.getPlayer()));
 								} else
 									WQIP.put(ev.getPlayer(), new WarzoneQuest(ev.getPlayer().getInventory().getHeldItemSlot(), ev.getPlayer(), conf.config.getInt("WQuests." + key + ".Duration"), this, key));
 								return;
@@ -991,7 +959,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			// This is easier than rewriting the code to give a flare to a player
 			getCommand("flare").getExecutor().onCommand(getServer().getConsoleSender(), getCommand("flare"), "flare",
 					new String[]{"give", flare, ev.getPlayer().getName()});
-			ev.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', getTrans().config.getString("Flare Given Upon Join Message")));
+			ev.getPlayer().sendMessage(getTrans().format("Flare Given Upon Join Message", null, ev.getPlayer()));
 		}
 	}
 

@@ -47,7 +47,33 @@ public class Config {
 		config = YamlConfiguration.loadConfiguration(configFile);
 	}
 
-	public static String format(String message, Location loc, Player player){
+	public String[] format(String messageKey, Location loc, Player player){
+		return format(messageKey, loc, player, null);
+	}
+
+	public String[] format(String messageKey, Player player){
+		return format(messageKey, null, player, null);
+	}
+
+	public String[] format(String messageKey, Location loc, Player player, String left){
+		String message = config.getString(messageKey, "none");
+		if(message.equals("none")){
+			return new String[]{};
+		}
+
+		String[] lines = message.split("\\|");
+
+		for(int i = 0; i < lines.length; i++){
+			lines[i] = formatLine(lines[i], loc, player, left);
+			if(i > 0){
+				lines[i] = ChatColor.getLastColors(lines[i-1]) + lines[i];
+			}
+		}
+
+		return lines;
+	}
+
+	public static String formatLine(String message, Location loc, Player player, String left){
 		message = ChatColor.translateAlternateColorCodes('&', message);
 		if(loc != null) {
 			message = message.replace("{x}", loc.getBlockX() + "");
@@ -57,6 +83,10 @@ public class Config {
 
 		if(player != null){
 			message = message.replace("{player}", player.getName());
+		}
+
+		if(left != null){
+			message = message.replace("{left", left);
 		}
 
 		return message;
