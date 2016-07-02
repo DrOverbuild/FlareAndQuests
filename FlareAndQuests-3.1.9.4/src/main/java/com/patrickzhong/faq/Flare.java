@@ -19,8 +19,6 @@ import org.bukkit.util.EulerAngle;
 
 public class Flare {
 
-	public static Map<Player, String> playerFlares = new HashMap<>();
-
 	FlareAndQuests plugin;
 	boolean manual = false;
 	double vel = 0.0;
@@ -154,7 +152,7 @@ public class Flare {
 	public static void activateFlare(final ItemStack is, final Player player, final FlareAndQuests plugin, final String name){
 		plugin.getConf().load();
 
-		if(playerFlares.containsKey(player)){
+		if(plugin.playerFlares.containsKey(player)){
 			player.sendMessage(ChatColor.translateAlternateColorCodes('&', plugin.getTrans().config.getString("Flare In Use")));
 		}
 
@@ -178,7 +176,7 @@ public class Flare {
 		if(delay <= 0){
 			new Flare(is, player, plugin, name);
 		}else{
-			playerFlares.put(player, name);
+			plugin.playerFlares.put(player, name);
 
 			final String message2 = ChatColor.translateAlternateColorCodes('&', plugin.getTrans().config.getString("Flare Arriving In Action Bar Message"));
 
@@ -194,7 +192,7 @@ public class Flare {
 
 					if(secondsLeft <= 0){
 						ActionBar.sendActionBar(player,"");
-						playerFlares.remove(player);
+						plugin.playerFlares.remove(player);
 						new Flare(is, player, plugin, name);
 						this.cancel();
 					}

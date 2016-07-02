@@ -3,10 +3,7 @@ package com.patrickzhong.faq;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import com.massivecraft.factions.Conf;
 import com.patrickzhong.faq.commands.*;
@@ -64,6 +61,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	public HashMap<Player, Location> right = new HashMap<Player, Location>();
 	HashMap<Player, RankQuest> QIP = new HashMap<Player, RankQuest>();
 	HashMap<Player, WarzoneQuest> WQIP = new HashMap<>();
+	HashMap<Player, String> playerFlares = new HashMap<>();
+
 
 	HashMap<Block, BukkitTask> partTimers = new HashMap<Block, BukkitTask>();
 
@@ -610,6 +609,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		return getServer().getPluginManager().getPlugin("Factions") != null;
 	}
 
+	public boolean playerIsActive(Player p){
+		return WQIP.containsKey(p) || QIP.containsKey(p) || deathsLeft.containsKey(p) || playerFlares.containsKey(p);
+	}
+
 	@EventHandler
 	public void onDeath(PlayerDeathEvent ev) {
 		if (deathsLeft.containsKey(ev.getEntity())) {
@@ -792,6 +795,12 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("Flares." + key + ".Activate"), false)) {
 							// Matched to flare
 							ev.setCancelled(true);
+
+							if(playerIsActive(ev.getPlayer())){
+								ev.getPlayer().sendMessage(Config.format(getTrans().config.getString("Cannot Activate Flare While Doing Other Function"), null, ev.getPlayer()));
+								return;
+							}
+
 							if (!isWarzone(ev.getPlayer().getLocation())) {
 								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Not in Warzone Message")).replace("{player}", ev.getPlayer().getName());
 								if (!message.toLowerCase().equals("none"))
@@ -809,6 +818,12 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("Witems." + key + ".Activate"), false)) {
 							//Matched to Witem
 							ev.setCancelled(true);
+
+							if(playerIsActive(ev.getPlayer())){
+								ev.getPlayer().sendMessage(Config.format(getTrans().config.getString("Cannot Activate Witem While Doing Other Function"), null, ev.getPlayer()));
+								return;
+							}
+
 							if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Witems." + key + ".First"), (Location) conf.config.get("Witems." + key + ".Second"))) {
 								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Not in Region Message")).replace("{player}", ev.getPlayer().getName());
 								if (!message.toLowerCase().equals("none"))
@@ -837,6 +852,12 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						if (ItemStacks.stackIsSimilar(ev.getItem(), citem, false)) {
 							// Matched to Rank Quest
 							ev.setCancelled(true);
+
+							if(playerIsActive(ev.getPlayer())){
+								ev.getPlayer().sendMessage(Config.format(getTrans().config.getString("Cannot Activate Rank Quest While Doing Other Function"), null, ev.getPlayer()));
+								return;
+							}
+
 							if (ev.getItem().getAmount() > 1) {
 								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Cannot Activate Stacked Rank Quests Message")).replace("{player}", ev.getPlayer().getName());
 								if (!message.toLowerCase().equals("none"))
@@ -883,8 +904,14 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							ItemStack citem = conf.config.getItemStack("WQuests." + key + ".Activate");
 
 							if (ItemStacks.stackIsSimilar(ev.getItem(), citem, false)) {
-								// Matched to Rank Quest
+								// Matched to Warzone Quest
 								ev.setCancelled(true);
+
+								if(playerIsActive(ev.getPlayer())){
+									ev.getPlayer().sendMessage(Config.format(getTrans().config.getString("Cannot Activate Warzone Quest While Doing Other Function"), null, ev.getPlayer()));
+									return;
+								}
+
 								if(!isWarzone(ev.getPlayer().getLocation())) {
 									String message = Config.format(trans.config.getString("Not in Warzone Message"), null, ev.getPlayer());
 									if(!message.toLowerCase().equals("none")){
@@ -933,10 +960,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void onQuit(PlayerQuitEvent ev){
-		if(Flare.playerFlares.containsKey(ev.getPlayer())){
-			playerData.config.set("players." + ev.getPlayer().getUniqueId().toString() + ".flare", Flare.playerFlares.get(ev.getPlayer()));
+		if(playerFlares.containsKey(ev.getPlayer())){
+			playerData.config.set("players." + ev.getPlayer().getUniqueId().toString() + ".flare", playerFlares.get(ev.getPlayer()));
 			playerData.save();
-			Flare.playerFlares.remove(ev.getPlayer());
+			playerFlares.remove(ev.getPlayer());
 		}else{
 			playerData.config.set("players." + ev.getPlayer().getUniqueId().toString() + ".flare", null);
 		}

@@ -55,6 +55,10 @@ public class ConfigDefaults {
 		defsT.put("Cannot Activate Stacked Rank Quests Message", "&4You cannot activate more than one rank quest at the same time!");
 		defsT.put("Cannot Activate Stacked Warzone Quests Message", "&4You cannot activate more than one Warzone Quest at the same time!");
 		defsT.put("Cannot Activate While in Keep Inv Message", "&4You cannot activate a rank quest while in a keep inventory period!");
+		defsT.put("Cannot Activate Rank Quest While Doing Other Function", "&4You cannot activate a rank quest while doing another function!");
+		defsT.put("Cannot Activate Flare While Doing Other Function", "&4You cannot activate a flare while doing another function!");
+		defsT.put("Cannot Activate Warzone Quest While Doing Other Function", "&4You cannot activate a warzone quest while doing another function!");
+		defsT.put("Cannot Activate Witem While Doing Other Function", "&4You cannot activate a witem while doing another function!");
 		defsT.put("Flare Broadcast", "&e{player} &7has used a flare!");
 
 		return new Config(plugin, defsT, "translations");
