@@ -23,7 +23,7 @@ public class WITEMCommand extends BasePluginCommand {
 		if (args[0].equalsIgnoreCase("list")) {
 			list(sender, "Witems");
 			return true;
-		}else if (args.length < 2) {
+		} else if (args.length < 2) {
 		} else if (args[0].equalsIgnoreCase("delete")) {
 			if (!getConf().config.contains("Witems." + args[1]))
 				sender.sendMessage(DR + "There is no witem named " + R + args[1]);
@@ -49,7 +49,7 @@ public class WITEMCommand extends BasePluginCommand {
 				sender.sendMessage(ChatColor.GRAY + "Commands: " + msg);
 			}
 			return true;
-		}else if (args.length < 3) {
+		} else if (args.length < 3) {
 		} else if (args[0].equalsIgnoreCase("addcommand")) {
 			List<String> cmds = getConf().config.getStringList("Witems." + args[1] + ".Commands");
 			if (cmds == null)
@@ -113,7 +113,11 @@ public class WITEMCommand extends BasePluginCommand {
 					p.getInventory().setItem(p.getInventory().getHeldItemSlot(), null);
 					p.updateInventory();
 					p.sendMessage(G + "Successfully created a witem named " + Y + args[1]);
-					p.sendMessage(G + "Next step: select a region using " + Y + "/rq wand" + G + " and " + Y + "/witem setregion " + args[1]);
+					if(plugin.serverHasFactions()){
+						p.sendMessage(G + "Next step: add a command using " + Y + "/witem addcommand " + args[1] + " <command>");
+					}else {
+						p.sendMessage(G + "Next step: select a region using " + Y + "/rq wand" + G + " and " + Y + "/witem setregion " + args[1]);
+					}
 				}
 			}
 		} else if (!getConf().config.contains("Witems." + args[1])) {
@@ -128,6 +132,11 @@ public class WITEMCommand extends BasePluginCommand {
 				getConf().config.set("Witems." + args[1] + ".Second", s);
 				getConf().save();
 				p.sendMessage(G + "Successfully set the region for " + Y + args[1]);
+
+				if(plugin.serverHasFactions()){
+					p.sendMessage(G + "Please be aware that Witems will use the warzone instead of region if Factions is installed.");
+				}
+
 				p.sendMessage(G + "Next step: add a command using " + Y + "/witem addcommand " + args[1] + " <command>");
 			}
 		}
@@ -139,7 +148,11 @@ public class WITEMCommand extends BasePluginCommand {
 	public void sendHelp(CommandSender sender) {
 		sender.sendMessage(BEG + "/witem create <name> " + SEP + "Creates a witem.");
 		sender.sendMessage(BEG + "/witem delete <name> " + SEP + "Deletes a witem.");
-		sender.sendMessage(BEG + "/witem setregion <name> " + SEP + "Sets the region to your selection.");
+
+		if (!plugin.serverHasFactions()) {
+			sender.sendMessage(BEG + "/witem setregion <name> " + SEP + "Sets the region to your selection.");
+		}
+
 		sender.sendMessage(BEG + "/witem addcommand <name> <command> " + SEP + "Adds a command.");
 		sender.sendMessage(BEG + "/witem listcommands <name> " + SEP + "Lists all commands.");
 		sender.sendMessage(BEG + "/witem delcommand <name> <command> " + SEP + "Deletes a command.");

@@ -89,16 +89,15 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		registerCommands();
 	}
 
-	public void registerCommands(){
+	public void registerCommands() {
 		getCommand("rq").setExecutor(new RQCommand(this));
 		getCommand("faq").setExecutor(new FAQCommand(this));
 		getCommand("flare").setExecutor(new FLARECommand(this));
+		getCommand("witem").setExecutor(new WITEMCommand(this));
 
-		if(serverHasFactions()) {
-			getCommand("witem").setExecutor(new WITEMCommand(this));
+		if (serverHasFactions()) {
 			getCommand("wrq").setExecutor(new WRQCommand(this));
-		}else{
-			CommandUnregister.unRegisterBukkitCommand(getCommand("witem"), this);
+		} else {
 			CommandUnregister.unRegisterBukkitCommand(getCommand("wrq"), this);
 		}
 	}
@@ -599,18 +598,18 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	}
 
 	public boolean isWarzone(Location loc) {
-		if(serverHasFactions()) {
+		if (serverHasFactions()) {
 			Faction f = Board.getInstance().getFactionAt(new FLocation(loc));
 			return f != null && f.isWarZone();
 		}
 		return true;
 	}
 
-	public boolean serverHasFactions(){
+	public boolean serverHasFactions() {
 		return getServer().getPluginManager().getPlugin("Factions") != null;
 	}
 
-	public boolean playerIsActive(Player p){
+	public boolean playerIsActive(Player p) {
 		return WQIP.containsKey(p) || QIP.containsKey(p) || deathsLeft.containsKey(p) || playerFlares.containsKey(p);
 	}
 
@@ -797,7 +796,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							// Matched to flare
 							ev.setCancelled(true);
 
-							if(playerIsActive(ev.getPlayer())){
+							if (playerIsActive(ev.getPlayer())) {
 								ev.getPlayer().sendMessage(Config.format(getTrans().config.getString("Cannot Activate Flare While Doing Other Function"), null, ev.getPlayer()));
 								return;
 							}
@@ -814,34 +813,49 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						}
 					}
 				}
-				if (serverHasFactions() && conf.config.contains("Witems")) {
+				if (conf.config.contains("Witems")) {
 					for (String key : conf.config.getConfigurationSection("Witems").getKeys(false)) {
 						if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("Witems." + key + ".Activate"), false)) {
 							//Matched to Witem
 							ev.setCancelled(true);
 
-							if(playerIsActive(ev.getPlayer())){
+							if (playerIsActive(ev.getPlayer())) {
 								ev.getPlayer().sendMessage(Config.format(getTrans().config.getString("Cannot Activate Witem While Doing Other Function"), null, ev.getPlayer()));
 								return;
 							}
 
+
+							if (serverHasFactions()) {
+								if (!isWarzone(ev.getPlayer().getLocation())) {
+									String message = Config.format(trans.config.getString("Not in Warzone Message"), ev.getPlayer().getLocation(), ev.getPlayer());
+									ev.getPlayer().sendMessage(message);
+									return;
+								}
+							}
+
 							if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Witems." + key + ".First"), (Location) conf.config.get("Witems." + key + ".Second"))) {
 								String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Not in Region Message")).replace("{player}", ev.getPlayer().getName());
-								if (!message.toLowerCase().equals("none"))
+								if (!message.toLowerCase().equals("none")) {
 									ev.getPlayer().sendMessage(message);
+								}
+
+								return;
 
 								//ev.getPlayer().sendMessage(DR+"You must be inside the proper region!");
+							}
+
+							if (ev.getItem().getAmount() == 1) {
+								ev.getPlayer().getInventory().setItem(ev.getPlayer().getInventory().getHeldItemSlot(), null);
 							} else {
-								if (ev.getItem().getAmount() == 1)
-									ev.getPlayer().getInventory().setItem(ev.getPlayer().getInventory().getHeldItemSlot(), null);
-								else
-									ev.getItem().setAmount(ev.getItem().getAmount() - 1);
+								ev.getItem().setAmount(ev.getItem().getAmount() - 1);
+							}
 
-								ev.getPlayer().updateInventory();
+							ev.getPlayer().updateInventory();
 
-								if (conf.config.contains("Witems." + key + ".Commands"))
-									for (String str : conf.config.getStringList("Witems." + key + ".Commands"))
-										this.getServer().dispatchCommand(Bukkit.getConsoleSender(), ChatColor.translateAlternateColorCodes('&', str).replace("{player}", ev.getPlayer().getName()));
+							if (conf.config.contains("Witems." + key + ".Commands")) {
+								for (String str : conf.config.getStringList("Witems." + key + ".Commands")) {
+									this.getServer().dispatchCommand(Bukkit.getConsoleSender(), ChatColor.translateAlternateColorCodes('&', str).replace("{player}", ev.getPlayer().getName()));
+								}
 							}
 						}
 					}
@@ -854,7 +868,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							// Matched to Rank Quest
 							ev.setCancelled(true);
 
-							if(playerIsActive(ev.getPlayer())){
+							if (playerIsActive(ev.getPlayer())) {
 								ev.getPlayer().sendMessage(Config.format(getTrans().config.getString("Cannot Activate Rank Quest While Doing Other Function"), null, ev.getPlayer()));
 								return;
 							}
@@ -908,17 +922,17 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								// Matched to Warzone Quest
 								ev.setCancelled(true);
 
-								if(playerIsActive(ev.getPlayer())){
+								if (playerIsActive(ev.getPlayer())) {
 									ev.getPlayer().sendMessage(Config.format(getTrans().config.getString("Cannot Activate Warzone Quest While Doing Other Function"), null, ev.getPlayer()));
 									return;
 								}
 
-								if(!isWarzone(ev.getPlayer().getLocation())) {
+								if (!isWarzone(ev.getPlayer().getLocation())) {
 									String message = Config.format(trans.config.getString("Not in Warzone Message"), null, ev.getPlayer());
-									if(!message.toLowerCase().equals("none")){
+									if (!message.toLowerCase().equals("none")) {
 										ev.getPlayer().sendMessage(message);
 									}
-								}else if (ev.getItem().getAmount() > 1) {
+								} else if (ev.getItem().getAmount() > 1) {
 									String message = Config.format(trans.config.getString("Cannot Activate Stacked Warzone Quests Message"), null, ev.getPlayer());
 									if (!message.toLowerCase().equals("none"))
 										ev.getPlayer().sendMessage(message);
@@ -960,24 +974,24 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	}
 
 	@EventHandler
-	public void onQuit(PlayerQuitEvent ev){
-		if(playerFlares.containsKey(ev.getPlayer())){
+	public void onQuit(PlayerQuitEvent ev) {
+		if (playerFlares.containsKey(ev.getPlayer())) {
 			playerData.config.set("players." + ev.getPlayer().getUniqueId().toString() + ".flare", playerFlares.get(ev.getPlayer()));
 			playerData.save();
 			playerFlares.remove(ev.getPlayer());
-		}else{
+		} else {
 			playerData.config.set("players." + ev.getPlayer().getUniqueId().toString() + ".flare", null);
 		}
 	}
 
 	@EventHandler
-	public void onJoin (PlayerJoinEvent ev){
+	public void onJoin(PlayerJoinEvent ev) {
 		String flare = playerData.config.getString("players." + ev.getPlayer().getUniqueId().toString() + ".flare", "");
-		if(!flare.isEmpty()){
+		if (!flare.isEmpty()) {
 			// This is easier than rewriting the code to give a flare to a player
 			getCommand("flare").getExecutor().onCommand(getServer().getConsoleSender(), getCommand("flare"), "flare",
 					new String[]{"give", flare, ev.getPlayer().getName()});
-			ev.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&',getTrans().config.getString("Flare Given Upon Join Message")));
+			ev.getPlayer().sendMessage(ChatColor.translateAlternateColorCodes('&', getTrans().config.getString("Flare Given Upon Join Message")));
 		}
 	}
 
