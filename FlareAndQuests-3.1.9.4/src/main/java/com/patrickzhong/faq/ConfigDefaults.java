@@ -32,10 +32,16 @@ public class ConfigDefaults {
 		defsT.put("RQ Lost Broadcast", "&e{player} &7has lost their rank quest!  ({x}, {y}, {z})");
 		defsT.put("RQ Reset Broadcast", "&e{player} &7has reset their rank quest!  ({x}, {y}, {z})");
 		defsT.put("RQ Quit Broadcast", "&e{player} &7left, so their rank quest was reset!  ({x}, {y}, {z})");
+		defsT.put("WRQ Start Broadcast", "&e{player} &7has started a warzone quest!  ({x}, {y}, {z})");
+		defsT.put("WRQ Complete Broadcast", "&e{player} &7has completed their warzone quest!  ({x}, {y}, {z})");
+		defsT.put("WRQ Lost Broadcast", "&e{player} &7has lost their warzone quest!  ({x}, {y}, {z})");
+		defsT.put("WRQ Reset Broadcast", "&e{player} &7has reset their warzone quest!  ({x}, {y}, {z})");
+		defsT.put("WRQ Quit Broadcast", "&e{player} &7left, so their warzone quest was reset!  ({x}, {y}, {z})");
 		defsT.put("Action Bar Message", "&b&lRank Quest: &e{left} &7seconds");
 
 		defsT.put("Not in Warzone Message", "&4You must be in a Warzone!");
 		defsT.put("Already Doing Quest Message", "&4You are already doing a rank quest!");
+		defsT.put("Already Doing Warzone Quest Message", "&4You are already doing a warzone quest!");
 		defsT.put("Not in Region Message", "&4You must be inside the proper region!");
 		defsT.put("Keep-Inventory Start Message", "&7You now have &e{duration} &7seconds or &e{deaths} &7deaths of keep-inventory.");
 		defsT.put("Keep-Inventory Expire Message", "&7Your keep-inventory period has expired.");
@@ -47,6 +53,7 @@ public class ConfigDefaults {
 		defsT.put("Flare Given Upon Join Message", "&7You have been given a flare because you disconnected whilst waiting for a flare.");
 
 		defsT.put("Cannot Activate Stacked Rank Quests Message", "&4You cannot activate more than one rank quest at the same time!");
+		defsT.put("Cannot Activate Stacked Warzone Quests Message", "&4You cannot activate more than one Warzone Quest at the same time!");
 		defsT.put("Cannot Activate While in Keep Inv Message", "&4You cannot activate a rank quest while in a keep inventory period!");
 		defsT.put("Flare Broadcast", "&e{player} &7has used a flare!");
 

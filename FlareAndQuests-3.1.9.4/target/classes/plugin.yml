@@ -20,6 +20,10 @@ commands:
     description: Main command for Witems
     usage: /<command>
     permission: faq.witem
+  wrq:
+    description: Main command for Warzone Rank Quests
+    usage: /<command>
+    permission: faq.wrq
 
 permissions:
   faq.*:

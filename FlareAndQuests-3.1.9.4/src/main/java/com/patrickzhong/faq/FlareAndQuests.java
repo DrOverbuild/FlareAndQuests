@@ -8,16 +8,15 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-import com.patrickzhong.faq.commands.FAQCommand;
-import com.patrickzhong.faq.commands.FLARECommand;
-import com.patrickzhong.faq.commands.RQCommand;
-import com.patrickzhong.faq.commands.WITEMCommand;
+import com.massivecraft.factions.Conf;
+import com.patrickzhong.faq.commands.*;
 import com.patrickzhong.faq.util.ActionBar;
 import com.patrickzhong.faq.util.ItemStacks;
 import net.minecraft.server.v1_9_R2.ChatMessage;
 import net.minecraft.server.v1_9_R2.EntityPlayer;
 import net.minecraft.server.v1_9_R2.PacketPlayOutOpenWindow;
 
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.craftbukkit.v1_9_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
 import org.bukkit.block.Block;
@@ -64,6 +63,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	public HashMap<Player, Location> left = new HashMap<Player, Location>();
 	public HashMap<Player, Location> right = new HashMap<Player, Location>();
 	HashMap<Player, RankQuest> QIP = new HashMap<Player, RankQuest>();
+	HashMap<Player, WarzoneQuest> WQIP = new HashMap<>();
 
 	HashMap<Block, BukkitTask> partTimers = new HashMap<Block, BukkitTask>();
 
@@ -93,7 +93,14 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		getCommand("rq").setExecutor(new RQCommand(this));
 		getCommand("faq").setExecutor(new FAQCommand(this));
 		getCommand("flare").setExecutor(new FLARECommand(this));
-		getCommand("witem").setExecutor(new WITEMCommand(this));
+
+		if(serverHasFactions()) {
+			getCommand("witem").setExecutor(new WITEMCommand(this));
+			getCommand("wrq").setExecutor(new WRQCommand(this));
+		}else{
+			getCommand("witem").unregister(new SimpleCommandMap(getServer()));
+			getCommand("wrq").unregister(new SimpleCommandMap(getServer()));
+		}
 	}
 
 //	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -591,6 +598,18 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		return trans;
 	}
 
+	public boolean isWarzone(Location loc) {
+		if(serverHasFactions()) {
+			Faction f = Board.getInstance().getFactionAt(new FLocation(loc));
+			return f != null && f.isWarZone();
+		}
+		return true;
+	}
+
+	public boolean serverHasFactions(){
+		return getServer().getPluginManager().getPlugin("Factions") != null;
+	}
+
 	@EventHandler
 	public void onDeath(PlayerDeathEvent ev) {
 		if (deathsLeft.containsKey(ev.getEntity())) {
@@ -609,11 +628,6 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			} else
 				deathsLeft.put(ev.getEntity(), num);
 		}
-	}
-
-	public boolean isWarzone(Location loc) {
-		Faction f = Board.getInstance().getFactionAt(new FLocation(loc));
-		return f == null ? false : f.isWarZone();
 	}
 
 	@EventHandler
@@ -790,7 +804,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						}
 					}
 				}
-				if (conf.config.contains("Witems")) {
+				if (serverHasFactions() && conf.config.contains("Witems")) {
 					for (String key : conf.config.getConfigurationSection("Witems").getKeys(false)) {
 						if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("Witems." + key + ".Activate"), false)) {
 							//Matched to Witem
@@ -862,6 +876,54 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							if (conf.config.contains("Quests." + key + ".Commands"))
 								for (String str : conf.config.getStringList("Quests." + key + ".Commands"))
 									this.getServer().dispatchCommand(Bukkit.getConsoleSender(), ChatColor.translateAlternateColorCodes('&', str).replace("{player}", ev.getPlayer().getName()));
+						}
+					}
+					if (serverHasFactions() && conf.config.contains("WQuests")) {
+						for (String key : conf.config.getConfigurationSection("WQuests").getKeys(false)) {
+							ItemStack citem = conf.config.getItemStack("WQuests." + key + ".Activate");
+
+							if (ItemStacks.stackIsSimilar(ev.getItem(), citem, false)) {
+								// Matched to Rank Quest
+								ev.setCancelled(true);
+								if(!isWarzone(ev.getPlayer().getLocation())) {
+									String message = Config.format(trans.config.getString("Not in Warzone Message"), null, ev.getPlayer());
+									if(!message.toLowerCase().equals("none")){
+										ev.getPlayer().sendMessage(message);
+									}
+								}else if (ev.getItem().getAmount() > 1) {
+									String message = Config.format(trans.config.getString("Cannot Activate Stacked Warzone Quests Message"), null, ev.getPlayer());
+									if (!message.toLowerCase().equals("none"))
+										ev.getPlayer().sendMessage(message);
+								} else if (WQIP.containsKey(ev.getPlayer())) {
+									String message = Config.format(trans.config.getString("Already Doing Warzone Quest Message"), null, ev.getPlayer());
+									if (!message.toLowerCase().equals("none"))
+										ev.getPlayer().sendMessage(message);
+
+									//ev.getPlayer().sendMessage(DR+"You are already doing a rank quest!");
+								} else if (deathsLeft.containsKey(ev.getPlayer())) {
+									String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Cannot Activate While in Keep Inv Message")).replace("{player}", ev.getPlayer().getName());
+									if (!message.toLowerCase().equals("none"))
+										ev.getPlayer().sendMessage(message);
+								} else
+									WQIP.put(ev.getPlayer(), new WarzoneQuest(ev.getPlayer().getInventory().getHeldItemSlot(), ev.getPlayer(), conf.config.getInt("WQuests." + key + ".Duration"), this, key));
+								return;
+							} else if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("WQuests." + key + ".Voucher"), false)) {
+								// Matched to Voucher
+								ev.setCancelled(true);
+								PlayerInventory inv = ev.getPlayer().getInventory();
+
+								if (ev.getItem().getAmount() == 1)
+									inv.setItem(inv.getHeldItemSlot(), null);
+								else
+									ev.getItem().setAmount(ev.getItem().getAmount() - 1);
+
+								for (ItemStack i : (List<ItemStack>) conf.config.getList("WQuests." + key + ".Rewards", new ArrayList<ItemStack>()))
+									inv.addItem(i);
+								ev.getPlayer().updateInventory();
+								if (conf.config.contains("WQuests." + key + ".Commands"))
+									for (String str : conf.config.getStringList("WQuests." + key + ".Commands"))
+										this.getServer().dispatchCommand(Bukkit.getConsoleSender(), ChatColor.translateAlternateColorCodes('&', str).replace("{player}", ev.getPlayer().getName()));
+							}
 						}
 					}
 				}
