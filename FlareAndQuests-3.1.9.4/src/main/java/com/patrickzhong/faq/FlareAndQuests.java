@@ -8,6 +8,7 @@ import java.util.*;
 import com.massivecraft.factions.Conf;
 import com.patrickzhong.faq.commands.*;
 import com.patrickzhong.faq.util.ActionBar;
+import com.patrickzhong.faq.util.CommandUnregister;
 import com.patrickzhong.faq.util.ItemStacks;
 import net.minecraft.server.v1_9_R2.ChatMessage;
 import net.minecraft.server.v1_9_R2.EntityPlayer;
@@ -97,8 +98,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			getCommand("witem").setExecutor(new WITEMCommand(this));
 			getCommand("wrq").setExecutor(new WRQCommand(this));
 		}else{
-			getCommand("witem").unregister(new SimpleCommandMap(getServer()));
-			getCommand("wrq").unregister(new SimpleCommandMap(getServer()));
+			CommandUnregister.unRegisterBukkitCommand(getCommand("witem"), this);
+			CommandUnregister.unRegisterBukkitCommand(getCommand("wrq"), this);
 		}
 	}
 
