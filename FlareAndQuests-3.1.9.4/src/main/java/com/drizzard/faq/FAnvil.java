@@ -1,4 +1,4 @@
-package com.patrickzhong.faq;
+package com.drizzard.faq;
 
 import org.bukkit.craftbukkit.v1_9_R2.entity.CraftHumanEntity;
 import net.minecraft.server.v1_9_R2.BlockPosition;

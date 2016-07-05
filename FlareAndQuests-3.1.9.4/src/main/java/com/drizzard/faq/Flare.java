@@ -1,8 +1,8 @@
-package com.patrickzhong.faq;
+package com.drizzard.faq;
 
 import java.util.*;
 
-import com.patrickzhong.faq.util.ActionBar;
+import com.drizzard.faq.util.ActionBar;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;

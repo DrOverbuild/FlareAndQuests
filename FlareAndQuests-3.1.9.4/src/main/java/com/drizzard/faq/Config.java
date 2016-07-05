@@ -1,4 +1,4 @@
-package com.patrickzhong.faq;
+package com.drizzard.faq;
 
 import java.io.File;
 import java.io.IOException;

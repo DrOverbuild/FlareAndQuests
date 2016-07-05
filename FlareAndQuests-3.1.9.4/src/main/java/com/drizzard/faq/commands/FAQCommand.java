@@ -1,8 +1,6 @@
-package com.patrickzhong.faq.commands;
+package com.drizzard.faq.commands;
 
-import com.patrickzhong.faq.FlareAndQuests;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
+import com.drizzard.faq.FlareAndQuests;
 import org.bukkit.command.CommandSender;
 
 /**

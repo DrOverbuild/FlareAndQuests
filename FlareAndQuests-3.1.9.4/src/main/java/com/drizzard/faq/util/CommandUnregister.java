@@ -1,4 +1,4 @@
-package com.patrickzhong.faq.util;
+package com.drizzard.faq.util;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;

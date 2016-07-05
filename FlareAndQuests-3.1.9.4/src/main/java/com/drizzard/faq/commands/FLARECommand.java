@@ -1,14 +1,9 @@
-package com.patrickzhong.faq.commands;
+package com.drizzard.faq.commands;
 
-import com.patrickzhong.faq.FlareAndQuests;
+import com.drizzard.faq.FlareAndQuests;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by jasper on 6/28/16.

@@ -1,6 +1,6 @@
-package com.patrickzhong.faq;
+package com.drizzard.faq;
 
-import com.patrickzhong.faq.util.ActionBar;
+import com.drizzard.faq.util.ActionBar;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -21,10 +21,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-/**
- * Created by jasper on 7/1/16.
- */
-public class WarzoneQuest implements Listener {
+public class RankQuest implements Listener {
+
 	Item im;
 	Player owner;
 	int timeLeft;
@@ -33,7 +31,10 @@ public class WarzoneQuest implements Listener {
 	BukkitTask timer;
 	String name;
 
-	public WarzoneQuest(final int slot, final Player owner, int duration, final FlareAndQuests plugin, final String name) {
+	Location one;
+	Location two;
+
+	public RankQuest(final int slot, final Player owner, int duration, final FlareAndQuests plugin, final String name) {
 		ItemStack is = owner.getInventory().getItem(slot);
 		this.slot = slot;
 		this.owner = owner;
@@ -54,8 +55,11 @@ public class WarzoneQuest implements Listener {
 		}
 
 		plugin.conf.load();
+		one = (Location) plugin.conf.config.get("Quests." + name + ".First");
+		two = (Location) plugin.conf.config.get("Quests." + name + ".Second");
 
-		String[] message = plugin.getTrans().format("WRQ Start Broadcast", owner.getLocation(), owner);
+		String[] message = plugin.getTrans().format("RQ Start Broadcast", owner.getLocation(), owner);
+//		String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Start Broadcast")).replace("{player}", owner.getName());
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			p.sendMessage(message);
 		}
@@ -88,10 +92,10 @@ public class WarzoneQuest implements Listener {
 							is.setItemMeta(IM);
 						}
 					}*/
-					owner.getInventory().addItem(plugin.conf.config.getItemStack("WQuests." + name + ".Voucher"));
+					owner.getInventory().addItem(plugin.conf.config.getItemStack("Quests." + name + ".Voucher"));
 					owner.updateInventory();
 
-					String[] message = plugin.getTrans().format("WRQ Complete Broadcast", owner.getLocation(), owner);
+					String[] message = plugin.getTrans().format("RQ Complete Broadcast", owner.getLocation(), owner);
 					for (Player p : Bukkit.getOnlinePlayers()) {
 						p.sendMessage(message);
 					}
@@ -110,7 +114,7 @@ public class WarzoneQuest implements Listener {
 
 	public void kill() {
 		timer.cancel();
-		plugin.WQIP.remove(owner);
+		plugin.QIP.remove(owner);
 		HandlerList.unregisterAll(this);
 	}
 
@@ -131,7 +135,7 @@ public class WarzoneQuest implements Listener {
 					owner.updateInventory();
 				}
 				plugin.conf.load();
-				String[] message = plugin.getTrans().format("WRQ Lost Broadcast", owner.getLocation(), owner);
+				String[] message = plugin.getTrans().format("RQ Lost Broadcast", owner.getLocation(), owner);
 				for (Player p : Bukkit.getOnlinePlayers()) {
 					p.sendMessage(message);
 				}
@@ -153,10 +157,11 @@ public class WarzoneQuest implements Listener {
 
 	@EventHandler
 	public void onMove(PlayerMoveEvent ev) {
-		if (ev.getPlayer().equals(owner) && !plugin.isWarzone(ev.getTo())) {
+		if (ev.getPlayer().equals(owner) && !plugin.inside(ev.getTo(), one, two)) {
 			ItemStack is = owner.getInventory().getItem(slot);
 			plugin.conf.load();
-			String[] message = plugin.getTrans().format("WRQ Reset Broadcast", owner.getLocation(), owner);
+			String[] message = plugin.getTrans().format("RQ Reset Broadcast", owner.getLocation(), owner);
+//			String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Reset Broadcast")).replace("{player}", owner.getName());
 			for (Player p : Bukkit.getOnlinePlayers()) {
 				p.sendMessage(message);
 			}
@@ -173,10 +178,11 @@ public class WarzoneQuest implements Listener {
 
 	@EventHandler
 	public void onTeleport(PlayerTeleportEvent ev) {
-		if (ev.getPlayer().equals(owner) && !plugin.isWarzone(ev.getTo())) {
+		if (ev.getPlayer().equals(owner) && !plugin.inside(ev.getTo(), one, two)) {
 			ItemStack is = owner.getInventory().getItem(slot);
 			plugin.conf.load();
-			String[] message = plugin.getTrans().format("WRQ Reset Broadcast", owner.getLocation(), owner);
+			String[] message = plugin.getTrans().format("RQ Reset Broadcast", owner.getLocation(), owner);
+//			String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Reset Broadcast")).replace("{player}", owner.getName());
 			for (Player p : Bukkit.getOnlinePlayers()) {
 				p.sendMessage(message);
 			}
@@ -203,7 +209,7 @@ public class WarzoneQuest implements Listener {
 				owner.updateInventory();
 			}
 			plugin.conf.load();
-			String[] message = plugin.getTrans().format("WRQ Quit Broadcast", owner.getLocation(), owner);
+			String[] message = plugin.getTrans().format("RQ Quit Broadcast", owner.getLocation(), owner);
 			for (Player p : Bukkit.getOnlinePlayers()) {
 				p.sendMessage(message);
 			}
@@ -224,12 +230,13 @@ public class WarzoneQuest implements Listener {
 				is.setItemMeta(IM);
 				owner.updateInventory();
 			}
-
-			String[] message = plugin.getTrans().format("WRQ Lost Broadcast", owner.getLocation(), owner);
+			String[] message = plugin.getTrans().format("RQ Lost Broadcast", owner.getLocation(), owner);
+//			String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Lost Broadcast")).replace("{player}", owner.getName());
 			for (Player p : Bukkit.getOnlinePlayers()) {
 				p.sendMessage(message);
 			}
 			kill();
 		}
 	}
+
 }

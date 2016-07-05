@@ -1,20 +1,18 @@
-package com.patrickzhong.faq;
+package com.drizzard.faq;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
-import com.massivecraft.factions.Conf;
-import com.patrickzhong.faq.commands.*;
-import com.patrickzhong.faq.util.ActionBar;
-import com.patrickzhong.faq.util.CommandUnregister;
-import com.patrickzhong.faq.util.ItemStacks;
+import com.drizzard.faq.commands.*;
+import com.drizzard.faq.util.ItemStacks;
+import com.drizzard.faq.util.ActionBar;
+import com.drizzard.faq.util.CommandUnregister;
 import net.minecraft.server.v1_9_R2.ChatMessage;
 import net.minecraft.server.v1_9_R2.EntityPlayer;
 import net.minecraft.server.v1_9_R2.PacketPlayOutOpenWindow;
 
-import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.craftbukkit.v1_9_R2.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_9_R2.inventory.CraftItemStack;
 import org.bukkit.block.Block;

@@ -1,6 +1,6 @@
-package com.patrickzhong.faq.util;
+package com.drizzard.faq.util;
 
-import com.patrickzhong.faq.FlareAndQuests;
+import com.drizzard.faq.FlareAndQuests;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

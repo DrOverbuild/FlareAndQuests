@@ -1,8 +1,7 @@
-package com.patrickzhong.faq.commands;
+package com.drizzard.faq.commands;
 
-import com.patrickzhong.faq.Config;
-import com.patrickzhong.faq.FlareAndQuests;
-import net.minecraft.server.v1_9_R2.CommandSaveOn;
+import com.drizzard.faq.Config;
+import com.drizzard.faq.FlareAndQuests;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;

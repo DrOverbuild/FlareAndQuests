@@ -1,4 +1,4 @@
-package com.patrickzhong.faq;
+package com.drizzard.faq;
 
 import java.util.HashMap;
 
