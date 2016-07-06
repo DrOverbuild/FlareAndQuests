@@ -238,8 +238,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 //						if (cmds == null)
 //							cmds = new ArrayList<String>();
 //
-//						for (String command : cmds)
-//							msg += (msg.equals("") ? "" : G + ", ") + Y + ChatColor.translateAlternateColorCodes('&', command);
+//						for (String message : cmds)
+//							msg += (msg.equals("") ? "" : G + ", ") + Y + ChatColor.translateAlternateColorCodes('&', message);
 //						sender.sendMessage(ChatColor.GRAY + "Commands: " + msg);
 //					}
 //				} else {
@@ -276,7 +276,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 //							conf.config.set("Quests."+args[1]+".Rewards", items);
 //							conf.save();
 //							player.sendMessage(G+"Successfully set the reward items for "+Y+args[1]);
-//							player.sendMessage(G+"Next step: add reward commands using "+Y+"/rq addvcommand "+args[1]+" <command>");
+//							player.sendMessage(G+"Next step: add reward commands using "+Y+"/rq addvcommand "+args[1]+" <message>");
 //							*/
 //							// End SETVITEMS (RQ)
 //						} else if (args[0].equalsIgnoreCase("setregion")) {
@@ -348,7 +348,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 //									conf.save();
 //									player.sendMessage(G + "Successfully removed " + Y + "/" + ChatColor.translateAlternateColorCodes('&', newCMD) + G + " from the quest " + Y + args[1]);
 //								} else
-//									player.sendMessage(DR + "Could not find the command " + R + "/" + ChatColor.translateAlternateColorCodes('&', newCMD));
+//									player.sendMessage(DR + "Could not find the message " + R + "/" + ChatColor.translateAlternateColorCodes('&', newCMD));
 //								// End DELVCOMMAND (RQ)
 //							}
 //						} else if (args[0].equalsIgnoreCase("give")) {
@@ -420,7 +420,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 //								conf.config.set("Witems." + args[1] + ".Second", s);
 //								conf.save();
 //								p.sendMessage(G + "Successfully set the region for " + Y + args[1]);
-//								p.sendMessage(G + "Next step: add a command using " + Y + "/witem addcommand " + args[1] + " <command>");
+//								p.sendMessage(G + "Next step: add a message using " + Y + "/witem addcommand " + args[1] + " <message>");
 //							}
 //						} else if (args[0].equalsIgnoreCase("addcommand")) {
 //							Player player = (Player) sender;
@@ -455,7 +455,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 //									conf.save();
 //									player.sendMessage(G + "Successfully removed " + Y + "/" + ChatColor.translateAlternateColorCodes('&', newCMD) + G + " from the witem " + Y + args[1]);
 //								} else
-//									player.sendMessage(DR + "Could not find the command " + R + "/" + ChatColor.translateAlternateColorCodes('&', newCMD));
+//									player.sendMessage(DR + "Could not find the message " + R + "/" + ChatColor.translateAlternateColorCodes('&', newCMD));
 //
 //							}
 //						} else if (args[0].equalsIgnoreCase("give")) {
@@ -524,7 +524,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		int dA = conf.config.getInt("Deaths Allowed For Keep-Inv");
 		int dD = conf.config.getInt("Keep-Inv Duration");
 
-		player.sendMessage(getTrans().format("Keep-Inventory Start Message", player));
+		player.sendMessage(getTrans().format("Keep-Inventory Start Message", player, dD + "", dA + ""));
 		//player.sendMessage(G+"You now have "+Y+dD+G+" seconds or "+Y+dA+G+" deaths of keep-inventory.");
 
 		deathsLeft.put(player, dA);
@@ -645,7 +645,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 			if (a) {
 				ev.getPlayer().sendMessage(G + "Successfully set the reward items for " + Y + name);
-				ev.getPlayer().sendMessage(G + "Next step: add reward commands using " + Y + "/rq addvcommand " + name + " <command>");
+				ev.getPlayer().sendMessage(G + "Next step: add reward commands using " + Y + "/rq addvcommand " + name + " <message>");
 			} else {
 				ev.getPlayer().sendMessage(G + "Successfully set the inventory of " + Y + name);
 				ev.getPlayer().sendMessage(G + "You're all done setting up the flare " + Y + name + G + "!");

@@ -20,6 +20,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.List;
+
 /**
  * Created by jasper on 7/1/16.
  */
@@ -73,6 +75,8 @@ public class WarzoneQuest implements Listener {
 
 				if (owner.getInventory().getHeldItemSlot() != slot)
 					ActionBar.sendActionBar(owner, ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("Action Bar Message")).replace("{left}", timeLeft + ""));
+
+				RankQuest.sendTimedActions(owner, timeLeft);
 
 				if (timeLeft == 0) {
 					plugin.conf.load();

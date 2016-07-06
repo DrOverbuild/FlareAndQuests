@@ -21,6 +21,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.List;
+
 public class RankQuest implements Listener {
 
 	Item im;
@@ -30,6 +34,8 @@ public class RankQuest implements Listener {
 	FlareAndQuests plugin;
 	BukkitTask timer;
 	String name;
+
+	public static List<TimedAction> timedActions = new ArrayList<>();
 
 	Location one;
 	Location two;
@@ -79,6 +85,8 @@ public class RankQuest implements Listener {
 				if (owner.getInventory().getHeldItemSlot() != slot)
 					ActionBar.sendActionBar(owner, ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("Action Bar Message")).replace("{left}", timeLeft + ""));
 
+				sendTimedActions(owner, timeLeft);
+
 				if (timeLeft == 0) {
 					plugin.conf.load();
 					//if(is.getAmount() == 1)
@@ -106,6 +114,38 @@ public class RankQuest implements Listener {
 				}
 			}
 		}.runTaskTimer(plugin, 20, 20);
+	}
+
+	public static void loadTimedActions(FlareAndQuests plugin) {
+		plugin.getConf().load();
+
+		List<String> actions = plugin.getConf().config.getStringList("rq-timed-actions");
+
+		for (String action : actions) {
+			TimedAction timedAction = TimedAction.parseTimedAction(action);
+			if (timedAction.getAction().name().startsWith("ERR_")) {
+				plugin.getLogger().info("Error parsing '" + action + "'. Error code: " + timedAction.getAction().name());
+			} else {
+				timedActions.add(timedAction);
+			}
+		}
+	}
+
+	public static void sendTimedActions(Player p, int timeLeft) {
+		for (TimedAction action : timedActions) {
+			if (action.getTime() == timeLeft) {
+				;
+				if (action.getAction().equals(TimedAction.ActionType.MSG)) {
+					p.sendMessage(action.formatMultiLineMessage(p, timeLeft + "", p.getLocation()));
+				} else if (action.getAction().equals(TimedAction.ActionType.EXEC)) {
+					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), TimedAction.formatMessage(action.getMessage(), p, timeLeft + "", p.getLocation()));
+				} else {
+					for(String line : action.formatMultiLineMessage(p, timeLeft + "", p.getLocation())){
+						Bukkit.broadcastMessage(line);
+					}
+				}
+			}
+		}
 	}
 
 	public boolean isActive(Player player) {

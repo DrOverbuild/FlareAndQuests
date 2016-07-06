@@ -47,18 +47,22 @@ public class Config {
 	}
 
 	public String[] format(String messageKey, Location loc, Player player) {
-		return format(messageKey, loc, player, null, null);
+		return format(messageKey, loc, player, null, null, null, null);
 	}
 
 	public String[] format(String messageKey, Player player) {
-		return format(messageKey, null, player, null, null);
+		return format(messageKey, null, player, null, null, null, null);
 	}
 
 	public String[] format(String messageKey, String minOnline) {
-		return format(messageKey, null, null, null, minOnline);
+		return format(messageKey, null, null, null, minOnline, null, null);
 	}
 
-	public String[] format(String messageKey, Location loc, Player player, String left, String minOnline) {
+	public String[] format(String messageKey, Player player, String duration, String deaths) {
+		return format(messageKey, player.getLocation(), player, null, null, duration, deaths);
+	}
+
+	public String[] format(String messageKey, Location loc, Player player, String left, String minOnline, String duration, String deaths) {
 		String message = config.getString(messageKey, "none");
 		if (message.equals("none")) {
 			return new String[]{};
@@ -67,7 +71,7 @@ public class Config {
 		String[] lines = message.split("\\|");
 
 		for (int i = 0; i < lines.length; i++) {
-			lines[i] = formatLine(lines[i], loc, player, left, minOnline);
+			lines[i] = formatLine(lines[i], loc, player, left, minOnline, duration, deaths);
 			if (i > 0) {
 				lines[i] = ChatColor.getLastColors(lines[i - 1]) + lines[i];
 			}
@@ -76,7 +80,7 @@ public class Config {
 		return lines;
 	}
 
-	public static String formatLine(String message, Location loc, Player player, String left, String minOnline) {
+	public static String formatLine(String message, Location loc, Player player, String left, String minOnline, String duration, String deaths) {
 		message = ChatColor.translateAlternateColorCodes('&', message);
 		if (loc != null) {
 			message = message.replace("{x}", loc.getBlockX() + "");
@@ -96,17 +100,13 @@ public class Config {
 			message = message.replace("{min-online}", minOnline);
 		}
 
-		return message;
-	}
-
-	public static String formatLine(String message, Player player, int secondsLeft) {
-		message = ChatColor.translateAlternateColorCodes('&', message);
-
-		if (player != null) {
-			message = message.replace("{player}", player.getName());
+		if (duration != null) {
+			message = message.replace("{duraction}", duration);
 		}
 
-		message = message.replace("{left-seconds}", "" + secondsLeft);
+		if (deaths != null) {
+			message = message.replace("{deaths}", deaths);
+		}
 
 		return message;
 	}

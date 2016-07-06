@@ -29,8 +29,8 @@ public class ConfigDefaults {
 		defs.put("WRQ Minimum Players", 2);
 
 		List<String> timedActions = new ArrayList<>();
-		timedActions.add("time:20 say:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
-		timedActions.add("time:10 say:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
+		timedActions.add("time:20 broadcast:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
+		timedActions.add("time:10 broadcast:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
 		timedActions.add("time:5 msg:{player} &eYou are almost done!");
 
 		defs.put("rq-timed-actions", timedActions);
