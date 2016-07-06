@@ -85,6 +85,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		NMSPATH = "net.minecraft.server.v" + version + ".";
 
 		registerCommands();
+
+		RankQuest.loadTimedActions(this);
 	}
 
 	public void registerCommands() {
@@ -590,6 +592,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		return trans;
 	}
 
+	public Config getPlayerData() {
+		return playerData;
+	}
+
 	public boolean isWarzone(Location loc) {
 		if (serverHasFactions()) {
 			Faction f = Board.getInstance().getFactionAt(new FLocation(loc));
@@ -790,6 +796,12 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								return;
 							}
 
+							int minPlayers = getConf().config.getInt("Flare Minimum Players");
+							if (getServer().getOnlinePlayers().size() < minPlayers) {
+								ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", minPlayers + ""));
+								return;
+							}
+
 							if (!isWarzone(ev.getPlayer().getLocation())) {
 								ev.getPlayer().sendMessage(getTrans().format("Not in Warzone Message", null, ev.getPlayer()));
 							} else
@@ -803,6 +815,12 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("Witems." + key + ".Activate"), false)) {
 							//Matched to Witem
 							ev.setCancelled(true);
+
+							int minPlayers = getConf().config.getInt("Witem Minimum Players");
+							if (getServer().getOnlinePlayers().size() < minPlayers) {
+								ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", minPlayers + ""));
+								return;
+							}
 
 							if (playerIsActive(ev.getPlayer())) {
 								ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Witem While Doing Other Function", null, ev.getPlayer()));
@@ -850,6 +868,12 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							// Matched to Rank Quest
 							ev.setCancelled(true);
 
+							int minPlayers = getConf().config.getInt("RQ Minimum Players");
+							if (getServer().getOnlinePlayers().size() < minPlayers) {
+								ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", minPlayers + ""));
+								return;
+							}
+
 							if (playerIsActive(ev.getPlayer())) {
 								ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Rank Quest While Doing Other Function", null, ev.getPlayer()));
 								return;
@@ -893,6 +917,12 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							if (ItemStacks.stackIsSimilar(ev.getItem(), citem, false)) {
 								// Matched to Warzone Quest
 								ev.setCancelled(true);
+
+								int minPlayers = getConf().config.getInt("WRQ Minimum Players");
+								if (getServer().getOnlinePlayers().size() < minPlayers) {
+									ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", minPlayers + ""));
+									return;
+								}
 
 								if (playerIsActive(ev.getPlayer())) {
 									ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Warzone Quest While Doing Other Function", null, ev.getPlayer()));
@@ -958,6 +988,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			getCommand("flare").getExecutor().onCommand(getServer().getConsoleSender(), getCommand("flare"), "flare",
 					new String[]{"give", flare, ev.getPlayer().getName()});
 			ev.getPlayer().sendMessage(getTrans().format("Flare Given Upon Join Message", null, ev.getPlayer()));
+			playerData.config.set("players." + ev.getPlayer().getUniqueId().toString() + ".flare", null);
+			playerData.save();
 		}
 	}
 

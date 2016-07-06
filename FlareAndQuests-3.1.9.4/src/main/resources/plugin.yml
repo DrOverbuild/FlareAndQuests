@@ -1,6 +1,6 @@
 name: FlareAndQuests
 main: com.drizzard.faq.FlareAndQuests
-version: ${version}
+version: 3.0.0
 author: ShowbizLocket61
 
 commands:

@@ -1,6 +1,8 @@
 package com.drizzard.faq;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by jasper on 6/28/16.
@@ -20,6 +22,18 @@ public class ConfigDefaults {
 		defs.put("Minimum Flare Contents", 2);
 		defs.put("Maximum Flare Contents", 6);
 		defs.put("Flare Arrival Delay", 0);
+
+		defs.put("RQ Minimum Players", 2);
+		defs.put("Flare Minimum Players", 2);
+		defs.put("Witem Minimum Players", 2);
+		defs.put("WRQ Minimum Players", 2);
+
+		List<String> timedActions = new ArrayList<>();
+		timedActions.add("time:20 say:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
+		timedActions.add("time:10 say:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
+		timedActions.add("time:5 msg:{player} &eYou are almost done!");
+
+		defs.put("rq-timed-actions", timedActions);
 
 		return new Config(plugin, defs, "config");
 	}
@@ -51,7 +65,7 @@ public class ConfigDefaults {
 		defsT.put("Flare Arrived Message", "&7Your supplies have arrived! ({x}, {y}, {z})");
 		defsT.put("Flare In Use", "&cYou can only use one flare at a time!");
 		defsT.put("Flare Given Upon Join Message", "&7You have been given a flare because you disconnected whilst waiting for a flare.");
-
+		defsT.put("Not Enough Players", "&cYou can't use that item right now! There must be at least {min-online} players online.");
 		defsT.put("Cannot Activate Stacked Rank Quests Message", "&4You cannot activate more than one rank quest at the same time!");
 		defsT.put("Cannot Activate Stacked Warzone Quests Message", "&4You cannot activate more than one Warzone Quest at the same time!");
 		defsT.put("Cannot Activate While in Keep Inv Message", "&4You cannot activate a rank quest while in a keep inventory period!");

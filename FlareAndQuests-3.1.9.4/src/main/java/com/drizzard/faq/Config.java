@@ -11,83 +11,102 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 public class Config {
-	
+
 	File configFile;
 	public YamlConfiguration config;
 
-	public Config(Plugin plugin, HashMap<String, Object> defaults, String name){
-		
-		if(!plugin.getDataFolder().exists())
+	public Config(Plugin plugin, HashMap<String, Object> defaults, String name) {
+
+		if (!plugin.getDataFolder().exists())
 			plugin.getDataFolder().mkdir();
-		configFile = new File(plugin.getDataFolder(), name+".yml");
-		if(!configFile.exists()){
+		configFile = new File(plugin.getDataFolder(), name + ".yml");
+		if (!configFile.exists()) {
 			try {
 				configFile.createNewFile();
 			} catch (IOException e) {
 			}
 		}
 		load();
-		if(defaults != null){
-			for(String path : defaults.keySet())
+		if (defaults != null) {
+			for (String path : defaults.keySet())
 				config.addDefault(path, defaults.get(path));
 			config.options().copyDefaults(true);
 			save();
 		}
 	}
-	
-	public void save(){
+
+	public void save() {
 		try {
 			config.save(configFile);
-		}
-		catch (Exception e){
+		} catch (Exception e) {
 		}
 	}
-	
-	public void load(){
+
+	public void load() {
 		config = YamlConfiguration.loadConfiguration(configFile);
 	}
 
-	public String[] format(String messageKey, Location loc, Player player){
-		return format(messageKey, loc, player, null);
+	public String[] format(String messageKey, Location loc, Player player) {
+		return format(messageKey, loc, player, null, null);
 	}
 
-	public String[] format(String messageKey, Player player){
-		return format(messageKey, null, player, null);
+	public String[] format(String messageKey, Player player) {
+		return format(messageKey, null, player, null, null);
 	}
 
-	public String[] format(String messageKey, Location loc, Player player, String left){
+	public String[] format(String messageKey, String minOnline) {
+		return format(messageKey, null, null, null, minOnline);
+	}
+
+	public String[] format(String messageKey, Location loc, Player player, String left, String minOnline) {
 		String message = config.getString(messageKey, "none");
-		if(message.equals("none")){
+		if (message.equals("none")) {
 			return new String[]{};
 		}
 
 		String[] lines = message.split("\\|");
 
-		for(int i = 0; i < lines.length; i++){
-			lines[i] = formatLine(lines[i], loc, player, left);
-			if(i > 0){
-				lines[i] = ChatColor.getLastColors(lines[i-1]) + lines[i];
+		for (int i = 0; i < lines.length; i++) {
+			lines[i] = formatLine(lines[i], loc, player, left, minOnline);
+			if (i > 0) {
+				lines[i] = ChatColor.getLastColors(lines[i - 1]) + lines[i];
 			}
 		}
 
 		return lines;
 	}
 
-	public static String formatLine(String message, Location loc, Player player, String left){
+	public static String formatLine(String message, Location loc, Player player, String left, String minOnline) {
 		message = ChatColor.translateAlternateColorCodes('&', message);
-		if(loc != null) {
+		if (loc != null) {
 			message = message.replace("{x}", loc.getBlockX() + "");
 			message = message.replace("{y}", loc.getBlockY() + "");
 			message = message.replace("{z}", loc.getBlockZ() + "");
 		}
 
-		if(player != null){
+		if (player != null) {
 			message = message.replace("{player}", player.getName());
 		}
 
-		if(left != null){
-			message = message.replace("{left", left);
+		if (left != null) {
+			message = message.replace("{left}", left);
 		}
+
+		if (minOnline != null) {
+			message = message.replace("{min-online}", minOnline);
+		}
+
+		return message;
+	}
+
+	public static String formatLine(String message, Player player, int secondsLeft) {
+		message = ChatColor.translateAlternateColorCodes('&', message);
+
+		if (player != null) {
+			message = message.replace("{player}", player.getName());
+		}
+
+		message = message.replace("{left-seconds}", "" + secondsLeft);
 
 		return message;
 	}

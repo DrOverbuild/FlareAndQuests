@@ -2,6 +2,7 @@ package com.drizzard.faq.commands;
 
 import com.drizzard.faq.FlareAndQuests;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -35,9 +36,18 @@ public class FLARECommand extends BasePluginCommand {
 			}
 
 			Player target = Bukkit.getPlayer(args[2]);
-			if (target == null)
-				sender.sendMessage(DR + "Could not find " + R + args[2]);
-			else {
+			if (target == null) {
+
+				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[2]);
+
+				if (offlinePlayer != null) {
+					sender.sendMessage(R + args[2] + DR + " is currently not online, but we will try to give him a flare when he joins.");
+					plugin.getPlayerData().config.set("players." + offlinePlayer.getUniqueId().toString() + ".flare", args[1]);
+					plugin.getPlayerData().save();
+				} else {
+					sender.sendMessage(DR + "Could not find" + R + args[2]);
+				}
+			} else {
 				target.getInventory().addItem(getConf().config.getItemStack("Flares." + args[1] + ".Activate"));
 				target.updateInventory();
 				sender.sendMessage(G + "Gave the flare " + Y + args[1] + G + " to " + Y + args[2]);
@@ -77,7 +87,7 @@ public class FLARECommand extends BasePluginCommand {
 			}
 
 			getPlugin().openFlareInventory(p, args[1]);
-		} else{
+		} else {
 			return false;
 		}
 
