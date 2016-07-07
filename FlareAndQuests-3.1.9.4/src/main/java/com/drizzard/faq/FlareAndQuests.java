@@ -59,7 +59,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	public HashMap<Player, Location> left = new HashMap<Player, Location>();
 	public HashMap<Player, Location> right = new HashMap<Player, Location>();
 	HashMap<Player, RankQuest> QIP = new HashMap<Player, RankQuest>();
-	HashMap<Player, WarzoneQuest> WQIP = new HashMap<>();
+	//	HashMap<Player, WarzoneQuest> WQIP = new HashMap<>();
 	HashMap<Player, String> playerFlares = new HashMap<>();
 
 
@@ -94,12 +94,6 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		getCommand("faq").setExecutor(new FAQCommand(this));
 		getCommand("flare").setExecutor(new FLARECommand(this));
 		getCommand("witem").setExecutor(new WITEMCommand(this));
-
-		if (serverHasFactions()) {
-			getCommand("wrq").setExecutor(new WRQCommand(this));
-		} else {
-			CommandUnregister.unRegisterBukkitCommand(getCommand("wrq"), this);
-		}
 	}
 
 //	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -609,7 +603,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	}
 
 	public boolean playerIsActive(Player p) {
-		return WQIP.containsKey(p) || QIP.containsKey(p) || deathsLeft.containsKey(p) || playerFlares.containsKey(p);
+		return QIP.containsKey(p) || deathsLeft.containsKey(p) || playerFlares.containsKey(p);
 	}
 
 	@EventHandler
@@ -883,14 +877,20 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Stacked Rank Quests Message", null, ev.getPlayer()));
 							} else if (QIP.containsKey(ev.getPlayer())) {
 								ev.getPlayer().sendMessage(getTrans().format("Already Doing Quest Message", null, ev.getPlayer()));
+							} else if (serverHasFactions()) {
+								if (!isWarzone(ev.getPlayer().getLocation())) {
+									String[] message = getTrans().format("Not in Warzone Message", null, ev.getPlayer());
+									ev.getPlayer().sendMessage(message);
+								}
 							} else if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Quests." + key + ".First"), (Location) conf.config.get("Quests." + key + ".Second"))) {
 								ev.getPlayer().sendMessage(getTrans().format("Not in Region Message", null, ev.getPlayer()));
 
 								//ev.getPlayer().sendMessage(DR+"You must be inside the proper region!");
 							} else if (deathsLeft.containsKey(ev.getPlayer())) {
 								ev.getPlayer().sendMessage(getTrans().format("Cannot Activate While in Keep Inv Message", null, ev.getPlayer()));
-							} else
+							} else {
 								QIP.put(ev.getPlayer(), new RankQuest(ev.getPlayer().getInventory().getHeldItemSlot(), ev.getPlayer(), conf.config.getInt("Quests." + key + ".Duration"), this, key));
+							}
 							return;
 						} else if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("Quests." + key + ".Voucher"), false)) {
 							// Matched to Voucher
@@ -910,60 +910,60 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 									this.getServer().dispatchCommand(Bukkit.getConsoleSender(), ChatColor.translateAlternateColorCodes('&', str).replace("{player}", ev.getPlayer().getName()));
 						}
 					}
-					if (serverHasFactions() && conf.config.contains("WQuests")) {
-						for (String key : conf.config.getConfigurationSection("WQuests").getKeys(false)) {
-							ItemStack citem = conf.config.getItemStack("WQuests." + key + ".Activate");
-
-							if (ItemStacks.stackIsSimilar(ev.getItem(), citem, false)) {
-								// Matched to Warzone Quest
-								ev.setCancelled(true);
-
-								int minPlayers = getConf().config.getInt("WRQ Minimum Players");
-								if (getServer().getOnlinePlayers().size() < minPlayers) {
-									ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", minPlayers + ""));
-									return;
-								}
-
-								if (playerIsActive(ev.getPlayer())) {
-									ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Warzone Quest While Doing Other Function", null, ev.getPlayer()));
-									return;
-								}
-
-								if (!isWarzone(ev.getPlayer().getLocation())) {
-									String[] message = getTrans().format("Not in Warzone Message", null, ev.getPlayer());
-									ev.getPlayer().sendMessage(message);
-								} else if (ev.getItem().getAmount() > 1) {
-									String[] message = getTrans().format("Cannot Activate Stacked Warzone Quests Message", null, ev.getPlayer());
-									ev.getPlayer().sendMessage(message);
-								} else if (WQIP.containsKey(ev.getPlayer())) {
-									String[] message = getTrans().format("Already Doing Warzone Quest Message", null, ev.getPlayer());
-									ev.getPlayer().sendMessage(message);
-
-									//ev.getPlayer().sendMessage(DR+"You are already doing a rank quest!");
-								} else if (deathsLeft.containsKey(ev.getPlayer())) {
-									ev.getPlayer().sendMessage(getTrans().format("Cannot Activate While in Keep Inv Message", null, ev.getPlayer()));
-								} else
-									WQIP.put(ev.getPlayer(), new WarzoneQuest(ev.getPlayer().getInventory().getHeldItemSlot(), ev.getPlayer(), conf.config.getInt("WQuests." + key + ".Duration"), this, key));
-								return;
-							} else if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("WQuests." + key + ".Voucher"), false)) {
-								// Matched to Voucher
-								ev.setCancelled(true);
-								PlayerInventory inv = ev.getPlayer().getInventory();
-
-								if (ev.getItem().getAmount() == 1)
-									inv.setItem(inv.getHeldItemSlot(), null);
-								else
-									ev.getItem().setAmount(ev.getItem().getAmount() - 1);
-
-								for (ItemStack i : (List<ItemStack>) conf.config.getList("WQuests." + key + ".Rewards", new ArrayList<ItemStack>()))
-									inv.addItem(i);
-								ev.getPlayer().updateInventory();
-								if (conf.config.contains("WQuests." + key + ".Commands"))
-									for (String str : conf.config.getStringList("WQuests." + key + ".Commands"))
-										this.getServer().dispatchCommand(Bukkit.getConsoleSender(), ChatColor.translateAlternateColorCodes('&', str).replace("{player}", ev.getPlayer().getName()));
-							}
-						}
-					}
+//					if (serverHasFactions() && conf.config.contains("WQuests")) {
+//						for (String key : conf.config.getConfigurationSection("WQuests").getKeys(false)) {
+//							ItemStack citem = conf.config.getItemStack("WQuests." + key + ".Activate");
+//
+//							if (ItemStacks.stackIsSimilar(ev.getItem(), citem, false)) {
+//								// Matched to Warzone Quest
+//								ev.setCancelled(true);
+//
+//								int minPlayers = getConf().config.getInt("WRQ Minimum Players");
+//								if (getServer().getOnlinePlayers().size() < minPlayers) {
+//									ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", minPlayers + ""));
+//									return;
+//								}
+//
+//								if (playerIsActive(ev.getPlayer())) {
+//									ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Warzone Quest While Doing Other Function", null, ev.getPlayer()));
+//									return;
+//								}
+//
+//								if (!isWarzone(ev.getPlayer().getLocation())) {
+//									String[] message = getTrans().format("Not in Warzone Message", null, ev.getPlayer());
+//									ev.getPlayer().sendMessage(message);
+//								} else if (ev.getItem().getAmount() > 1) {
+//									String[] message = getTrans().format("Cannot Activate Stacked Warzone Quests Message", null, ev.getPlayer());
+//									ev.getPlayer().sendMessage(message);
+//								} else if (WQIP.containsKey(ev.getPlayer())) {
+//									String[] message = getTrans().format("Already Doing Warzone Quest Message", null, ev.getPlayer());
+//									ev.getPlayer().sendMessage(message);
+//
+//									//ev.getPlayer().sendMessage(DR+"You are already doing a rank quest!");
+//								} else if (deathsLeft.containsKey(ev.getPlayer())) {
+//									ev.getPlayer().sendMessage(getTrans().format("Cannot Activate While in Keep Inv Message", null, ev.getPlayer()));
+//								} else
+//									WQIP.put(ev.getPlayer(), new WarzoneQuest(ev.getPlayer().getInventory().getHeldItemSlot(), ev.getPlayer(), conf.config.getInt("WQuests." + key + ".Duration"), this, key));
+//								return;
+//							} else if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("WQuests." + key + ".Voucher"), false)) {
+//								// Matched to Voucher
+//								ev.setCancelled(true);
+//								PlayerInventory inv = ev.getPlayer().getInventory();
+//
+//								if (ev.getItem().getAmount() == 1)
+//									inv.setItem(inv.getHeldItemSlot(), null);
+//								else
+//									ev.getItem().setAmount(ev.getItem().getAmount() - 1);
+//
+//								for (ItemStack i : (List<ItemStack>) conf.config.getList("WQuests." + key + ".Rewards", new ArrayList<ItemStack>()))
+//									inv.addItem(i);
+//								ev.getPlayer().updateInventory();
+//								if (conf.config.contains("WQuests." + key + ".Commands"))
+//									for (String str : conf.config.getStringList("WQuests." + key + ".Commands"))
+//										this.getServer().dispatchCommand(Bukkit.getConsoleSender(), ChatColor.translateAlternateColorCodes('&', str).replace("{player}", ev.getPlayer().getName()));
+//							}
+//						}
+//					}
 				}
 			}
 		}

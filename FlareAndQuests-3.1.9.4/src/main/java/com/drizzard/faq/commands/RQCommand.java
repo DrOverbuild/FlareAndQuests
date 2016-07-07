@@ -99,7 +99,11 @@ public class RQCommand extends BasePluginCommand {
 					p.getInventory().setItem(p.getInventory().getHeldItemSlot(), null);
 					p.updateInventory();
 					p.sendMessage(G + "Successfully created a rank quest named " + Y + args[1]);
-					p.sendMessage(G + "Next step: select a region using " + Y + "/rq wand" + G + " and " + Y + "/rq setregion " + args[1]);
+					if(plugin.serverHasFactions()){
+						p.sendMessage(G + "Next step: set the duration using " + Y + "/rq settime " + args[1] + " <seconds>");
+					}else {
+						p.sendMessage(G + "Next step: select a region using " + Y + "/rq wand" + G + " and " + Y + "/rq setregion " + args[1]);
+					}
 				}
 			}
 		} else if (!getConf().config.contains("Quests." + args[1])) {
