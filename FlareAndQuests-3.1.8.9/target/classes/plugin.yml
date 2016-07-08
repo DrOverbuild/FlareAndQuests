@@ -1,6 +1,6 @@
 name: FlareAndQuests
 main: com.drizzard.faq.FlareAndQuests
-version: 4.1.8.9
+version: 4.1.9.4
 author: ShowbizLocket61
 
 commands:
@@ -20,10 +20,6 @@ commands:
     description: Main command for Witems
     usage: /<command>
     permission: faq.witem
-  wrq:
-    description: Main command for Warzone Rank Quests
-    usage: /<command>
-    permission: faq.wrq
 
 permissions:
   faq.*:

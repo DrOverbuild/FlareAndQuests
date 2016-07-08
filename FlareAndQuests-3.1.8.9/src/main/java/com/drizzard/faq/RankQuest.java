@@ -1,9 +1,13 @@
 package com.drizzard.faq;
 
 import com.drizzard.faq.util.ActionBar;
+import com.drizzard.faq.util.FireworkUtil;
+import com.drizzard.faq.util.SoundUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -70,6 +74,10 @@ public class RankQuest implements Listener {
 			p.sendMessage(message);
 		}
 
+		owner.setMaxHealth((double) plugin.conf.config.getInt("rq-player-health", 10) * 2);
+
+		SoundUtil.playRQStartSound(plugin, owner);
+
 		timer = new BukkitRunnable() {
 			public void run() {
 				timeLeft--;
@@ -102,6 +110,10 @@ public class RankQuest implements Listener {
 					}*/
 					owner.getInventory().addItem(plugin.conf.config.getItemStack("Quests." + name + ".Voucher"));
 					owner.updateInventory();
+
+					FireworkUtil.fireworks(plugin, owner.getLocation());
+
+					SoundUtil.playRQFinishSound(plugin, owner);
 
 					String[] message = plugin.getTrans().format("RQ Complete Broadcast", owner.getLocation(), owner);
 					for (Player p : Bukkit.getOnlinePlayers()) {
@@ -140,7 +152,7 @@ public class RankQuest implements Listener {
 				} else if (action.getAction().equals(TimedAction.ActionType.EXEC)) {
 					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), TimedAction.formatMessage(action.getMessage(), p, timeLeft + "", p.getLocation()));
 				} else {
-					for(String line : action.formatMultiLineMessage(p, timeLeft + "", p.getLocation())){
+					for (String line : action.formatMultiLineMessage(p, timeLeft + "", p.getLocation())) {
 						Bukkit.broadcastMessage(line);
 					}
 				}
@@ -154,6 +166,7 @@ public class RankQuest implements Listener {
 
 	public void kill() {
 		timer.cancel();
+		owner.setMaxHealth(20d);
 		plugin.QIP.remove(owner);
 		HandlerList.unregisterAll(this);
 	}

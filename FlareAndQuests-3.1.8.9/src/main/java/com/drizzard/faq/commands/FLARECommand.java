@@ -33,6 +33,7 @@ public class FLARECommand extends BasePluginCommand {
 		} else if (args[0].equalsIgnoreCase("give")) {
 			if (!getConf().config.contains("Flares." + args[1])) {
 				sender.sendMessage(DR + "There is no flare of the name " + R + args[1]);
+				return true;
 			}
 
 			Player target = Bukkit.getPlayer(args[2]);
