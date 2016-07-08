@@ -991,6 +991,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			playerData.config.set("players." + ev.getPlayer().getUniqueId().toString() + ".flare", null);
 			playerData.save();
 		}
+
+		ev.getPlayer().setMaxHealth(20d);
 	}
 
 }

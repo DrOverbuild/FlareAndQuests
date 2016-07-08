@@ -73,6 +73,8 @@ public class RankQuest implements Listener {
 			p.sendMessage(message);
 		}
 
+		owner.setMaxHealth((double) plugin.conf.config.getInt("rq-player-health", 10) * 2);
+
 		timer = new BukkitRunnable() {
 			public void run() {
 				timeLeft--;
@@ -145,7 +147,7 @@ public class RankQuest implements Listener {
 				} else if (action.getAction().equals(TimedAction.ActionType.EXEC)) {
 					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), TimedAction.formatMessage(action.getMessage(), p, timeLeft + "", p.getLocation()));
 				} else {
-					for(String line : action.formatMultiLineMessage(p, timeLeft + "", p.getLocation())){
+					for (String line : action.formatMultiLineMessage(p, timeLeft + "", p.getLocation())) {
 						Bukkit.broadcastMessage(line);
 					}
 				}
@@ -159,6 +161,7 @@ public class RankQuest implements Listener {
 
 	public void kill() {
 		timer.cancel();
+		owner.setMaxHealth(20d);
 		plugin.QIP.remove(owner);
 		HandlerList.unregisterAll(this);
 	}

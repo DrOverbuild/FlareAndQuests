@@ -38,6 +38,8 @@ public class ConfigDefaults {
 		defs.put("fireworks.type", "RANDOM");
 		defs.put("fireworks.color", "RANDOM");
 
+		defs.put("rq-player-health", 10);
+
 		defs.put("rq-timed-actions", timedActions);
 
 		return new Config(plugin, defs, "config");
