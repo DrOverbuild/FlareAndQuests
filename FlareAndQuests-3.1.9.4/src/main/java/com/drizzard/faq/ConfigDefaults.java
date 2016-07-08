@@ -1,5 +1,7 @@
 package com.drizzard.faq;
 
+import org.bukkit.Sound;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +25,10 @@ public class ConfigDefaults {
 		defs.put("Maximum Flare Contents", 6);
 		defs.put("Flare Arrival Delay", 0);
 
+		defs.put("minimum-players.rq", 2);
+		defs.put("minimum-players.flare", 2);
+		defs.put("minimum-players.witem", 2);
+
 		defs.put("RQ Minimum Players", 2);
 		defs.put("Flare Minimum Players", 2);
 		defs.put("Witem Minimum Players", 2);
@@ -39,6 +45,12 @@ public class ConfigDefaults {
 		defs.put("fireworks.color", "RANDOM");
 
 		defs.put("rq-player-health", 10);
+
+		defs.put("sounds.rq-start", Sound.ENTITY_ENDERDRAGON_GROWL.name());
+		defs.put("sounds.rq-finish", Sound.ENTITY_EXPERIENCE_ORB_PICKUP.name());
+		defs.put("sounds.flare-use", Sound.ENTITY_BLAZE_AMBIENT.name());
+		defs.put("sounds.chest-arrival", Sound.BLOCK_ANVIL_HIT.name());
+		defs.put("sounds.witem-use", Sound.ENTITY_BLAZE_AMBIENT.name());
 
 		defs.put("rq-timed-actions", timedActions);
 

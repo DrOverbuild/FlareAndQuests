@@ -6,10 +6,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import com.drizzard.faq.commands.*;
-import com.drizzard.faq.util.FireworkUtil;
-import com.drizzard.faq.util.ItemStacks;
-import com.drizzard.faq.util.ActionBar;
-import com.drizzard.faq.util.CommandUnregister;
+import com.drizzard.faq.util.*;
 import net.minecraft.server.v1_9_R2.ChatMessage;
 import net.minecraft.server.v1_9_R2.EntityPlayer;
 import net.minecraft.server.v1_9_R2.PacketPlayOutOpenWindow;
@@ -792,7 +789,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								return;
 							}
 
-							int minPlayers = getConf().config.getInt("Flare Minimum Players");
+							int minPlayers = getConf().config.getInt("minimum-players.flare");
 							if (getServer().getOnlinePlayers().size() < minPlayers) {
 								ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", minPlayers + ""));
 								return;
@@ -812,7 +809,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							//Matched to Witem
 							ev.setCancelled(true);
 
-							int minPlayers = getConf().config.getInt("Witem Minimum Players");
+							int minPlayers = getConf().config.getInt("minimum-players.witem");
 							if (getServer().getOnlinePlayers().size() < minPlayers) {
 								ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", minPlayers + ""));
 								return;
@@ -830,9 +827,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 									ev.getPlayer().sendMessage(message);
 									return;
 								}
-							}
-
-							if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Witems." + key + ".First"), (Location) conf.config.get("Witems." + key + ".Second"))) {
+							}else if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Witems." + key + ".First"), (Location) conf.config.get("Witems." + key + ".Second"))) {
 								ev.getPlayer().sendMessage(getTrans().format("Not in Region Message", null, ev.getPlayer()));
 
 								return;
@@ -847,6 +842,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							}
 
 							ev.getPlayer().updateInventory();
+
+							SoundUtil.playWitemUseSound(this, ev.getPlayer());
 
 							if (conf.config.contains("Witems." + key + ".Commands")) {
 								for (String str : conf.config.getStringList("Witems." + key + ".Commands")) {
@@ -864,7 +861,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							// Matched to Rank Quest
 							ev.setCancelled(true);
 
-							int minPlayers = getConf().config.getInt("RQ Minimum Players");
+							int minPlayers = getConf().config.getInt("minimum-players.rq");
 							if (getServer().getOnlinePlayers().size() < minPlayers) {
 								ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", minPlayers + ""));
 								return;

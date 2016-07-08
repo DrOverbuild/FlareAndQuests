@@ -2,6 +2,7 @@ package com.drizzard.faq;
 
 import com.drizzard.faq.util.ActionBar;
 import com.drizzard.faq.util.FireworkUtil;
+import com.drizzard.faq.util.SoundUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -75,6 +76,8 @@ public class RankQuest implements Listener {
 
 		owner.setMaxHealth((double) plugin.conf.config.getInt("rq-player-health", 10) * 2);
 
+		SoundUtil.playRQStartSound(plugin, owner);
+
 		timer = new BukkitRunnable() {
 			public void run() {
 				timeLeft--;
@@ -109,6 +112,8 @@ public class RankQuest implements Listener {
 					owner.updateInventory();
 
 					FireworkUtil.fireworks(plugin, owner.getLocation());
+
+					SoundUtil.playRQFinishSound(plugin, owner);
 
 					String[] message = plugin.getTrans().format("RQ Complete Broadcast", owner.getLocation(), owner);
 					for (Player p : Bukkit.getOnlinePlayers()) {

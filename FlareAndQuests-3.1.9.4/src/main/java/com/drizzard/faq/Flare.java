@@ -3,6 +3,7 @@ package com.drizzard.faq;
 import java.util.*;
 
 import com.drizzard.faq.util.ActionBar;
+import com.drizzard.faq.util.SoundUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,7 +25,7 @@ public class Flare {
 	double vel = 0.0;
 	Random rand = new Random();
 
-	public Flare(ItemStack is, Player player, final FlareAndQuests plugin, final String name) {
+	public Flare(ItemStack is, final Player player, final FlareAndQuests plugin, final String name) {
 
 		double r = plugin.conf.config.getDouble("Flare Drop Radius");
 		Location loc = player.getLocation().add(0, 5, 0);
@@ -110,6 +111,8 @@ public class Flare {
 							}
 						}.runTaskTimer(plugin, 0, 1));
 
+						SoundUtil.playChestArrivalSound(plugin, player, c.getLocation());
+
 						this.cancel();
 					} else
 						armor.teleport(armor.getLocation().add(0, 5 * vel, 0));
@@ -145,6 +148,7 @@ public class Flare {
 
 		if (plugin.playerFlares.containsKey(player)) {
 			player.sendMessage(plugin.getTrans().format("Flare In Use", null, player));
+			return;
 		}
 
 		double r = plugin.conf.config.getDouble("Flare Drop Radius");
@@ -156,11 +160,15 @@ public class Flare {
 		}
 		player.sendMessage(message);
 
-		if (is.getAmount() == 1)
+		if (is.getAmount() == 1) {
 			player.getInventory().setItem(player.getInventory().getHeldItemSlot(), null);
-		else
+		} else {
 			is.setAmount(is.getAmount() - 1);
+		}
+
 		player.updateInventory();
+
+		SoundUtil.playFlareUseSound(plugin, player);
 
 		final int delay = plugin.getConf().config.getInt("Flare Arrival Delay", 0);
 
@@ -176,8 +184,6 @@ public class Flare {
 
 				@Override
 				public void run() {
-					// TODO: Handle player quit event
-
 					ActionBar.sendActionBar(player, message2.replace("{time}", secondsLeft + ""));
 					secondsLeft--;
 
