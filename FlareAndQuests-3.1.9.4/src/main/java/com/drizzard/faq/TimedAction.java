@@ -93,7 +93,7 @@ public class TimedAction {
 	}
 
 	public static String formatMessage(String message, Player p, String leftSeconds, Location loc) {
-		message = Config.formatLine(message, loc, p, leftSeconds, null);
+		message = Config.formatLine(message, loc, p, leftSeconds, null, null, null);
 
 		if (leftSeconds != null) {
 			message = message.replace("{left-seconds}", leftSeconds);

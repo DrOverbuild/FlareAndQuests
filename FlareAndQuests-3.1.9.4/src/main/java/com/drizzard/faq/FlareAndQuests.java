@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import com.drizzard.faq.commands.*;
+import com.drizzard.faq.util.FireworkUtil;
 import com.drizzard.faq.util.ItemStacks;
 import com.drizzard.faq.util.ActionBar;
 import com.drizzard.faq.util.CommandUnregister;
@@ -87,6 +88,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		registerCommands();
 
 		RankQuest.loadTimedActions(this);
+		FireworkUtil.loadFromConfig(this);
 	}
 
 	public void registerCommands() {
@@ -877,12 +879,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Stacked Rank Quests Message", null, ev.getPlayer()));
 							} else if (QIP.containsKey(ev.getPlayer())) {
 								ev.getPlayer().sendMessage(getTrans().format("Already Doing Quest Message", null, ev.getPlayer()));
-							} else if (serverHasFactions()) {
-								if (!isWarzone(ev.getPlayer().getLocation())) {
-									String[] message = getTrans().format("Not in Warzone Message", null, ev.getPlayer());
-									ev.getPlayer().sendMessage(message);
-								}
-							} else if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Quests." + key + ".First"), (Location) conf.config.get("Quests." + key + ".Second"))) {
+							} else if (serverHasFactions() && !isWarzone(ev.getPlayer().getLocation())) {
+								String[] message = getTrans().format("Not in Warzone Message", null, ev.getPlayer());
+								ev.getPlayer().sendMessage(message);
+							} else if (!serverHasFactions() && !inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Quests." + key + ".First"), (Location) conf.config.get("Quests." + key + ".Second"))) {
 								ev.getPlayer().sendMessage(getTrans().format("Not in Region Message", null, ev.getPlayer()));
 
 								//ev.getPlayer().sendMessage(DR+"You must be inside the proper region!");

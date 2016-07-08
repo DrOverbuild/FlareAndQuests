@@ -32,6 +32,12 @@ public class ConfigDefaults {
 		timedActions.add("time:10 broadcast:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
 		timedActions.add("time:5 msg:{player} &eYou are almost done!");
 
+		defs.put("fireworks.enabled", true);
+		defs.put("fireworks.amount", 20);
+		defs.put("fireworks.rate", 5);
+		defs.put("fireworks.type", "RANDOM");
+		defs.put("fireworks.color", "RANDOM");
+
 		defs.put("rq-timed-actions", timedActions);
 
 		return new Config(plugin, defs, "config");
