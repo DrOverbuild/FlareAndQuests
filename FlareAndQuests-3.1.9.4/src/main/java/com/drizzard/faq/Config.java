@@ -93,7 +93,7 @@ public class Config {
 		}
 
 		if (left != null) {
-			message = message.replace("{left}", left);
+			message = message.replace("{time}", left);
 		}
 
 		if (minOnline != null) {
@@ -101,7 +101,7 @@ public class Config {
 		}
 
 		if (duration != null) {
-			message = message.replace("{duraction}", duration);
+			message = message.replace("{duration}", duration);
 		}
 
 		if (deaths != null) {

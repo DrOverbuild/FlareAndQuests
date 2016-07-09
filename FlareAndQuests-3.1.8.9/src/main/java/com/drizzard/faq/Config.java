@@ -101,7 +101,7 @@ public class Config {
 		}
 
 		if (duration != null) {
-			message = message.replace("{duraction}", duration);
+			message = message.replace("{duration}", duration);
 		}
 
 		if (deaths != null) {

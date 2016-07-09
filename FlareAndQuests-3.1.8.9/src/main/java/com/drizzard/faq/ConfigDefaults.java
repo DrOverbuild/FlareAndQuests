@@ -29,10 +29,6 @@ public class ConfigDefaults {
 		defs.put("minimum-players.flare", 2);
 		defs.put("minimum-players.witem", 2);
 
-		defs.put("RQ Minimum Players", 2);
-		defs.put("Flare Minimum Players", 2);
-		defs.put("Witem Minimum Players", 2);
-
 		List<String> timedActions = new ArrayList<>();
 		timedActions.add("time:20 broadcast:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
 		timedActions.add("time:10 broadcast:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
