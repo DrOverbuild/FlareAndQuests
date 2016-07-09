@@ -111,7 +111,7 @@ public class Flare {
 							}
 						}.runTaskTimer(plugin, 0, 1));
 
-						SoundUtil.playChestArrivalSound(plugin, player, c.getLocation());
+						SoundUtil.playChestArrivalSound(plugin, player);
 
 						this.cancel();
 					} else
