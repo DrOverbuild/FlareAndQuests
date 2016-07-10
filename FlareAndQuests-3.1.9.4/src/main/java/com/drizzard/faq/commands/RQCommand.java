@@ -56,18 +56,29 @@ public class RQCommand extends BasePluginCommand {
 			return true;
 		} else if (args.length < 3) {
 		} else if (args[0].equalsIgnoreCase("give")) {
-			if (!getConf().config.contains("Quests." + args[1])) {
-				sender.sendMessage(DR + "There is no quest of the name " + R + args[1]);
+			if (!getConf().config.contains("Quests." + args[2])) {
+				sender.sendMessage(DR + "There is no quest of the name " + R + args[2]);
 				return true;
 			}
 
-			Player target = Bukkit.getPlayer(args[2]);
+			Player target = Bukkit.getPlayer(args[1]);
 			if (target == null)
-				sender.sendMessage(DR + "Could not find " + R + args[2]);
+				sender.sendMessage(DR + "Could not find " + R + args[1]);
 			else {
-				target.getInventory().addItem(getConf().config.getItemStack("Quests." + args[1] + ".Activate"));
+				int numberOfItems = 1;
+				if (args.length > 3) {
+					try {
+						numberOfItems = Integer.parseInt(args[3]);
+					} catch (NumberFormatException e) {
+					}
+				}
+
+				for (int i = 0; i < numberOfItems; i++) {
+					target.getInventory().addItem(getConf().config.getItemStack("Quests." + args[2] + ".Activate"));
+				}
 				target.updateInventory();
-				sender.sendMessage(G + "Gave the quest " + Y + args[1] + G + " to " + Y + args[2]);
+
+				sender.sendMessage(G + "Gave " + numberOfItems + " quest(s) with the name " + Y + args[2] + G + " to " + Y + args[1]);
 			}
 			return true;
 		}
@@ -171,7 +182,7 @@ public class RQCommand extends BasePluginCommand {
 			} else {
 				p.sendMessage(DR + "Could not find the command " + R + "/" + ChatColor.translateAlternateColorCodes('&', newCMD));
 			}
-		}else{
+		} else {
 			return false;
 		}
 
@@ -190,7 +201,7 @@ public class RQCommand extends BasePluginCommand {
 		sender.sendMessage(BEG + "/rq addvcommand <name> <command> " + SEP + "Adds a command.");
 		sender.sendMessage(BEG + "/rq listvcommands <name> " + SEP + "Lists all commands.");
 		sender.sendMessage(BEG + "/rq delvcommand <name> <command> " + SEP + "Deletes a command.");
-		sender.sendMessage(BEG + "/rq give <name> <player> " + SEP + "Gives a player a rank quest.");
+		sender.sendMessage(BEG + "/rq give <player> <name> <amount>" + SEP + "Gives a player a rank quest.");
 		sender.sendMessage(BEG + "/rq list " + SEP + "Lists all rank quests.");
 	}
 }

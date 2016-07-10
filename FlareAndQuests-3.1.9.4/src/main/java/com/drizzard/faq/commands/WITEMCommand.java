@@ -51,7 +51,7 @@ public class WITEMCommand extends BasePluginCommand {
 			return true;
 		} else if (args.length < 3) {
 		} else if (args[0].equalsIgnoreCase("addcommand")) {
-			if(!getConf().config.contains("Witems." + args[1])){
+			if (!getConf().config.contains("Witems." + args[1])) {
 				sender.sendMessage(DR + "There is no Witem of the name " + R + args[1]);
 				return true;
 			}
@@ -69,7 +69,7 @@ public class WITEMCommand extends BasePluginCommand {
 			sender.sendMessage(G + "You're all done setting up the witem " + Y + args[1] + G + "!");
 			return true;
 		} else if (args[0].equalsIgnoreCase("delcommand")) {
-			if(!getConf().config.contains("Witems." + args[1])){
+			if (!getConf().config.contains("Witems." + args[1])) {
 				sender.sendMessage(DR + "There is no Witem of the name " + R + args[1]);
 				return true;
 			}
@@ -89,13 +89,40 @@ public class WITEMCommand extends BasePluginCommand {
 			}
 			return true;
 		} else if (args[0].equalsIgnoreCase("give")) {
-			Player target = Bukkit.getPlayer(args[2]);
+//			Player target = Bukkit.getPlayer(args[2]);
+//			if (target == null) {
+//				sender.sendMessage(DR + "Could not find " + R + args[2]);
+//			} else {
+//				target.getInventory().addItem(getConf().config.getItemStack("Witems." + args[1] + ".Activate"));
+//				target.updateInventory();
+//				sender.sendMessage(G + "Gave the witem " + Y + args[1] + G + " to " + Y + args[2]);
+//			}
+//			return true;
+
+
+			if (!getConf().config.contains("Witems." + args[2])) {
+				sender.sendMessage(DR + "There is no witem of the name " + R + args[2]);
+				return true;
+			}
+
+			Player target = Bukkit.getPlayer(args[1]);
 			if (target == null) {
-				sender.sendMessage(DR + "Could not find " + R + args[2]);
+				sender.sendMessage(DR + "Could not find " + R + args[1]);
 			} else {
-				target.getInventory().addItem(getConf().config.getItemStack("Witems." + args[1] + ".Activate"));
+				int numberOfItems = 1;
+				if (args.length > 3) {
+					try {
+						numberOfItems = Integer.parseInt(args[3]);
+					} catch (NumberFormatException e) {
+					}
+				}
+
+				for (int i = 0; i < numberOfItems; i++) {
+					target.getInventory().addItem(getConf().config.getItemStack("Witems." + args[2] + ".Activate"));
+				}
 				target.updateInventory();
-				sender.sendMessage(G + "Gave the witem " + Y + args[1] + G + " to " + Y + args[2]);
+
+				sender.sendMessage(G + "Gave " + numberOfItems + " witem(s) with the name " + Y + args[2] + G + " to " + Y + args[1]);
 			}
 			return true;
 		}
@@ -123,9 +150,9 @@ public class WITEMCommand extends BasePluginCommand {
 					p.getInventory().setItem(p.getInventory().getHeldItemSlot(), null);
 					p.updateInventory();
 					p.sendMessage(G + "Successfully created a witem named " + Y + args[1]);
-					if(plugin.serverHasFactions()){
+					if (plugin.serverHasFactions()) {
 						p.sendMessage(G + "Next step: add a command using " + Y + "/witem addcommand " + args[1] + " <command>");
-					}else {
+					} else {
 						p.sendMessage(G + "Next step: select a region using " + Y + "/rq wand" + G + " and " + Y + "/witem setregion " + args[1]);
 					}
 				}
@@ -143,7 +170,7 @@ public class WITEMCommand extends BasePluginCommand {
 				getConf().save();
 				p.sendMessage(G + "Successfully set the region for " + Y + args[1]);
 
-				if(plugin.serverHasFactions()){
+				if (plugin.serverHasFactions()) {
 					p.sendMessage(G + "Please be aware that Witems will use the warzone instead of region if Factions is installed.");
 				}
 
@@ -166,7 +193,7 @@ public class WITEMCommand extends BasePluginCommand {
 		sender.sendMessage(BEG + "/witem addcommand <name> <command> " + SEP + "Adds a command.");
 		sender.sendMessage(BEG + "/witem listcommands <name> " + SEP + "Lists all commands.");
 		sender.sendMessage(BEG + "/witem delcommand <name> <command> " + SEP + "Deletes a command.");
-		sender.sendMessage(BEG + "/witem give <name> <player> " + SEP + "Gives a player a witem.");
+		sender.sendMessage(BEG + "/witem give <player> <name> <amount>" + SEP + "Gives a player a witem.");
 		sender.sendMessage(BEG + "/witem list " + SEP + "Lists all witems.");
 	}
 }
