@@ -31,27 +31,62 @@ public class FLARECommand extends BasePluginCommand {
 			return true;
 		} else if (args.length < 3) {
 		} else if (args[0].equalsIgnoreCase("give")) {
-			if (!getConf().config.contains("Flares." + args[1])) {
-				sender.sendMessage(DR + "There is no flare of the name " + R + args[1]);
+//			if (!getConf().config.contains("Flares." + args[1])) {
+//				sender.sendMessage(DR + "There is no flare of the name " + R + args[1]);
+//				return true;
+//			}
+//
+//			Player target = Bukkit.getPlayer(args[2]);
+//			if (target == null) {
+//
+//				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[2]);
+//
+//				if (offlinePlayer != null) {
+//					sender.sendMessage(R + args[2] + DR + " is currently not online, but we will try to give him a flare when he joins.");
+//					plugin.getPlayerData().config.set("players." + offlinePlayer.getUniqueId().toString() + ".flare", args[1]);
+//					plugin.getPlayerData().save();
+//				} else {
+//					sender.sendMessage(DR + "Could not find" + R + args[2]);
+//				}
+//			} else {
+//				target.getInventory().addItem(getConf().config.getItemStack("Flares." + args[1] + ".Activate"));
+//				target.updateInventory();
+//				sender.sendMessage(G + "Gave the flare " + Y + args[1] + G + " to " + Y + args[2]);
+//			}
+//			return true;
+
+
+			if (!getConf().config.contains("Flares." + args[2])) {
+				sender.sendMessage(DR + "There is no flare of the name " + R + args[2]);
 				return true;
 			}
 
-			Player target = Bukkit.getPlayer(args[2]);
+			Player target = Bukkit.getPlayer(args[1]);
 			if (target == null) {
-
-				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[2]);
+				OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(args[1]);
 
 				if (offlinePlayer != null) {
-					sender.sendMessage(R + args[2] + DR + " is currently not online, but we will try to give him a flare when he joins.");
-					plugin.getPlayerData().config.set("players." + offlinePlayer.getUniqueId().toString() + ".flare", args[1]);
+					sender.sendMessage(R + args[1] + DR + " is currently not online, but we will try to give him a flare when he joins.");
+					plugin.getPlayerData().config.set("players." + offlinePlayer.getUniqueId().toString() + ".flare", args[2]);
 					plugin.getPlayerData().save();
 				} else {
-					sender.sendMessage(DR + "Could not find" + R + args[2]);
+					sender.sendMessage(DR + "Could not find" + R + args[1]);
 				}
 			} else {
-				target.getInventory().addItem(getConf().config.getItemStack("Flares." + args[1] + ".Activate"));
+				int numberOfItems = 1;
+				if (args.length > 3) {
+					try {
+						numberOfItems = Integer.parseInt(args[3]);
+					} catch (NumberFormatException e) {
+					}
+				}
+
+				for (int i = 0; i < numberOfItems; i++) {
+					target.getInventory().addItem(getConf().config.getItemStack("Flares." + args[2] + ".Activate"));
+				}
 				target.updateInventory();
-				sender.sendMessage(G + "Gave the flare " + Y + args[1] + G + " to " + Y + args[2]);
+
+				sender.sendMessage(G + "Gave " + numberOfItems + " flare(s) with the name " + Y + args[2] + G + " to " + Y + args[1]);
 			}
 			return true;
 		}
@@ -100,7 +135,7 @@ public class FLARECommand extends BasePluginCommand {
 		sender.sendMessage(BEG + "/flare create <name> " + SEP + "Creates a flare.");
 		sender.sendMessage(BEG + "/flare delete <name> " + SEP + "Deletes a flare.");
 		sender.sendMessage(BEG + "/flare setinventory <name> " + SEP + "Sets the chest inventory.");
-		sender.sendMessage(BEG + "/flare give <name> <player> " + SEP + "Gives a player a flare.");
+		sender.sendMessage(BEG + "/flare give <player> <name> <amount>" + SEP + "Gives a player a flare.");
 		sender.sendMessage(BEG + "/flare list " + SEP + "Lists all flares.");
 	}
 }

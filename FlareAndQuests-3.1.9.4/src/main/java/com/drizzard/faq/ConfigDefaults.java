@@ -42,6 +42,13 @@ public class ConfigDefaults {
 
 		defs.put("rq-player-health", 10);
 
+		// Uncomment these lines for 1.8.9 version
+//		defs.put("sounds.rq-start", Sound.ENDERDRAGON_GROWL.name());
+//		defs.put("sounds.rq-finish", Sound.ORB_PICKUP.name());
+//		defs.put("sounds.flare-use", Sound.BLAZE_BREATH.name());
+//		defs.put("sounds.chest-arrival", Sound.ANVIL_LAND.name());
+//		defs.put("sounds.witem-use", Sound.BLAZE_BREATH.name());
+
 		defs.put("sounds.rq-start", Sound.ENTITY_ENDERDRAGON_GROWL.name());
 		defs.put("sounds.rq-finish", Sound.ENTITY_EXPERIENCE_ORB_PICKUP.name());
 		defs.put("sounds.flare-use", Sound.ENTITY_BLAZE_AMBIENT.name());

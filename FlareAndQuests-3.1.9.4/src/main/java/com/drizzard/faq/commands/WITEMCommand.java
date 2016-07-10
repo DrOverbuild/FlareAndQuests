@@ -176,6 +176,8 @@ public class WITEMCommand extends BasePluginCommand {
 
 				p.sendMessage(G + "Next step: add a command using " + Y + "/witem addcommand " + args[1] + " <command>");
 			}
+		}else{
+			return false;
 		}
 
 		return true;

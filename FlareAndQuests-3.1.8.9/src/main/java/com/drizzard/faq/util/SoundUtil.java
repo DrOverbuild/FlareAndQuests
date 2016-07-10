@@ -43,10 +43,10 @@ public class SoundUtil {
 		}
 	}
 
-	public static void playChestArrivalSound(FlareAndQuests plugin, Player p, Location loc) {
+	public static void playChestArrivalSound(FlareAndQuests plugin, Player p) {
 		Sound sound = getSound(plugin, "chest-arrival");
 		if (sound != null) {
-			p.playSound(loc, sound, 1f, 1f);
+			p.playSound(p.getLocation(), sound, 1f, 1f);
 		}
 	}
 

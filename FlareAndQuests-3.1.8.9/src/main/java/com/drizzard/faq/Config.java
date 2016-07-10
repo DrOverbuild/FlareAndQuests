@@ -93,7 +93,7 @@ public class Config {
 		}
 
 		if (left != null) {
-			message = message.replace("{left}", left);
+			message = message.replace("{time}", left);
 		}
 
 		if (minOnline != null) {
