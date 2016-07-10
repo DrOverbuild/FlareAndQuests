@@ -551,18 +551,24 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	}
 
 	public boolean inside(Location loc, Location one, Location two) {
-		if (one == null || two == null)
-			return false;
 
-		boolean worlds = loc.getWorld().equals(one.getWorld()) && loc.getWorld().equals(two.getWorld());
+		if (serverHasFactions()) {
+			return isWarzone(loc);
+		} else {
+
+			if (one == null || two == null)
+				return false;
+
+			boolean worlds = loc.getWorld().equals(one.getWorld()) && loc.getWorld().equals(two.getWorld());
 		
 		/*boolean x = Math.signum(loc.getX()-one.getX()) == -1 * Math.signum(loc.getX()-two.getX());
 		boolean y = Math.signum(loc.getY()-one.getY()) == -1 * Math.signum(loc.getY()-two.getY());
 		boolean z = Math.signum(loc.getZ()-one.getZ()) == -1 * Math.signum(loc.getZ()-two.getZ());*/
-		boolean x = inside1D(loc.getX(), one.getBlockX(), two.getBlockX());
-		boolean y = inside1D(loc.getY(), one.getBlockY(), two.getBlockY());
-		boolean z = inside1D(loc.getZ(), one.getBlockZ(), two.getBlockZ());
-		return worlds && x && y && z;
+			boolean x = inside1D(loc.getX(), one.getBlockX(), two.getBlockX());
+			boolean y = inside1D(loc.getY(), one.getBlockY(), two.getBlockY());
+			boolean z = inside1D(loc.getZ(), one.getBlockZ(), two.getBlockZ());
+			return worlds && x && y && z;
+		}
 	}
 
 	private boolean inside1D(double a, double b, double c) {
@@ -827,7 +833,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 									ev.getPlayer().sendMessage(message);
 									return;
 								}
-							}else if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Witems." + key + ".First"), (Location) conf.config.get("Witems." + key + ".Second"))) {
+							} else if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Witems." + key + ".First"), (Location) conf.config.get("Witems." + key + ".Second"))) {
 								ev.getPlayer().sendMessage(getTrans().format("Not in Region Message", null, ev.getPlayer()));
 
 								return;
@@ -876,11 +882,13 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Stacked Rank Quests Message", null, ev.getPlayer()));
 							} else if (QIP.containsKey(ev.getPlayer())) {
 								ev.getPlayer().sendMessage(getTrans().format("Already Doing Quest Message", null, ev.getPlayer()));
-							} else if (serverHasFactions() && !isWarzone(ev.getPlayer().getLocation())) {
-								String[] message = getTrans().format("Not in Warzone Message", null, ev.getPlayer());
-								ev.getPlayer().sendMessage(message);
-							} else if (!serverHasFactions() && !inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Quests." + key + ".First"), (Location) conf.config.get("Quests." + key + ".Second"))) {
-								ev.getPlayer().sendMessage(getTrans().format("Not in Region Message", null, ev.getPlayer()));
+							} else if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Quests." + key + ".First"), (Location) conf.config.get("Quests." + key + ".Second"))) {
+								if (serverHasFactions()) {
+									String[] message = getTrans().format("Not in Warzone Message", null, ev.getPlayer());
+									ev.getPlayer().sendMessage(message);
+								} else {
+									ev.getPlayer().sendMessage(getTrans().format("Not in Region Message", null, ev.getPlayer()));
+								}
 
 								//ev.getPlayer().sendMessage(DR+"You must be inside the proper region!");
 							} else if (deathsLeft.containsKey(ev.getPlayer())) {

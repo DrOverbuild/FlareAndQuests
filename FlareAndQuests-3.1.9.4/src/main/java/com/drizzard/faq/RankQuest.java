@@ -111,7 +111,7 @@ public class RankQuest implements Listener {
 					owner.getInventory().addItem(plugin.conf.config.getItemStack("Quests." + name + ".Voucher"));
 					owner.updateInventory();
 
-					FireworkUtil.fireworks(plugin, owner.getLocation());
+					FireworkUtil.fireworks(plugin, owner);
 
 					SoundUtil.playRQFinishSound(plugin, owner);
 

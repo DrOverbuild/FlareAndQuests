@@ -51,6 +51,11 @@ public class WITEMCommand extends BasePluginCommand {
 			return true;
 		} else if (args.length < 3) {
 		} else if (args[0].equalsIgnoreCase("addcommand")) {
+			if(!getConf().config.contains("Witems." + args[1])){
+				sender.sendMessage(DR + "There is no Witem of the name " + R + args[1]);
+				return true;
+			}
+
 			List<String> cmds = getConf().config.getStringList("Witems." + args[1] + ".Commands");
 			if (cmds == null)
 				cmds = new ArrayList<String>();
@@ -64,6 +69,11 @@ public class WITEMCommand extends BasePluginCommand {
 			sender.sendMessage(G + "You're all done setting up the witem " + Y + args[1] + G + "!");
 			return true;
 		} else if (args[0].equalsIgnoreCase("delcommand")) {
+			if(!getConf().config.contains("Witems." + args[1])){
+				sender.sendMessage(DR + "There is no Witem of the name " + R + args[1]);
+				return true;
+			}
+
 			List<String> cmds = getConf().config.getStringList("Witems." + args[1] + ".Commands");
 			if (cmds == null)
 				cmds = new ArrayList<String>();

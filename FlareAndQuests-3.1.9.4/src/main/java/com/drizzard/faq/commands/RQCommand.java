@@ -58,6 +58,7 @@ public class RQCommand extends BasePluginCommand {
 		} else if (args[0].equalsIgnoreCase("give")) {
 			if (!getConf().config.contains("Quests." + args[1])) {
 				sender.sendMessage(DR + "There is no quest of the name " + R + args[1]);
+				return true;
 			}
 
 			Player target = Bukkit.getPlayer(args[2]);
@@ -99,11 +100,7 @@ public class RQCommand extends BasePluginCommand {
 					p.getInventory().setItem(p.getInventory().getHeldItemSlot(), null);
 					p.updateInventory();
 					p.sendMessage(G + "Successfully created a rank quest named " + Y + args[1]);
-					if(plugin.serverHasFactions()){
-						p.sendMessage(G + "Next step: set the duration using " + Y + "/rq settime " + args[1] + " <seconds>");
-					}else {
-						p.sendMessage(G + "Next step: select a region using " + Y + "/rq wand" + G + " and " + Y + "/rq setregion " + args[1]);
-					}
+					p.sendMessage(G + "Next step: select a region using " + Y + "/rq wand" + G + " and " + Y + "/rq setregion " + args[1]);
 				}
 			}
 		} else if (!getConf().config.contains("Quests." + args[1])) {

@@ -9,6 +9,7 @@ import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -69,7 +70,7 @@ public class FireworkUtil {
 		firework.setFireworkMeta(fireworkMeta);
 	}
 
-	public static void fireworks(FlareAndQuests plugin, final Location loc) {
+	public static void fireworks(FlareAndQuests plugin, final Player p) {
 		if (ENABLED) {
 			new BukkitRunnable() {
 				int times = AMOUNT;
@@ -77,7 +78,7 @@ public class FireworkUtil {
 				@Override
 				public void run() {
 					times--;
-					spawnFirework(loc);
+					spawnFirework(p.getLocation());
 
 					if (times <= 0) {
 						this.cancel();
