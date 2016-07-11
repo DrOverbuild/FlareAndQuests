@@ -102,9 +102,9 @@ public class RQCommand extends BasePluginCommand {
 			return false;
 		} else if (args[0].equalsIgnoreCase("create")) {
 			if (playerHasNamedItem(p)) {
-				if (getPlugin().getConf().config.contains("Quests." + args[1]))
+				if (getPlugin().getConf().config.contains("Quests." + args[1])) {
 					p.sendMessage(DR + "There is already a quest named " + R + args[1]);
-				else {
+				} else {
 					getConf().config.set("Quests." + args[1] + ".Activate", p.getItemInHand());
 					getConf().save();
 					//player.getInventory().remove(player.getItemInHand());
@@ -117,9 +117,7 @@ public class RQCommand extends BasePluginCommand {
 		} else if (!getConf().config.contains("Quests." + args[1])) {
 			sender.sendMessage(DR + "There is no quest of the name " + R + args[1]);
 		} else if (args[0].equalsIgnoreCase("setvoucher")) {
-			if (p.getItemInHand() == null)
-				p.sendMessage(DR + "You must hold an item in your hand.");
-			else {
+			if (playerHasNamedItem(p)) {
 				getConf().config.set("Quests." + args[1] + ".Voucher", p.getItemInHand());
 				getConf().save();
 				p.getInventory().remove(p.getItemInHand());
