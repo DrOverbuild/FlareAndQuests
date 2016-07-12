@@ -42,6 +42,7 @@ public class ConfigDefaults {
 
 		defs.put("rq-player-health", 10);
 
+		// Uncomment these lines for 1.8.9 version
 		defs.put("sounds.rq-start", Sound.ENDERDRAGON_GROWL.name());
 		defs.put("sounds.rq-finish", Sound.ORB_PICKUP.name());
 		defs.put("sounds.flare-use", Sound.BLAZE_BREATH.name());

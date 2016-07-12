@@ -2,6 +2,7 @@ package com.drizzard.faq.commands;
 
 import com.drizzard.faq.FlareAndQuests;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -123,6 +124,23 @@ public class FLARECommand extends BasePluginCommand {
 			}
 
 			getPlugin().openFlareInventory(p, args[1]);
+		} else if (args[0].equalsIgnoreCase("setregion")) {
+			Location f = plugin.left.get(p);
+			Location s = plugin.right.get(p);
+			if (f == null || s == null)
+				p.sendMessage(DR + "Please select a region first");
+			else {
+				getConf().config.set("Flares." + args[1] + ".First", f);
+				getConf().config.set("Flares." + args[1] + ".Second", s);
+				getConf().save();
+				p.sendMessage(G + "Successfully set the region for " + Y + args[1]);
+
+				if (plugin.serverHasFactions()) {
+					p.sendMessage(G + "Please be aware that Flares will use the warzone instead of region if Factions is installed.");
+				}
+
+				p.sendMessage(G + "Next step: add a command using " + Y + "/witem addcommand " + args[1] + " <command>");
+			}
 		} else {
 			return false;
 		}

@@ -150,11 +150,7 @@ public class WITEMCommand extends BasePluginCommand {
 					p.getInventory().setItem(p.getInventory().getHeldItemSlot(), null);
 					p.updateInventory();
 					p.sendMessage(G + "Successfully created a witem named " + Y + args[1]);
-					if (plugin.serverHasFactions()) {
-						p.sendMessage(G + "Next step: add a command using " + Y + "/witem addcommand " + args[1] + " <command>");
-					} else {
-						p.sendMessage(G + "Next step: select a region using " + Y + "/rq wand" + G + " and " + Y + "/witem setregion " + args[1]);
-					}
+					p.sendMessage(G + "Next step: select a region using " + Y + "/rq wand" + G + " and " + Y + "/witem setregion " + args[1]);
 				}
 			}
 		} else if (!getConf().config.contains("Witems." + args[1])) {

@@ -24,6 +24,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.io.BukkitObjectOutputStream;
 
 import java.sql.Time;
 import java.util.ArrayList;
@@ -88,7 +89,6 @@ public class RankQuest implements Listener {
 				String snip = IM.getDisplayName().substring(0, IM.getDisplayName().indexOf("(") + 1);
 				IM.setDisplayName(snip + ChatColor.YELLOW + timeLeft + ChatColor.GRAY + ")");
 				is.setItemMeta(IM);
-				owner.updateInventory();
 
 				if (owner.getInventory().getHeldItemSlot() != slot)
 					ActionBar.sendActionBar(owner, ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("Action Bar Message")).replace("{left}", timeLeft + ""));
