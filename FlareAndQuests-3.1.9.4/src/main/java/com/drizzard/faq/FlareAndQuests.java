@@ -801,8 +801,14 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 								return;
 							}
 
-							if (!isWarzone(ev.getPlayer().getLocation())) {
-								ev.getPlayer().sendMessage(getTrans().format("Not in Warzone Message", null, ev.getPlayer()));
+							if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Flares." + key + ".First"), (Location) conf.config.get("Flares." + key + ".Second"))) {
+								if (serverHasFactions()) {
+									String[] message = getTrans().format("Not in Warzone Message", ev.getPlayer().getLocation(), ev.getPlayer());
+									ev.getPlayer().sendMessage(message);
+								} else {
+									ev.getPlayer().sendMessage(getTrans().format("Not in Region Message", null, ev.getPlayer()));
+								}
+								return;
 							} else
 								Flare.activateFlare(ev.getItem(), ev.getPlayer(), this, key);
 							return;
@@ -827,14 +833,13 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							}
 
 
-							if (serverHasFactions()) {
-								if (!isWarzone(ev.getPlayer().getLocation())) {
+							if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Witems." + key + ".First"), (Location) conf.config.get("Witems." + key + ".Second"))) {
+								if (serverHasFactions()) {
 									String[] message = getTrans().format("Not in Warzone Message", ev.getPlayer().getLocation(), ev.getPlayer());
 									ev.getPlayer().sendMessage(message);
-									return;
+								} else {
+									ev.getPlayer().sendMessage(getTrans().format("Not in Region Message", null, ev.getPlayer()));
 								}
-							} else if (!inside(ev.getPlayer().getLocation(), (Location) conf.config.get("Witems." + key + ".First"), (Location) conf.config.get("Witems." + key + ".Second"))) {
-								ev.getPlayer().sendMessage(getTrans().format("Not in Region Message", null, ev.getPlayer()));
 
 								return;
 

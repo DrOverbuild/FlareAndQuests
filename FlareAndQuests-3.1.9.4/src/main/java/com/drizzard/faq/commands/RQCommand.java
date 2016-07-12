@@ -141,6 +141,11 @@ public class RQCommand extends BasePluginCommand {
 				getConf().config.set("Quests." + args[1] + ".Second", s);
 				getConf().save();
 				p.sendMessage(G + "Successfully set the region for " + Y + args[1]);
+
+				if (plugin.serverHasFactions()) {
+					p.sendMessage(G + "Please be aware that Rank Quests will use the warzone instead of region if Factions is installed.");
+				}
+
 				//38.47
 				p.sendMessage(G + "Next step: set the duration using " + Y + "/rq settime " + args[1] + " <seconds>");
 			}
