@@ -782,6 +782,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 				ev.getPlayer().sendMessage(G + "Set second position to " + Y + loc.getBlockX() + G + ", " + Y + loc.getBlockY() + G + ", " + Y + loc.getBlockZ() + G + " in " + Y + loc.getWorld().getName());
 			}
 		} else {
+			if(ev.getAction().equals(Action.LEFT_CLICK_AIR) || ev.getAction().equals(Action.LEFT_CLICK_BLOCK)){
+				return;
+			}
+
 			if (ev.getItem() != null) {
 				conf.load();
 				if (conf.config.contains("Flares")) {

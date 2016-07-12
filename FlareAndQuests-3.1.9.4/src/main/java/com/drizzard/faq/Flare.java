@@ -185,14 +185,13 @@ public class Flare {
 				@Override
 				public void run() {
 					ActionBar.sendActionBar(player, message2.replace("{time}", secondsLeft + ""));
-					secondsLeft--;
-
 					if (secondsLeft <= 0) {
-						ActionBar.sendActionBar(player, "");
 						plugin.playerFlares.remove(player);
 						new Flare(is, player, plugin, name);
 						this.cancel();
+						return;
 					}
+					secondsLeft--;
 				}
 			}.runTaskTimer(plugin, 0, 20);
 		}
