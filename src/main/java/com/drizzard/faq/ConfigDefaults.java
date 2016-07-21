@@ -1,6 +1,6 @@
 package com.drizzard.faq;
 
-import org.bukkit.Sound;
+import com.drizzard.faq.util.Sounds;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,18 +42,28 @@ public class ConfigDefaults {
 
         defs.put("rq-player-health", 10);
 
+        //This is the old sound system
+        /*
         // Uncomment these lines for 1.8.9 version
-//		defs.put("sounds.rq-start", Sound.ENDERDRAGON_GROWL.name());
-//		defs.put("sounds.rq-finish", Sound.ORB_PICKUP.name());
-//		defs.put("sounds.flare-use", Sound.BLAZE_BREATH.name());
-//		defs.put("sounds.chest-arrival", Sound.ANVIL_LAND.name());
-//		defs.put("sounds.witem-use", Sound.BLAZE_BREATH.name());
+		defs.put("sounds.rq-start", Sound.ENDERDRAGON_GROWL.name());
+		defs.put("sounds.rq-finish", Sound.ORB_PICKUP.name());
+		defs.put("sounds.flare-use", Sound.BLAZE_BREATH.name());
+		defs.put("sounds.chest-arrival", Sound.ANVIL_LAND.name());
+		defs.put("sounds.witem-use", Sound.BLAZE_BREATH.name());
 
-        defs.put("sounds.rq-start", Sound.ENTITY_ENDERDRAGON_GROWL.name());
+        defs.put("sounds.rq-start", Sounds.ENTITY_ENDERDRAGON_GROWL.name());
         defs.put("sounds.rq-finish", Sound.ENTITY_EXPERIENCE_ORB_PICKUP.name());
         defs.put("sounds.flare-use", Sound.ENTITY_BLAZE_AMBIENT.name());
         defs.put("sounds.chest-arrival", Sound.BLOCK_ANVIL_HIT.name());
         defs.put("sounds.witem-use", Sound.ENTITY_BLAZE_AMBIENT.name());
+        */
+
+        //New sound system
+        defs.put("sounds.rq-start", Sounds.ENDERDRAGON_GROWL.name());
+        defs.put("sounds.rq-finish", Sounds.ORB_PICKUP.name());
+        defs.put("sounds.flare-use", Sounds.BLAZE_BREATH.name());
+        defs.put("sounds.chest-arrival", Sounds.ANVIL_LAND.name());
+        defs.put("sounds.witem-use", Sounds.BLAZE_BREATH.name());
 
         defs.put("rq-timed-actions", timedActions);
 
