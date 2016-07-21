@@ -12,7 +12,6 @@ import com.drizzard.faq.util.SoundUtil;
 import com.massivecraft.factions.Board;
 import com.massivecraft.factions.FLocation;
 import com.massivecraft.factions.Faction;
-import javafx.util.Pair;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -64,7 +63,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
     HashMap<Player, String> playerFlares = new HashMap<>();
     HashMap<Block, BukkitTask> partTimers = new HashMap<>();
     HashMap<Player, Integer> deathsLeft = new HashMap<>();
-    HashMap<Inventory, Pair<ItemStack, String>> anvils = new HashMap<>();
+    HashMap<Inventory, Group<ItemStack, String>> anvils = new HashMap<>();
 
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(this, this);
@@ -321,7 +320,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
                         AnvilSender.send(ev.getWhoClicked(), "Set Chance", tag);
 
-                        anvils.put(ev.getWhoClicked().getOpenInventory().getTopInventory(), new Pair<>(targetClone, name));
+                        anvils.put(ev.getWhoClicked().getOpenInventory().getTopInventory(), new Group<>(targetClone, name));
                     }
                 }.runTaskLater(this, 1);
             }
@@ -329,14 +328,14 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
             ItemStack clicked = ev.getCurrentItem();
             if (clicked == null || ev.getRawSlot() > 3)
                 return;
-            Pair<ItemStack, String> g = anvils.remove(ev.getInventory());
+            Group<ItemStack, String> g = anvils.remove(ev.getInventory());
             if (g == null)
                 return;
 
             ev.setCancelled(true);
 
-            ItemStack target = g.getKey();
-            String name = g.getValue();
+            ItemStack target = g.a;
+            String name = g.b;
 
             ItemMeta im = target.getItemMeta();
             List<String> lore = im.getLore();
@@ -552,5 +551,25 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
         ev.getPlayer().setMaxHealth(20d);
     }
+}
 
+class Group<K, V> {
+    public K a;
+    public V b;
+
+    public Group(K a, V b) {
+        this.a = a;
+        this.b = b;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        Group ot = ((Group) other);
+        return (a.equals(ot.a) && b.equals(ot.b)) || (a.equals(ot.b) && b.equals(ot.a));
+    }
+
+    @Override
+    public int hashCode() {
+        return 0;
+    }
 }
