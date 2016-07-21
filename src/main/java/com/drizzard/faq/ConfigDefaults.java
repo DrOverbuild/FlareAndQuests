@@ -67,6 +67,9 @@ public class ConfigDefaults {
 
         defs.put("rq-timed-actions", timedActions);
 
+        //always use regions
+        defs.put("always-use-regions", false);
+
         return new Config(plugin, defs, "config");
     }
 
