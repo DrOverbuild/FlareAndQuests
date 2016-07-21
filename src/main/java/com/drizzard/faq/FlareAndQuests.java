@@ -212,7 +212,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
     }
 
     public boolean serverHasFactions() {
-        return getServer().getPluginManager().getPlugin("Factions") != null && conf.config.getBoolean("always-use-regions", false);
+        return getServer().getPluginManager().getPlugin("Factions") != null && !conf.config.getBoolean("always-use-regions", false);
     }
 
     public boolean playerIsActive(Player p) {
