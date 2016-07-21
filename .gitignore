@@ -58,7 +58,7 @@ local.properties
 # User-specific stuff:
 .idea/
 *.iml
-lib/
+# lib/
 
 ## File-based project format:
 *.iws
