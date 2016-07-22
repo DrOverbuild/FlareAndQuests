@@ -367,7 +367,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
                 t.cancel();
         }
 
-        if (disp.equals("Rank Quest Region Selector")) {
+        if (disp.equals("FAQ Region Selector")) {
             ev.setCancelled(true);
             if (ev.getAction() == Action.LEFT_CLICK_BLOCK) {
                 Location loc = ev.getClickedBlock().getLocation();

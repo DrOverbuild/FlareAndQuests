@@ -1,11 +1,11 @@
 package com.drizzard.faq.commands;
 
 import com.drizzard.faq.FlareAndQuests;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.OfflinePlayer;
+import com.drizzard.faq.util.ItemStacks;
+import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * Created by jasper on 6/28/16.
@@ -74,8 +74,12 @@ public class FLARECommand extends BasePluginCommand {
             sender.sendMessage("You must be a player!");
             return true;
         }
+        if (args[0].equalsIgnoreCase("wand")) {
+            ItemStack i = ItemStacks.generateStack(Material.IRON_AXE, ChatColor.AQUA + "" + ChatColor.BOLD + "FAQ Region Selector");
 
-        if (args.length < 2) {
+            p.getInventory().addItem(i);
+            p.updateInventory();
+        } else if (args.length < 2) { // Handling too few arguments.
             return false;
         } else if (args[0].equalsIgnoreCase("create")) {
             if (playerHasNamedItem(p)) {
@@ -88,7 +92,7 @@ public class FLARECommand extends BasePluginCommand {
                     p.getInventory().setItem(p.getInventory().getHeldItemSlot(), null);
                     p.updateInventory();
                     p.sendMessage(G + "Successfully created a flare named " + Y + args[1]);
-                    p.sendMessage(G + "Next step: set the items using " + Y + "/flare setinventory " + args[1]);
+                    p.sendMessage(G + "Next step: select a region using " + Y + "/flare wand" + G + " and " + Y + "/flare setregion " + args[1]);
                 }
             }
         } else if (args[0].equalsIgnoreCase("setinventory")) {
@@ -112,7 +116,7 @@ public class FLARECommand extends BasePluginCommand {
                     p.sendMessage(G + "Please be aware that Flares will use the warzone instead of region if Factions is installed.");
                 }
 
-                p.sendMessage(G + "Next step: add a command using " + Y + "/witem addcommand " + args[1] + " <command>");
+                p.sendMessage(G + "Next step: set the items using " + Y + "/flare setinventory " + args[1]);
             }
         } else {
             return false;
@@ -125,6 +129,10 @@ public class FLARECommand extends BasePluginCommand {
     public void sendHelp(CommandSender sender) {
         sender.sendMessage(BEG + "/flare create <name> " + SEP + "Creates a flare.");
         sender.sendMessage(BEG + "/flare delete <name> " + SEP + "Deletes a flare.");
+        if (!plugin.serverHasFactions()) {
+            sender.sendMessage(BEG + "/flare wand " + SEP + "Gives you a selection wand.");
+            sender.sendMessage(BEG + "/flare setregion <name> " + SEP + "Sets the region to your selection.");
+        }
         sender.sendMessage(BEG + "/flare setinventory <name> " + SEP + "Sets the chest inventory.");
         sender.sendMessage(BEG + "/flare give <player> <name> <amount>" + SEP + "Gives a player a flare.");
         sender.sendMessage(BEG + "/flare list " + SEP + "Lists all flares.");

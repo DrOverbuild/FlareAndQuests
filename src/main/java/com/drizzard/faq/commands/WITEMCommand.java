@@ -1,11 +1,14 @@
 package com.drizzard.faq.commands;
 
 import com.drizzard.faq.FlareAndQuests;
+import com.drizzard.faq.util.ItemStacks;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -123,7 +126,12 @@ public class WITEMCommand extends BasePluginCommand {
             sender.sendMessage("You must be a player!");
             return true;
         }
-        if (args.length < 2) {
+        if (args[0].equalsIgnoreCase("wand")) {
+            ItemStack i = ItemStacks.generateStack(Material.IRON_AXE, ChatColor.AQUA + "" + ChatColor.BOLD + "FAQ Region Selector");
+
+            p.getInventory().addItem(i);
+            p.updateInventory();
+        } else if (args.length < 2) { // Handling too few arguments.
             return false;
         } else if (args[0].equalsIgnoreCase("create")) {
             if (playerHasNamedItem(p)) {
@@ -136,7 +144,7 @@ public class WITEMCommand extends BasePluginCommand {
                     p.getInventory().setItem(p.getInventory().getHeldItemSlot(), null);
                     p.updateInventory();
                     p.sendMessage(G + "Successfully created a witem named " + Y + args[1]);
-                    p.sendMessage(G + "Next step: select a region using " + Y + "/rq wand" + G + " and " + Y + "/witem setregion " + args[1]);
+                    p.sendMessage(G + "Next step: select a region using " + Y + "/witem wand" + G + " and " + Y + "/witem setregion " + args[1]);
                 }
             }
         } else if (!getConf().config.contains("Witems." + args[1])) {
@@ -169,11 +177,10 @@ public class WITEMCommand extends BasePluginCommand {
     public void sendHelp(CommandSender sender) {
         sender.sendMessage(BEG + "/witem create <name> " + SEP + "Creates a witem.");
         sender.sendMessage(BEG + "/witem delete <name> " + SEP + "Deletes a witem.");
-
         if (!plugin.serverHasFactions()) {
+            sender.sendMessage(BEG + "/witem wand " + SEP + "Gives you a selection wand.");
             sender.sendMessage(BEG + "/witem setregion <name> " + SEP + "Sets the region to your selection.");
         }
-
         sender.sendMessage(BEG + "/witem addcommand <name> <command> " + SEP + "Adds a command.");
         sender.sendMessage(BEG + "/witem listcommands <name> " + SEP + "Lists all commands.");
         sender.sendMessage(BEG + "/witem delcommand <name> <command> " + SEP + "Deletes a command.");

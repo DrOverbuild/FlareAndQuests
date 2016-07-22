@@ -94,7 +94,7 @@ public class RQCommand extends BasePluginCommand {
         // Commands that must be executed by player
 
         if (args[0].equalsIgnoreCase("wand")) {
-            ItemStack i = ItemStacks.generateStack(Material.IRON_AXE, ChatColor.AQUA + "" + ChatColor.BOLD + "Rank Quest Region Selector");
+            ItemStack i = ItemStacks.generateStack(Material.IRON_AXE, ChatColor.AQUA + "" + ChatColor.BOLD + "FAQ Region Selector");
 
             p.getInventory().addItem(i);
             p.updateInventory();
@@ -196,8 +196,10 @@ public class RQCommand extends BasePluginCommand {
     public void sendHelp(CommandSender sender) {
         sender.sendMessage(BEG + "/rq create <name> " + SEP + "Creates a rank quest.");
         sender.sendMessage(BEG + "/rq delete <name> " + SEP + "Deletes a rank quest.");
-        sender.sendMessage(BEG + "/rq wand " + SEP + "Gives you a selection wand.");
-        sender.sendMessage(BEG + "/rq setregion <name> " + SEP + "Sets the region to your selection.");
+        if (!plugin.serverHasFactions()) {
+            sender.sendMessage(BEG + "/rq wand " + SEP + "Gives you a selection wand.");
+            sender.sendMessage(BEG + "/rq setregion <name> " + SEP + "Sets the region to your selection.");
+        }
         sender.sendMessage(BEG + "/rq setvoucher <name> " + SEP + "Sets the voucher.");
         sender.sendMessage(BEG + "/rq settime <name> <seconds> " + SEP + "Sets the duration.");
         sender.sendMessage(BEG + "/rq setvitems <name> " + SEP + "Sets the reward items.");
