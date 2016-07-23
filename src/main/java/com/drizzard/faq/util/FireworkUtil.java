@@ -72,7 +72,6 @@ public class FireworkUtil {
             new BukkitRunnable() {
                 int times = AMOUNT;
 
-                @Override
                 public void run() {
                     times--;
                     spawnFirework(p.getLocation());

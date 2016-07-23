@@ -25,10 +25,9 @@ public abstract class BasePluginCommand implements CommandExecutor {
         this.plugin = plugin;
     }
 
-    @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-        if (!sender.hasPermission("faq." + command.getName().toLowerCase())) {
-            sender.sendMessage(R + "You need the permission 'faq." + command.getName().toLowerCase() + "'.");
+        if (!sender.hasPermission("faq." + command.getName().toLowerCase()) && !sender.hasPermission("faq.*")) {
+            sender.sendMessage(DR + "You need the permission "+R+"faq." + command.getName().toLowerCase() + DR+ " or "+R+" faq.* "+DR+".");
             return true;
         }
 
@@ -40,7 +39,7 @@ public abstract class BasePluginCommand implements CommandExecutor {
         getConf().load();
 
         if (!executeCommand(sender, args)) {
-            sender.sendMessage(DR + "Invalid syntax or missing arguments. Type /" + command.getName() + " to view help.");
+            sender.sendMessage(DR + "Invalid syntax or missing arguments. Type "+R+"/" + command.getName() + DR + " to view help.");
         }
 
         return true;

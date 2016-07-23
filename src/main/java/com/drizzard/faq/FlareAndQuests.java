@@ -54,16 +54,16 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
     public static final String Y = ChatColor.YELLOW + "";
     public static String CBPATH;
     public static String NMSPATH;
-    public HashMap<Player, Location> left = new HashMap<>();
-    public HashMap<Player, Location> right = new HashMap<>();
+    public HashMap<Player, Location> left = new HashMap<Player, Location>();
+    public HashMap<Player, Location> right = new HashMap<Player, Location>();
     Config conf;
     Config trans;
     Config playerData;
-    HashMap<Player, RankQuest> QIP = new HashMap<>();
-    HashMap<Player, String> playerFlares = new HashMap<>();
-    HashMap<Block, BukkitTask> partTimers = new HashMap<>();
-    HashMap<Player, Integer> deathsLeft = new HashMap<>();
-    HashMap<Inventory, Group<ItemStack, String>> anvils = new HashMap<>();
+    HashMap<Player, RankQuest> QIP = new HashMap<Player, RankQuest>();
+    HashMap<Player, String> playerFlares = new HashMap<Player, String>();
+    HashMap<Block, BukkitTask> partTimers = new HashMap<Block, BukkitTask>();
+    HashMap<Player, Integer> deathsLeft = new HashMap<Player, Integer>();
+    HashMap<Inventory, Group<ItemStack, String>> anvils = new HashMap<Inventory, Group<ItemStack, String>>();
 
     public void onEnable() {
         this.getServer().getPluginManager().registerEvents(this, this);
@@ -320,7 +320,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
                         AnvilSender.send(ev.getWhoClicked(), "Set Chance", tag);
 
-                        anvils.put(ev.getWhoClicked().getOpenInventory().getTopInventory(), new Group<>(targetClone, name));
+                        anvils.put(ev.getWhoClicked().getOpenInventory().getTopInventory(), new Group<ItemStack, String>(targetClone, name));
                     }
                 }.runTaskLater(this, 1);
             }
@@ -351,7 +351,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
             conf.config.set("Flares." + name + ".Contents", items);
             conf.save();
 
-            ev.getInventory().setContents(new ItemStack[3]);
+            ev.getInventory().setContents(new ItemStack[2]);
 
             openFlareInventory((Player) ev.getWhoClicked(), name);
         }

@@ -28,7 +28,7 @@ import java.util.List;
 
 public class RankQuest implements Listener {
 
-    public static List<TimedAction> timedActions = new ArrayList<>();
+    public static List<TimedAction> timedActions = new ArrayList<TimedAction>();
     Item im;
     Player owner;
     int timeLeft;

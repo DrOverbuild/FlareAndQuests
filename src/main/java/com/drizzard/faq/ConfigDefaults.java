@@ -24,12 +24,13 @@ public class ConfigDefaults {
         defs.put("Minimum Flare Contents", 2);
         defs.put("Maximum Flare Contents", 6);
         defs.put("Flare Arrival Delay", 0);
+        defs.put("Flare Chest Particle ID", 24);
 
         defs.put("minimum-players.rq", 2);
         defs.put("minimum-players.flare", 2);
         defs.put("minimum-players.witem", 2);
 
-        List<String> timedActions = new ArrayList<>();
+        List<String> timedActions = new ArrayList<String>();
         timedActions.add("time:20 broadcast:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
         timedActions.add("time:10 broadcast:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
         timedActions.add("time:5 msg:{player} &eYou are almost done!");

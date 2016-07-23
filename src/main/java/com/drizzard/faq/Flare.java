@@ -108,7 +108,7 @@ public class Flare {
 
                         plugin.partTimers.put(b, new BukkitRunnable() {
                             public void run() {
-                                plugin.spawnParticle(24, b.getLocation().clone().add(0.5, 0.5, 0.5), 1, 1, 1, 5, b.getWorld().getEntitiesByClass(Player.class));
+                                plugin.spawnParticle(plugin.conf.config.getInt("Flare Chest Particle ID"), b.getLocation().clone().add(0.5, 0.5, 0.5), 1, 1, 1, 5, b.getWorld().getEntitiesByClass(Player.class));
                             }
                         }.runTaskTimer(plugin, 0, 1));
 
@@ -170,7 +170,6 @@ public class Flare {
             new BukkitRunnable() {
                 int secondsLeft = delay;
 
-                @Override
                 public void run() {
                     ActionBar.sendActionBar(player, message2.replace("{time}", secondsLeft + ""));
                     if (secondsLeft <= 0) {

@@ -61,7 +61,7 @@ public class WITEMCommand extends BasePluginCommand {
 
             List<String> cmds = getConf().config.getStringList("Witems." + args[1] + ".Commands");
             if (cmds == null)
-                cmds = new ArrayList<>();
+                cmds = new ArrayList<String>();
             String newCMD = "";
             for (int i = 2; i < args.length; i++)
                 newCMD += (i > 2 ? " " : "") + args[i];
@@ -79,7 +79,7 @@ public class WITEMCommand extends BasePluginCommand {
 
             List<String> cmds = getConf().config.getStringList("Witems." + args[1] + ".Commands");
             if (cmds == null)
-                cmds = new ArrayList<>();
+                cmds = new ArrayList<String>();
             String newCMD = "";
             for (int i = 2; i < args.length; i++)
                 newCMD += (i > 2 ? " " : "") + args[i];
