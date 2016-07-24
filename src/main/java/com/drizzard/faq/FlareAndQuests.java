@@ -259,7 +259,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
             }
         } else if (ev.getInventory() instanceof AnvilInventory && anvils.containsKey(ev.getInventory())) {
             AnvilInventory inv = (AnvilInventory) ev.getInventory();
-            inv.setContents(new ItemStack[3]);
+            inv.setContents(new ItemStack[2]);
             anvils.remove(ev.getInventory());
         }
     }

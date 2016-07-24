@@ -29,7 +29,7 @@ public class WITEMCommand extends BasePluginCommand {
         } else if (args.length < 2) {
         } else if (args[0].equalsIgnoreCase("delete")) {
             if (!getConf().config.contains("Witems." + args[1]))
-                sender.sendMessage(DR + "There is no witem named " + R + args[1]);
+                sender.sendMessage(DR + "There is no witem of the name " + R + args[1]);
             else {
                 getConf().config.set("Witems." + args[1], null);
                 getConf().save();
@@ -38,7 +38,7 @@ public class WITEMCommand extends BasePluginCommand {
             return true;
         } else if (args[0].equalsIgnoreCase("listcommands")) {
             if (!getConf().config.contains("Witems." + args[1]))
-                sender.sendMessage(DR + "Could not find " + R + args[1]);
+                sender.sendMessage(DR + "There is no witem of the name " + R + args[1]);
             else {
                 String msg = "";
                 getConf().load();
@@ -55,7 +55,7 @@ public class WITEMCommand extends BasePluginCommand {
         } else if (args.length < 3) {
         } else if (args[0].equalsIgnoreCase("addcommand")) {
             if (!getConf().config.contains("Witems." + args[1])) {
-                sender.sendMessage(DR + "There is no Witem of the name " + R + args[1]);
+                sender.sendMessage(DR + "There is no witem of the name " + R + args[1]);
                 return true;
             }
 
@@ -73,7 +73,7 @@ public class WITEMCommand extends BasePluginCommand {
             return true;
         } else if (args[0].equalsIgnoreCase("delcommand")) {
             if (!getConf().config.contains("Witems." + args[1])) {
-                sender.sendMessage(DR + "There is no Witem of the name " + R + args[1]);
+                sender.sendMessage(DR + "There is no witem of the name " + R + args[1]);
                 return true;
             }
 

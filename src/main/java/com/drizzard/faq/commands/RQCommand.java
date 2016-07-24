@@ -40,7 +40,7 @@ public class RQCommand extends BasePluginCommand {
             return true;
         } else if (args[0].equalsIgnoreCase("listvcommands")) {
             if (!getConf().config.contains("Quests." + args[1]))
-                sender.sendMessage(DR + "Could not find " + R + args[1]);
+                sender.sendMessage(DR + "There is no quest named " + R + args[1]);
             else {
                 String msg = "";
                 getConf().load();

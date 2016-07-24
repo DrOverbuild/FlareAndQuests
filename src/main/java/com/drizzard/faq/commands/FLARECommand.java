@@ -62,7 +62,7 @@ public class FLARECommand extends BasePluginCommand {
                 }
                 target.updateInventory();
 
-                sender.sendMessage(G + "Gave " + numberOfItems + " flare(s) with the name " + Y + args[2] + G + " to " + Y + args[1]);
+                sender.sendMessage(G + "Gave " + numberOfItems + " flare"+ (numberOfItems == 1 ? "" : "s") +" with the name " + Y + args[2] + G + " to " + Y + args[1]);
             }
             return true;
         }
@@ -96,28 +96,31 @@ public class FLARECommand extends BasePluginCommand {
                 }
             }
         } else if (args[0].equalsIgnoreCase("setinventory")) {
-            if (!getConf().config.contains("Flares." + args[1])) {
+            if (!getConf().config.contains("Flares." + args[1]))
                 sender.sendMessage(DR + "There is no flare of the name " + R + args[1]);
-            }
-
-            getPlugin().openFlareInventory(p, args[1]);
+            else
+            	getPlugin().openFlareInventory(p, args[1]);
         } else if (args[0].equalsIgnoreCase("setregion")) {
-            Location f = plugin.left.get(p);
-            Location s = plugin.right.get(p);
-            if (f == null || s == null)
-                p.sendMessage(DR + "Please select a region first");
-            else {
-                getConf().config.set("Flares." + args[1] + ".First", f);
-                getConf().config.set("Flares." + args[1] + ".Second", s);
-                getConf().save();
-                p.sendMessage(G + "Successfully set the region for " + Y + args[1]);
-
-                if (plugin.serverHasFactions()) {
-                    p.sendMessage(G + "Please be aware that Flares will use the warzone instead of region if Factions is installed.");
-                }
-
-                p.sendMessage(G + "Next step: set the items using " + Y + "/flare setinventory " + args[1]);
-            }
+        	if (!getConf().config.contains("Flares." + args[1]))
+                sender.sendMessage(DR + "There is no flare of the name " + R + args[1]);
+        	else {
+        		Location f = plugin.left.get(p);
+	            Location s = plugin.right.get(p);
+	            if (f == null || s == null)
+	                p.sendMessage(DR + "Please select a region first");
+	            else {
+	                getConf().config.set("Flares." + args[1] + ".First", f);
+	                getConf().config.set("Flares." + args[1] + ".Second", s);
+	                getConf().save();
+	                p.sendMessage(G + "Successfully set the region for " + Y + args[1]);
+	
+	                if (plugin.serverHasFactions()) {
+	                    p.sendMessage(G + "Please be aware that Flares will use the warzone instead of region if Factions is installed.");
+	                }
+	
+	                p.sendMessage(G + "Next step: set the items using " + Y + "/flare setinventory " + args[1]);
+	            }
+        	}
         } else {
             return false;
         }
