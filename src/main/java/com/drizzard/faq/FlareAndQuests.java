@@ -326,8 +326,15 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
             }
         } else if (ev.getInventory() instanceof AnvilInventory) {
             ItemStack clicked = ev.getCurrentItem();
-            if (clicked == null || ev.getRawSlot() > 3)
+
+            if (clicked == null || ev.getRawSlot() > 3) {
                 return;
+            }
+
+            if(clicked.getType().equals(Material.AIR)){
+                return;
+            }
+
             Group<ItemStack, String> g = anvils.remove(ev.getInventory());
             if (g == null)
                 return;
@@ -339,9 +346,16 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
             ItemMeta im = target.getItemMeta();
             List<String> lore = im.getLore();
-            if (lore == null)
+            if (lore == null) {
                 lore = new ArrayList<String>();
-            lore.add(clicked.getItemMeta().getDisplayName());
+            }
+
+            if (clicked.hasItemMeta() && clicked.getItemMeta().hasDisplayName()) {
+                lore.add(clicked.getItemMeta().getDisplayName());
+            }else{
+                lore.add("100");
+            }
+
             im.setLore(lore);
             target.setItemMeta(im);
 
