@@ -1,5 +1,6 @@
 package com.drizzard.faq;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -94,6 +95,7 @@ public class Config {
     }
 
     public String[] format(String messageKey, Location loc, Player player, String left, String minOnline, String duration, String deaths) {
+        load();
         String message = config.getString(messageKey, "none");
         if (message.equals("none")) {
             return new String[]{};
