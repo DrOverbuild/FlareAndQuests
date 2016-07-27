@@ -12,6 +12,7 @@ import com.drizzard.faq.util.SoundUtil;
 import com.massivecraft.factions.Board;
 import com.massivecraft.factions.FLocation;
 import com.massivecraft.factions.Faction;
+import org.apache.commons.lang.IllegalClassException;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -42,6 +43,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -205,8 +207,32 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 	public boolean isWarzone(Location loc) {
 		if (serverHasFactions()) {
-			Faction f = Board.getInstance().getFactionAt(new FLocation(loc));
-			return f != null && f.isWarZone();
+			try {
+				// Attempt to use MassiveCraft Factions
+
+				// Such reflection
+				// Much wow
+				Class boardColl = Class.forName("com.massivecraft.factions.entity.BoardColl");
+				Class factionColl = Class.forName("com.massivecraft.factions.entity.FactionColl");
+				Class faction = Class.forName("com.massivecraft.factions.entity.Faction");
+				Class pS = Class.forName("com.massivecraft.massivecore.ps.PS");
+				Object boardCollInstance = boardColl.getMethod("get", null).invoke(null, null);
+				Object factionCollInstance = factionColl.getMethod("get", null).invoke(null, null);
+				Object factionInstance = boardColl.getMethod("getFactionAt", pS).invoke(boardCollInstance, pS.getMethod("valueOf", Location.class).invoke(null, loc));
+				Object warzoneFaction = factionColl.getMethod("getWarzone", null).invoke(factionCollInstance, null);
+
+				Method getNameMethod = faction.getMethod("getName", null);
+
+				return factionInstance != null && warzoneFaction != null && getNameMethod.invoke(factionInstance, null).equals(getNameMethod.invoke(warzoneFaction, null));
+
+			} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+				getLogger().info("Error trying to use MassiveCraft Factions");
+				e.printStackTrace();
+				getLogger().info("Attempting to use drtschock Factions");
+				// Attempt to use drtshock Factions
+				Faction f = Board.getInstance().getFactionAt(new FLocation(loc));
+				return f != null && f.isWarZone();
+			}
 		}
 		return true;
 	}

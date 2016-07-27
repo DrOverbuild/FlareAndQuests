@@ -2,6 +2,7 @@ name: FlareAndQuests
 main: com.drizzard.faq.FlareAndQuests
 version: ${project.version}
 author: ShowbizLocket61
+softdepend: [Factions]
 
 commands:
   faq:
