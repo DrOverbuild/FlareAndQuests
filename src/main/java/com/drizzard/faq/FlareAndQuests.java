@@ -226,9 +226,6 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 				return factionInstance != null && warzoneFaction != null && getNameMethod.invoke(factionInstance, null).equals(getNameMethod.invoke(warzoneFaction, null));
 
 			} catch (ClassNotFoundException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-				getLogger().info("Error trying to use MassiveCraft Factions");
-				e.printStackTrace();
-				getLogger().info("Attempting to use drtschock Factions");
 				// Attempt to use drtshock Factions
 				Faction f = Board.getInstance().getFactionAt(new FLocation(loc));
 				return f != null && f.isWarZone();
