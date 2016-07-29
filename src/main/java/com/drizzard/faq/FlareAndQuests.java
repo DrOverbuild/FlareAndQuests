@@ -284,17 +284,27 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			AnvilInventory inv = (AnvilInventory) ev.getInventory();
 			inv.setContents(new ItemStack[2]);
 			anvils.remove(ev.getInventory());
+		} else if (ev.getInventory().getHolder() instanceof Block) {
+			Block b = (Block) ev.getInventory().getHolder();
+			BukkitTask t = partTimers.remove((b).getLocation());
+			if (t != null){
+				t.cancel();
+				for(ItemStack i : ev.getInventory().getContents())
+					if(i != null)
+						return;
+				b.setType(Material.AIR);
+			}
 		}
 	}
 
-	@EventHandler
+	/*@EventHandler
 	public void onOpen(InventoryOpenEvent ev) {
 		if (ev.getInventory().getHolder() instanceof Block) {
 			BukkitTask t = partTimers.remove(((Block) ev.getInventory().getHolder()).getLocation());
 			if (t != null)
 				t.cancel();
 		}
-	}
+	}*/
 
 	@EventHandler
 	public void onInvClick(final InventoryClickEvent ev) {
