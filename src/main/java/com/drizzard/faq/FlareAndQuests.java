@@ -19,6 +19,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -260,20 +261,20 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 	@EventHandler
 	public void onClose(InventoryCloseEvent ev) {
-		String t = ev.getInventory().getTitle();
-		boolean a = t.contains("Set Voucher Items For ");
-		boolean b = t.contains("Set Flare Items For ");
-		if (a || b) {
+		String invTitle = ev.getInventory().getTitle();
+		boolean inventoryIsForVoucherConfig = invTitle.contains("Set Voucher Items For ");
+		boolean inventoryIsForFlareConfig = invTitle.contains("Set Flare Items For ");
+		if (inventoryIsForVoucherConfig || inventoryIsForFlareConfig) {
 			conf.load();
 			List<ItemStack> items = new ArrayList<ItemStack>();
 			for (ItemStack i : ev.getInventory().getContents())
 				if (i != null && i.getType() != Material.AIR)
 					items.add(i);
-			String name = t.substring(t.indexOf("For ") + 4);
-			conf.config.set((a ? "Quests." : "Flares.") + name + (a ? ".Rewards" : ".Contents"), items);
+			String name = invTitle.substring(invTitle.indexOf("For ") + 4);
+			conf.config.set((inventoryIsForVoucherConfig ? "Quests." : "Flares.") + name + (inventoryIsForVoucherConfig ? ".Rewards" : ".Contents"), items);
 			conf.save();
 
-			if (a) {
+			if (inventoryIsForVoucherConfig) {
 				ev.getPlayer().sendMessage(G + "Successfully set the reward items for " + Y + name);
 				ev.getPlayer().sendMessage(G + "Next step: add reward commands using " + Y + "/rq addvcommand " + name + " <message>");
 			} else {
@@ -284,15 +285,22 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 			AnvilInventory inv = (AnvilInventory) ev.getInventory();
 			inv.setContents(new ItemStack[2]);
 			anvils.remove(ev.getInventory());
-		} else if (ev.getInventory().getHolder() instanceof Block) {
-			Block b = (Block) ev.getInventory().getHolder();
-			BukkitTask t = partTimers.remove((b).getLocation());
-			if (t != null){
-				t.cancel();
-				for(ItemStack i : ev.getInventory().getContents())
-					if(i != null)
-						return;
-				b.setType(Material.AIR);
+		} else if (ev.getInventory().getHolder() instanceof Chest) {
+			boolean inventoryIsEmpty = true;
+			for(ItemStack i : ev.getInventory().getContents()) {
+				if (i != null && !i.getType().equals(Material.AIR)) {
+					inventoryIsEmpty = false;
+					break;
+				}
+			}
+
+			if(inventoryIsEmpty) {
+				Chest chest = (Chest) ev.getInventory().getHolder();
+				BukkitTask task = partTimers.remove(chest.getBlock());
+				if (task != null) {
+					task.cancel();
+					chest.getBlock().setType(Material.AIR);
+				}
 			}
 		}
 	}
@@ -408,11 +416,11 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	public void onClick(PlayerInteractEvent ev) {
 		String disp = ItemStacks.getDisplayName(ev.getItem());
 
-		if (ev.getClickedBlock() != null) {
+		/*if (ev.getClickedBlock() != null) {
 			BukkitTask t = partTimers.remove(ev.getClickedBlock());
 			if (t != null)
 				t.cancel();
-		}
+		}*/
 
 		if (disp.equals("FAQ Region Selector")) {
 			ev.setCancelled(true);
