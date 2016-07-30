@@ -82,7 +82,7 @@ public class ConfigDefaults {
         defsT.put("RQ Lost Broadcast", "&e{player} &7has lost their rank quest!  ({x}, {y}, {z})");
         defsT.put("RQ Reset Broadcast", "&e{player} &7has reset their rank quest!  ({x}, {y}, {z})");
         defsT.put("RQ Quit Broadcast", "&e{player} &7left, so their rank quest was reset!  ({x}, {y}, {z})");
-        defsT.put("Action Bar Message", "&b&lRank Quest: &e{time} &7seconds");
+        defsT.put("Action Bar Message", "&b&lRank Quest: &e{left} &7seconds");
 
         defsT.put("Not in Warzone Message", "&4You must be in a Warzone!");
         defsT.put("Already Doing Quest Message", "&4You are already doing a rank quest!");

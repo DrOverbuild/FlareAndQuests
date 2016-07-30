@@ -13,7 +13,13 @@ public class FAQCommand extends BasePluginCommand {
 
     @Override
     public boolean executeCommand(CommandSender sender, String[] args) {
-        sendHelp(sender);
+    	if(args.length > 0 && args[0].equalsIgnoreCase("reload")){
+    		this.plugin.getConf().load();
+    		this.plugin.getTrans().load();
+    		sender.sendMessage(G+"Successfully reloaded "+Y+"config.yml "+G+"and "+Y+"translations.yml");
+    	}	
+    	else
+    		sendHelp(sender);
         return true;
     }
 

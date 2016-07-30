@@ -9,12 +9,14 @@ import org.bukkit.inventory.ItemStack;
  */
 public class AnvilSender {
     public static void send(HumanEntity entity, String name, ItemStack item) {
-        if (NMSHelper.getNMSVersion().equals("v1_8_R3")) {
-            com.drizzard.faq.nms.anvil.v1_8_R3.AnvilContainer container = new com.drizzard.faq.nms.anvil.v1_8_R3.AnvilContainer(entity);
-            container.send(entity, name, item);
-        } else if (NMSHelper.getNMSVersion().equals("v1_9_R2")) {
-            com.drizzard.faq.nms.anvil.v1_9_R2.AnvilContainer container = new com.drizzard.faq.nms.anvil.v1_9_R2.AnvilContainer(entity);
-            container.send(entity, name, item);
-        } else throw new IllegalStateException("This version is not supported, version: " + NMSHelper.getNMSVersion());
+    	if (NMSHelper.getNMSVersion().equals("v1_7_R4"))
+            new com.drizzard.faq.nms.anvil.v1_7_R4.AnvilContainer(entity).send(entity, name, item);
+    	else if (NMSHelper.getNMSVersion().equals("v1_8_R3"))
+            new com.drizzard.faq.nms.anvil.v1_8_R3.AnvilContainer(entity).send(entity, name, item);
+        else if (NMSHelper.getNMSVersion().equals("v1_9_R2"))
+            new com.drizzard.faq.nms.anvil.v1_9_R2.AnvilContainer(entity).send(entity, name, item);
+        else if (NMSHelper.getNMSVersion().equals("v1_10_R1"))
+            new com.drizzard.faq.nms.anvil.v1_10_R1.AnvilContainer(entity).send(entity, name, item);
+        else throw new IllegalStateException("This version is not supported, version: " + NMSHelper.getNMSVersion());
     }
 }
