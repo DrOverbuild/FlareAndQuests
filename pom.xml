@@ -59,6 +59,13 @@
             <systemPath>${basedir}/lib/spigot18.jar</systemPath>
             <scope>system</scope>
         </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-1_10</artifactId>
+            <version>1.0</version>
+            <systemPath>${basedir}/lib/spigot110.jar</systemPath>
+            <scope>system</scope>
+        </dependency>
 
         <!-- Support for multiple forks of Factions -->
         <!-- drtshock Factions -->
