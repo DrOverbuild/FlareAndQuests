@@ -47,13 +47,6 @@
     <dependencies>
         <dependency>
             <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-1_9_R2</artifactId>
-            <version>1.0</version>
-            <systemPath>${basedir}/lib/spigot19.jar</systemPath>
-            <scope>system</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.spigotmc</groupId>
             <artifactId>spigot-1_8_R3</artifactId>
             <version>1.0</version>
             <systemPath>${basedir}/lib/spigot18.jar</systemPath>
@@ -61,9 +54,23 @@
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-1_9_R2</artifactId>
+            <version>1.0</version>
+            <systemPath>${basedir}/lib/spigot19.jar</systemPath>
+            <scope>system</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
             <artifactId>spigot-1_10</artifactId>
             <version>1.0</version>
             <systemPath>${basedir}/lib/spigot110.jar</systemPath>
+            <scope>system</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-1_7_10</artifactId>
+            <version>1.0</version>
+            <systemPath>${basedir}/lib/spigot17.jar</systemPath>
             <scope>system</scope>
         </dependency>
 
@@ -78,9 +85,9 @@
         </dependency>
 
         <!--
-          -  Massive Craft Factions (Not working because we are already depending on drtshock Factions
-          -  and that dependency has the same package name as MassiveCraft's Factions. So I had to use
-          -  reflection instead.)
+           - Massive Craft Factions (Not working because we are already depending on drtshock Factions
+           - and that dependency has the same package name as MassiveCraft's Factions. So I had to use
+           - reflection instead.)
          -->
         <dependency>
             <groupId>com.masssivecraft</groupId>
