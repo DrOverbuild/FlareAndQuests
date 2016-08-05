@@ -221,4 +221,22 @@ public enum Sounds {
             return resolvedSound = Sound.valueOf(pre19sound);
         }
     }
+
+    public String getPre19sound() {
+        return pre19sound;
+    }
+
+    public String getPost19sound() {
+        return post19sound;
+    }
+
+    public static Sounds soundFromPost19Value(String post19sound){
+        for(Sounds sound : Sounds.values()){
+            if(post19sound.equals(sound.getPost19sound())){
+                return sound;
+            }
+        }
+
+        return null;
+    }
 }

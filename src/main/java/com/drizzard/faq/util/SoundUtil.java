@@ -9,12 +9,19 @@ import org.bukkit.entity.Player;
 public class SoundUtil {
     private static Sounds getSound(FlareAndQuests plugin, String configKey) {
         plugin.getConf().load();
-        String name = plugin.getConf().config.getString("sounds." + configKey);
-        try {
-            return Sounds.valueOf(name.replace(".", "_").toUpperCase());
-        } catch (IllegalArgumentException e) {
-            plugin.getLogger().info("Cannot find sound " + name);
-            return null;
+        String name = plugin.getConf().config.getString("sounds." + configKey).replace(".", "_").toUpperCase();
+
+        Sounds sound = Sounds.soundFromPost19Value(name);
+
+        if(sound != null){
+            return sound;
+        }else {
+            try {
+                return Sounds.valueOf(name);
+            } catch (IllegalArgumentException e) {
+                plugin.getLogger().info("Cannot find sound " + name);
+                return null;
+            }
         }
     }
 
