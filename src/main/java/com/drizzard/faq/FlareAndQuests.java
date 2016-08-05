@@ -1,18 +1,11 @@
 package com.drizzard.faq;
 
-import com.drizzard.faq.commands.FAQCommand;
-import com.drizzard.faq.commands.FLARECommand;
-import com.drizzard.faq.commands.RQCommand;
-import com.drizzard.faq.commands.WITEMCommand;
+import com.drizzard.faq.commands.*;
 import com.drizzard.faq.nms.anvil.AnvilSender;
-import com.drizzard.faq.util.ActionBar;
-import com.drizzard.faq.util.FireworkUtil;
-import com.drizzard.faq.util.ItemStacks;
-import com.drizzard.faq.util.SoundUtil;
+import com.drizzard.faq.util.*;
 import com.massivecraft.factions.Board;
 import com.massivecraft.factions.FLocation;
 import com.massivecraft.factions.Faction;
-import org.apache.commons.lang.IllegalClassException;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -29,7 +22,6 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -607,26 +599,5 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		}
 
 		ev.getPlayer().setMaxHealth(20d);
-	}
-}
-
-class Group<K, V> {
-	public K a;
-	public V b;
-
-	public Group(K a, V b) {
-		this.a = a;
-		this.b = b;
-	}
-
-	@Override
-	public boolean equals(Object other) {
-		Group ot = ((Group) other);
-		return (a.equals(ot.a) && b.equals(ot.b)) || (a.equals(ot.b) && b.equals(ot.a));
-	}
-
-	@Override
-	public int hashCode() {
-		return 0;
 	}
 }
