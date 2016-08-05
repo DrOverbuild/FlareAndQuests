@@ -21,3 +21,7 @@ commands:
     description: Main command for Witems
     usage: /<command>
     permission: faq.witem
+  mm:
+    description: Main command for Mystery Mobs
+    usage: /<command>
+    permission: faq.mm

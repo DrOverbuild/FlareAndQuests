@@ -59,4 +59,11 @@ public class SoundUtil {
             p.playSound(p.getLocation(), sound.get(), 1f, 1f);
         }
     }
+
+    public static void playMMUseSound(FlareAndQuests plugin, Player p){
+        Sounds sound = getSound(plugin, "mm-use");
+        if (sound != null) {
+            p.playSound(p.getLocation(), sound.get(), 1f, 1f);
+        }
+    }
 }

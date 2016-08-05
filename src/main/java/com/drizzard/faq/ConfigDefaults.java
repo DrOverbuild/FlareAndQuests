@@ -34,6 +34,7 @@ public class ConfigDefaults {
         timedActions.add("time:20 broadcast:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
         timedActions.add("time:10 broadcast:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
         timedActions.add("time:5 msg:{player} &eYou are almost done!");
+        defs.put("rq-timed-actions", timedActions);
 
         defs.put("fireworks.enabled", true);
         defs.put("fireworks.amount", 20);
@@ -43,32 +44,13 @@ public class ConfigDefaults {
 
         defs.put("rq-player-health", 10);
 
-        //This is the old sound system
-        /*
-        // Uncomment these lines for 1.8.9 version
-		defs.put("sounds.rq-start", Sound.ENDERDRAGON_GROWL.name());
-		defs.put("sounds.rq-finish", Sound.ORB_PICKUP.name());
-		defs.put("sounds.flare-use", Sound.BLAZE_BREATH.name());
-		defs.put("sounds.chest-arrival", Sound.ANVIL_LAND.name());
-		defs.put("sounds.witem-use", Sound.BLAZE_BREATH.name());
-
-        defs.put("sounds.rq-start", Sounds.ENTITY_ENDERDRAGON_GROWL.name());
-        defs.put("sounds.rq-finish", Sound.ENTITY_EXPERIENCE_ORB_PICKUP.name());
-        defs.put("sounds.flare-use", Sound.ENTITY_BLAZE_AMBIENT.name());
-        defs.put("sounds.chest-arrival", Sound.BLOCK_ANVIL_HIT.name());
-        defs.put("sounds.witem-use", Sound.ENTITY_BLAZE_AMBIENT.name());
-        */
-
-        //New sound system
         defs.put("sounds.rq-start", Sounds.ENDERDRAGON_GROWL.name());
         defs.put("sounds.rq-finish", Sounds.ORB_PICKUP.name());
         defs.put("sounds.flare-use", Sounds.BLAZE_BREATH.name());
         defs.put("sounds.chest-arrival", Sounds.ANVIL_LAND.name());
         defs.put("sounds.witem-use", Sounds.BLAZE_BREATH.name());
+        defs.put("sounds.mm-use", Sounds.BLAZE_HIT.name());
 
-        defs.put("rq-timed-actions", timedActions);
-
-        //always use regions
         defs.put("always-use-regions", false);
 
         return new Config(plugin, defs, "config");
@@ -102,6 +84,7 @@ public class ConfigDefaults {
         defsT.put("Cannot Activate Flare While Doing Other Function", "&4You cannot activate a flare while doing another function!");
         defsT.put("Cannot Activate Witem While Doing Other Function", "&4You cannot activate a witem while doing another function!");
         defsT.put("Flare Broadcast", "&e{player} &7has used a flare!");
+        defsT.put("mm-item-use", "Congratulations! You have used a mystery mob item and got a {selectedspawner} spawner!");
 
         return new Config(plugin, defsT, "translations");
     }

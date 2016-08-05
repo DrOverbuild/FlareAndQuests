@@ -64,9 +64,6 @@ public abstract class BasePluginCommand implements CommandExecutor {
     public void list(CommandSender sender, String listWhat) {
         String msg = "";
         getConf().load();
-//		if(a) sec = "Quests";
-//		else if(b) sec = "Flares";
-//		else sec = "Witems";
         if (getConf().config.contains(listWhat)) {
             for (String key : getConf().config.getConfigurationSection(listWhat).getKeys(false)) {
                 msg += (msg.equals("") ? "" : G + ", ") + Y + key;
