@@ -1,6 +1,6 @@
 package com.drizzard.faq;
 
-import org.bukkit.Bukkit;
+import com.drizzard.faq.util.Group;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -34,6 +34,28 @@ public class Config {
             config.options().copyDefaults(true);
             save();
         }
+    }
+
+    public static String formatLine(String message, Location loc, Player player, Group<String, String>... otherVariables){
+        message = ChatColor.translateAlternateColorCodes('&', message);
+
+        if (loc != null) {
+            message = message.replace("{x}", loc.getBlockX() + "");
+            message = message.replace("{y}", loc.getBlockY() + "");
+            message = message.replace("{z}", loc.getBlockZ() + "");
+        }
+
+        if (player != null) {
+            message = message.replace("{player}", player.getName());
+        }
+
+        if(otherVariables != null) {
+            for (Group<String, String> variable : otherVariables) {
+                message = message.replace("{" + variable.a + "}", variable.b);
+            }
+        }
+
+        return message;
     }
 
     public static String formatLine(String message, Location loc, Player player, String left, String minOnline, String duration, String deaths) {
@@ -79,22 +101,25 @@ public class Config {
     }
 
     public String[] format(String messageKey, Location loc, Player player) {
-        return format(messageKey, loc, player, null, null, null, null);
+        return format(messageKey, loc, player, null);
     }
 
     public String[] format(String messageKey, Player player) {
-        return format(messageKey, null, player, null, null, null, null);
+        return format(messageKey, null, player, null);
     }
 
-    public String[] format(String messageKey, String minOnline) {
-        return format(messageKey, null, null, null, minOnline, null, null);
-    }
-
-    public String[] format(String messageKey, Player player, String duration, String deaths) {
-        return format(messageKey, player.getLocation(), player, null, null, duration, deaths);
+    public String[] format(String messageKey, Group<String, String>... otherVariables){
+        return format(messageKey, null, null, otherVariables);
     }
 
     public String[] format(String messageKey, Location loc, Player player, String left, String minOnline, String duration, String deaths) {
+       return format(messageKey, loc, player, new Group<>("time", left),
+                new Group<>("min-online", minOnline),
+                new Group<>("duration", duration),
+                new Group<>("deaths", deaths));
+    }
+
+    public String[] format(String messageKey, Location loc, Player player, Group<String, String>... otherVariables){
         load();
         String message = config.getString(messageKey, "none");
         if (message.equals("none")) {
@@ -104,7 +129,7 @@ public class Config {
         String[] lines = message.split("\\|");
 
         for (int i = 0; i < lines.length; i++) {
-            lines[i] = formatLine(lines[i], loc, player, left, minOnline, duration, deaths);
+            lines[i] = formatLine(lines[i], loc, player, otherVariables);
             if (i > 0) {
                 lines[i] = ChatColor.getLastColors(lines[i - 1]) + lines[i];
             }

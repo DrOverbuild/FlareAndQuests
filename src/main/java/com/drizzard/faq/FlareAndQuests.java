@@ -123,7 +123,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		int dA = conf.config.getInt("Deaths Allowed For Keep-Inv");
 		int dD = conf.config.getInt("Keep-Inv Duration");
 
-		player.sendMessage(getTrans().format("Keep-Inventory Start Message", player, dD + "", dA + ""));
+		player.sendMessage(getTrans().format("Keep-Inventory Start Message", player.getLocation(), player,
+				new Group<>("duration", dD + ""), new Group<>("deaths", dA + "")));
 		//player.sendMessage(G+"You now have "+Y+dD+G+" seconds or "+Y+dA+G+" deaths of keep-inventory.");
 
 		deathsLeft.put(player, dA);
@@ -446,7 +447,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 							int minPlayers = getConf().config.getInt("minimum-players.flare");
 							if (getServer().getOnlinePlayers().size() < minPlayers) {
-								ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", minPlayers + ""));
+								ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", new Group<>("min-online", minPlayers + "")));
 								return;
 							}
 
@@ -473,7 +474,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 							int minPlayers = getConf().config.getInt("minimum-players.witem");
 							if (getServer().getOnlinePlayers().size() < minPlayers) {
-								ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", minPlayers + ""));
+								ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", new Group<>("min-online", minPlayers + "")));
 								return;
 							}
 
@@ -524,7 +525,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 							int minPlayers = getConf().config.getInt("minimum-players.rq");
 							if (getServer().getOnlinePlayers().size() < minPlayers) {
-								ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", minPlayers + ""));
+								ev.getPlayer().sendMessage(getTrans().format("Not Enough Players", new Group<>("min-online", minPlayers + "")));
 								return;
 							}
 
