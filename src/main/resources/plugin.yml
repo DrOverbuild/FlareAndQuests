@@ -25,3 +25,25 @@ commands:
     description: Main command for Mystery Mobs
     usage: /<command>
     permission: faq.mm
+
+    permissions:
+      faq.*:
+        description: All FlareAndQuests permissions
+        default: op
+        children:
+          faq.faq: true
+          faq.rq: true
+          faq.flare: true
+          faq.witem: true
+      faq.faq:
+        description: Gives access to the /faq command
+        default: op
+      faq.rq:
+        description: Gives access to the /rq command
+        default: op
+      faq.flare:
+        description: Gives access to the /flare command
+        default: op
+      faq.witem:
+        description: Gives access to the /witem command
+        default: op
