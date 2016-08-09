@@ -7,10 +7,49 @@ import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.v1_7_R4.Overridden;
 import org.bukkit.entity.Player;
 
 /**
  * Created by jasper on 6/28/16.
+ *
+ * Command classes should extend this class for easy access to the common
+ * colors, error handling (incorrect permissions, wrong syntax, etc), and
+ * certain convenience methods like getting the plugin and the plugin's config
+ * files. This system was designed because originally all the commands and their
+ * implementations were in a single class. However, they all had a similar
+ * structure so the developer just intertwined the commands' implementations, so
+ * it was very hard to separate them into their own classes. Therefore, this
+ * system was designed, to keep the commands' structure while being better
+ * organized and expandable (easy to add additional commands).
+ *
+ * It's easy to add another command. Simply extend this class and override the
+ * constructor like this:
+ *
+ *      public ____Command(FlareAndQuests plugin) {
+ *          super(plugin);
+ *      }
+ *
+ * If you don't override this, the compiler will complain.
+ *
+ * Next, override the executeCommand(CommandSender, String[]) method. This
+ * method acts just like onCommand(CommandSender, Command, String, String[])
+ * from the org.bukkit.command.CommandExecutor class, however this method takes
+ * care of all the boilerplate code that all commands must have. It loads up the
+ * configuration and translation files, because the commands are very likely to
+ * use them, it takes care of permissions, it sends help if there are no
+ * arguments, and it handles when the arguments are invalid. This is all stuff
+ * that every command has to have and wouldn't be fun to have to implement
+ * individually in every command.
+ *
+ * It is also required to override the sendHelp(CommandSender) method. In this
+ * method you should send usage info of the command to the player.
+ *
+ * Finally, you'll need to register the command into the server. Do this by
+ * adding the command to plugin.yml and adding this code to
+ * FlareAndQuests.registerCommands():
+ *
+ * 		getCommand("____").setExecutor(new ____Command(this));
  */
 public abstract class BasePluginCommand implements CommandExecutor {
     public static final String DR = ChatColor.DARK_RED + "";
@@ -25,7 +64,11 @@ public abstract class BasePluginCommand implements CommandExecutor {
         this.plugin = plugin;
     }
 
+    @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+        getConf().load();
+        getTrans().load();
+
         if (!sender.hasPermission("faq." + command.getName().toLowerCase()) && !sender.hasPermission("faq.*")) {
             sender.sendMessage(DR + "You need the permission "+R+"faq." + command.getName().toLowerCase() + DR+ " or "+R+" faq.* "+DR+".");
             return true;
@@ -35,8 +78,6 @@ public abstract class BasePluginCommand implements CommandExecutor {
             sendHelp(sender);
             return true;
         }
-
-        getConf().load();
 
         if (!executeCommand(sender, args)) {
             sender.sendMessage(DR + "Invalid syntax or missing arguments. Type "+R+"/" + command.getName() + DR + " to view help.");
