@@ -467,6 +467,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						}
 					}
 				}
+
 				if (conf.config.contains("Witems")) {
 					for (String key : conf.config.getConfigurationSection("Witems").getKeys(false)) {
 						if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("Witems." + key + ".Activate"), false)) {
@@ -516,6 +517,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 						}
 					}
 				}
+
 				if (conf.config.contains("Quests")) {
 					for (String key : conf.config.getConfigurationSection("Quests").getKeys(false)) {
 						ItemStack citem = conf.config.getItemStack("Quests." + key + ".Activate");
@@ -570,6 +572,32 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 							if (conf.config.contains("Quests." + key + ".Commands"))
 								for (String str : conf.config.getStringList("Quests." + key + ".Commands"))
 									this.getServer().dispatchCommand(Bukkit.getConsoleSender(), ChatColor.translateAlternateColorCodes('&', str).replace("{player}", ev.getPlayer().getName()));
+						}
+					}
+				}
+
+				if (conf.config.contains("MysteryMobs")){
+					for (String key : conf.config.getConfigurationSection("MysteryMobs").getKeys(false)) {
+						if (ItemStacks.stackIsSimilar(ev.getItem(), conf.config.getItemStack("MysteryMobes." + key + ".Activate"), false)) {
+							// Matched to Mystery Mob
+							ev.setCancelled(true);
+
+							if (playerIsActive(ev.getPlayer())) {
+								ev.getPlayer().sendMessage(getTrans().format("Cannot Activate Mystery Mob While Doing Other Function", null, ev.getPlayer()));
+								return;
+							}
+
+							if (ev.getItem().getAmount() == 1) {
+								ev.getPlayer().getInventory().setItem(ev.getPlayer().getInventory().getHeldItemSlot(), null);
+							} else {
+								ev.getItem().setAmount(ev.getItem().getAmount() - 1);
+							}
+
+							ev.getPlayer().updateInventory();
+
+							SoundUtil.playMMUseSound(this, ev.getPlayer());
+
+							// TODO: Activate MM
 						}
 					}
 				}

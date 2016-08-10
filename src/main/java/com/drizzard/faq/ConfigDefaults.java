@@ -83,6 +83,7 @@ public class ConfigDefaults {
         defsT.put("Cannot Activate Rank Quest While Doing Other Function", "&4You cannot activate a rank quest while doing another function!");
         defsT.put("Cannot Activate Flare While Doing Other Function", "&4You cannot activate a flare while doing another function!");
         defsT.put("Cannot Activate Witem While Doing Other Function", "&4You cannot activate a witem while doing another function!");
+        defsT.put("Cannot Activate Mystery Mob While Doing Other Function", "&4You cannot activate a mystery mob while doing another function!");
         defsT.put("Flare Broadcast", "&e{player} &7has used a flare!");
         defsT.put("mm-item-use", "Congratulations! You have used a mystery mob item and got a {selectedspawner} spawner!");
 
