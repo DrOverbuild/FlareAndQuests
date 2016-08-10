@@ -4,7 +4,9 @@ import com.drizzard.faq.commands.*;
 import com.drizzard.faq.listeners.ActivationListener;
 import com.drizzard.faq.listeners.InventoryListener;
 import com.drizzard.faq.listeners.PlayerListener;
-import com.drizzard.faq.util.*;
+import com.drizzard.faq.util.ActionBar;
+import com.drizzard.faq.util.FireworkUtil;
+import com.drizzard.faq.util.Group;
 import com.massivecraft.factions.Board;
 import com.massivecraft.factions.FLocation;
 import com.massivecraft.factions.Faction;
@@ -13,10 +15,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -43,6 +44,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	Config conf;
 	Config trans;
 	Config playerData;
+	Config mysteryMobSpawners;
 	HashMap<Player, RankQuest> QIP = new HashMap<Player, RankQuest>();
 	HashMap<Player, String> playerFlares = new HashMap<Player, String>();
 	HashMap<Block, BukkitTask> partTimers = new HashMap<Block, BukkitTask>();
@@ -55,6 +57,9 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		conf = ConfigDefaults.setConfigDefaults(this);
 		trans = ConfigDefaults.setTranslationsDefaults(this);
 		playerData = new Config(this, null, "players");
+		mysteryMobSpawners = ConfigDefaults.setMysteryMobDefaults(this);
+
+		checkSpawners();
 
 		String packageName = getServer().getClass().getPackage().getName();
 		String version = packageName.substring(packageName.indexOf(".v") + 2);
@@ -75,11 +80,26 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		getCommand("mm").setExecutor(new MMCommand(this));
 	}
 
-	public void registerEvents(){
+	public void registerEvents() {
 		this.getServer().getPluginManager().registerEvents(this, this);
 		this.getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
 		this.getServer().getPluginManager().registerEvents(new ActivationListener(this), this);
 		this.getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+	}
+
+	/**
+	 * Runs through all the spawners configured in spawners.yml to make sure all
+	 * of them are linked to a known mob.
+	 */
+	public void checkSpawners() {
+		for (String key : mysteryMobSpawners.config.getConfigurationSection("spawners").getKeys(false)) {
+			String mobName = key.substring(0, key.lastIndexOf("_")).toUpperCase();
+			try {
+				EntityType.valueOf(mobName);
+			} catch (IllegalArgumentException e) {
+				getLogger().warning("Could not find mob \"" + mobName + "\"");
+			}
+		}
 	}
 
 	public void openFlareInventory(Player player, String name) {
@@ -214,6 +234,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 	public Config getPlayerData() {
 		return playerData;
+	}
+
+	public Config getMysteryMobSpawners() {
+		return mysteryMobSpawners;
 	}
 
 	public boolean isWarzone(Location loc) {

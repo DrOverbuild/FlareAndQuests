@@ -23,7 +23,7 @@ import java.util.List;
 
 /**
  * Created by jasper on 8/10/16.
- *
+ * <p>
  * Handles all inventory events.
  */
 public class InventoryListener implements Listener {
@@ -39,25 +39,40 @@ public class InventoryListener implements Listener {
 	@EventHandler
 	public void onClose(InventoryCloseEvent ev) {
 		String invTitle = ev.getInventory().getTitle();
-		boolean inventoryIsForVoucherConfig = invTitle.contains("Set Voucher Items For ");
-		boolean inventoryIsForFlareConfig = invTitle.contains("Set Flare Items For ");
-		if (inventoryIsForVoucherConfig || inventoryIsForFlareConfig) {
+
+		String activity = "";
+		String configKey = "";
+		if (invTitle.contains("Set Voucher Items For ")) {
+			activity = "Quests";
+			configKey = "Rewards";
+		} else if (invTitle.contains("Set Flare Items For")) {
+			activity = "Flares";
+			configKey = "Contents";
+		} else if (invTitle.contains("Select Spawners For")) {
+			activity = "MysteryMobs";
+		}
+
+		if (activity.equals("Quests") || activity.equals("Flares")) {
 			plugin.getConf().load();
 			List<ItemStack> items = new ArrayList<ItemStack>();
-			for (ItemStack i : ev.getInventory().getContents())
-				if (i != null && i.getType() != Material.AIR)
+			for (ItemStack i : ev.getInventory().getContents()) {
+				if (i != null && i.getType() != Material.AIR) {
 					items.add(i);
+				}
+			}
 			String name = invTitle.substring(invTitle.indexOf("For ") + 4);
-			plugin.getConf().config.set((inventoryIsForVoucherConfig ? "Quests." : "Flares.") + name + (inventoryIsForVoucherConfig ? ".Rewards" : ".Contents"), items);
+			plugin.getConf().config.set(activity + "." + name + "" + configKey, items);
 			plugin.getConf().save();
 
-			if (inventoryIsForVoucherConfig) {
+			if (activity.equals("Quests")) {
 				ev.getPlayer().sendMessage(G + "Successfully set the reward items for " + Y + name);
 				ev.getPlayer().sendMessage(G + "Next step: add reward commands using " + Y + "/rq addvcommand " + name + " <message>");
 			} else {
 				ev.getPlayer().sendMessage(G + "Successfully set the inventory of " + Y + name);
 				ev.getPlayer().sendMessage(G + "You're all done setting up the flare " + Y + name + G + "!");
 			}
+		} else if (activity.equals("MysteryMobs")) {
+
 		} else if (ev.getInventory() instanceof AnvilInventory && plugin.getAnvils().containsKey(ev.getInventory())) {
 			AnvilInventory inv = (AnvilInventory) ev.getInventory();
 			inv.setContents(new ItemStack[2]);

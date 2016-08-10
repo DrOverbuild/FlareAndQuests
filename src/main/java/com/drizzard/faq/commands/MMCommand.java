@@ -1,10 +1,15 @@
 package com.drizzard.faq.commands;
 
 import com.drizzard.faq.FlareAndQuests;
+import com.drizzard.faq.util.ItemStacks;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+
+import java.util.Set;
 
 /**
  * Created by jasper on 8/4/16.
@@ -14,13 +19,18 @@ public class MMCommand extends BasePluginCommand {
 		super(plugin);
 	}
 
+	private static int getInventorySize(int numberOfItems) {
+		int rows = (int) Math.ceil(((double) numberOfItems / 9.0));
+		return Math.min(rows * 9, 54);
+	}
+
 	@Override
 	public boolean executeCommand(CommandSender sender, String[] args) {
-		if(args[0].equalsIgnoreCase("list")){
+		if (args[0].equalsIgnoreCase("list")) {
 			list(sender, "MysteryMobs");
 			return true;
-		}else if(args.length < 2){
-		}else if(args[0].equalsIgnoreCase("delete")){
+		} else if (args.length < 2) {
+		} else if (args[0].equalsIgnoreCase("delete")) {
 			if (!getConf().config.contains("MysteryMobs." + args[1]))
 				sender.sendMessage(DR + "There is no Mystery Mob named " + R + args[1]);
 			else {
@@ -29,8 +39,8 @@ public class MMCommand extends BasePluginCommand {
 				sender.sendMessage(G + "Successfully deleted " + Y + args[1]);
 			}
 			return true;
-		}else if(args.length < 4){
-		}else if(args[0].equalsIgnoreCase("give")){
+		} else if (args.length < 4) {
+		} else if (args[0].equalsIgnoreCase("give")) {
 			if (!getConf().config.contains("MysteryMobs." + args[2])) {
 				sender.sendMessage(DR + "There is no mystery mob of the name " + R + args[2]);
 				return true;
@@ -53,7 +63,7 @@ public class MMCommand extends BasePluginCommand {
 				}
 				target.updateInventory();
 
-				sender.sendMessage(G + "Gave " + numberOfItems + " Mystery Mob"+ (numberOfItems == 1 ? "" : "s") +" with the name " + Y + args[2] + G + " to " + Y + args[1]);
+				sender.sendMessage(G + "Gave " + numberOfItems + " Mystery Mob" + (numberOfItems == 1 ? "" : "s") + " with the name " + Y + args[2] + G + " to " + Y + args[1]);
 			}
 			return true;
 		}
@@ -66,16 +76,56 @@ public class MMCommand extends BasePluginCommand {
 			return true;
 		}
 
-		if(args.length < 2){
-		}else if(args[0].equalsIgnoreCase("create")){
-			// TODO: Implement "/mm create <name>" command
+		if (args.length < 2) {
+		} else if (args[0].equalsIgnoreCase("create")) {
+
+			if (playerHasNamedItem(p)) {
+				if (getConf().config.contains("MysteryMobs." + args[1])) {
+					p.sendMessage(DR + "There is already a mystery mob named " + R + args[1]);
+				} else {
+					getConf().config.set("MysteryMobs." + args[1] + ".Activate", p.getItemInHand());
+					getConf().save();
+					p.getInventory().setItem(p.getInventory().getHeldItemSlot(), null);
+					p.updateInventory();
+
+					openMysteryMobInventory(p, args[1]);
+				}
+			}
+
 			return true;
-		}else if(args[0].equalsIgnoreCase("edit")){
-			// TODO: Implement "/mm edit <name>" command
+		} else if (args[0].equalsIgnoreCase("edit")) {
+
+			if (getConf().config.contains("MysteryMobs." + args[1])) {
+				openMysteryMobInventory(p, args[1]);
+			} else {
+				p.sendMessage(DR + "There are no mystery mobs named " + args[1]);
+
+			}
+
 			return true;
 		}
 
 		return false;
+	}
+
+	public void openMysteryMobInventory(Player p, String name) {
+		plugin.getMysteryMobSpawners().load();
+		Set<String> keys = plugin.getMysteryMobSpawners().config.getConfigurationSection("spawners").getKeys(false);
+		Inventory inv = Bukkit.createInventory(p, getInventorySize(keys.size()), "Select Spawners For " + name);
+		for (String key : keys) {
+			String mobName = key.substring(0, key.lastIndexOf("_")).toUpperCase();
+
+			// Checking to ensure that only known mobs are listed.
+			try {
+				EntityType.valueOf(mobName);
+				inv.addItem(ItemStacks.generateStack(Material.MOB_SPAWNER, plugin.getMysteryMobSpawners().config.getString("spawners." + key + ".display_name")));
+
+			} catch (IllegalArgumentException e) {
+
+			}
+		}
+
+		p.openInventory(inv);
 	}
 
 	@Override

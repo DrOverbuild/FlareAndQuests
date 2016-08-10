@@ -5,6 +5,7 @@ import com.drizzard.faq.util.Sounds;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by jasper on 6/28/16.
@@ -90,4 +91,42 @@ public class ConfigDefaults {
         return new Config(plugin, defsT, "translations");
     }
 
+    public static Config setMysteryMobDefaults(FlareAndQuests plugin){
+        HashMap<String, Object> defs = new HashMap<>();
+
+        defs.put("spawners.bat_spawner.display_name","Bat Spawner");
+        defs.put("spawners.blaze_spawner.display_name","Blaze Spawner");
+        defs.put("spawners.chicken_spawner.display_name","Chicken Spawner");
+        defs.put("spawners.cow_spawner.display_name","Cow Spawner");
+        defs.put("spawners.creeper_spawner.display_name","Creeper Spawner");
+        defs.put("spawners.enderman_spawner.display_name","Enderman Spawner");
+        defs.put("spawners.endermite_spawner.display_name","Endermite Spawner");
+        defs.put("spawners.ghast_spawner.display_name","Ghast Spawner");
+        defs.put("spawners.guardian_spawner.display_name","Guardian Spawner");
+        defs.put("spawners.pig_spawner.display_name","Pig Spawner");
+        defs.put("spawners.rabbit_spawner.display_name","Rabbit Spawner");
+        defs.put("spawners.sheep_spawner.display_name","Sheep Spawner");
+        defs.put("spawners.silverfish_spawner.display_name","Silverfish Spawner");
+        defs.put("spawners.skeleton_spawner.display_name","Skeleton Spawner");
+        defs.put("spawners.spider_spawner.display_name","Spider Spawner");
+        defs.put("spawners.squid_spawner.display_name","Squid Spawner");
+        defs.put("spawners.slime_spawner.display_name","Slime Spawner");
+        defs.put("spawners.villager_spawner.display_name","Villager Spawner");
+        defs.put("spawners.witch_spawner.display_name","Witch Spawner");
+        defs.put("spawners.wolf_spawner.display_name","Wolf Spawner");
+        defs.put("spawners.cave_spider_spawner.display_name","Cave Spider Spawner");
+        defs.put("spawners.zombie_spawner.display_name","Zombie Spawner");
+        defs.put("spawners.ender_dragon_spawner.display_name","Ender Dragon Spawner");
+        defs.put("spawners.giant_spawner.display_name","Giant Spawner");
+        defs.put("spawners.snowman_spawner.display_name","Snowman Spawner");
+        defs.put("spawners.horse_spawner.display_name","Horse Spawner");
+        defs.put("spawners.mushroom_cow_spawner.display_name","Mooshroom Spawner");
+        defs.put("spawners.ocelot_spawner.display_name","Ocelot Spawner");
+        defs.put("spawners.pig_zombie_spawner.display_name","Zombie Pigman Spawner");
+        defs.put("spawners.magma_cube_spawner.display_name","Magma Cube Spawner");
+        defs.put("spawners.wither_spawner.display_name","Wither Spawner");
+        defs.put("spawners.iron_golem_spawner.display_name","Iron Golem Spawner");
+
+        return new Config(plugin, defs, "spawners");
+    }
 }
