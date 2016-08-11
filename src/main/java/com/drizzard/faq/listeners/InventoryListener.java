@@ -3,6 +3,7 @@ package com.drizzard.faq.listeners;
 import com.drizzard.faq.FlareAndQuests;
 import com.drizzard.faq.nms.anvil.AnvilSender;
 import com.drizzard.faq.util.Group;
+import com.drizzard.faq.util.ItemStacks;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
@@ -19,6 +20,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -73,10 +75,10 @@ public class InventoryListener implements Listener {
 			}
 		} else if (activity.equals("MysteryMobs")) {
 
-		} else if (ev.getInventory() instanceof AnvilInventory && plugin.getAnvils().containsKey(ev.getInventory())) {
+		} else if (ev.getInventory() instanceof AnvilInventory && plugin.getFlareAnvils().containsKey(ev.getInventory())) {
 			AnvilInventory inv = (AnvilInventory) ev.getInventory();
 			inv.setContents(new ItemStack[2]);
-			plugin.getAnvils().remove(ev.getInventory());
+			plugin.getFlareAnvils().remove(ev.getInventory());
 		} else if (ev.getInventory().getHolder() instanceof Chest) {
 			boolean inventoryIsEmpty = true;
 			for (ItemStack i : ev.getInventory().getContents()) {
@@ -101,6 +103,8 @@ public class InventoryListener implements Listener {
 	public void onInvClick(InventoryClickEvent ev) {
 		if (ev.getInventory().getTitle().contains("Set Flare Items For ")) {
 			flareItemsModified(ev);
+		} else if (ev.getInventory().getTitle().contains("Select Spawners For ")) {
+			spawnersSelected(ev);
 		} else if (ev.getInventory() instanceof AnvilInventory) {
 			itemChanceSet(ev);
 		}
@@ -120,12 +124,13 @@ public class InventoryListener implements Listener {
 		int slot = ev.getRawSlot();
 
 		final ItemStack target;
-		if (ev.getClick() == ClickType.SHIFT_LEFT && slot >= 27 && !clBAD)
+		if (ev.getClick() == ClickType.SHIFT_LEFT && slot >= 27 && !clBAD) {
 			target = clicked;
-		else if (slot < 27 && !cuBAD)
+		} else if (slot < 27 && !cuBAD) {
 			target = cursor;
-		else
+		} else {
 			target = null;
+		}
 
 		if (target != null) {
 			final ItemStack targetClone = target.clone();
@@ -156,9 +161,45 @@ public class InventoryListener implements Listener {
 
 					AnvilSender.send(ev.getWhoClicked(), "Set Chance", tag);
 
-					plugin.getAnvils().put(ev.getWhoClicked().getOpenInventory().getTopInventory(), new Group<ItemStack, String>(targetClone, name));
+					plugin.getFlareAnvils().put(ev.getWhoClicked().getOpenInventory().getTopInventory(), new Group<ItemStack, String>(targetClone, name));
 				}
 			}.runTaskLater(plugin, 1);
+		}
+	}
+
+	private void spawnersSelected(final InventoryClickEvent ev) {
+		ev.setCancelled(true);
+
+		if (ev.getClickedInventory().getHolder() == null) {
+			plugin.getMysteryMobSpawners().load();
+			plugin.getConf().load();
+
+			final String title = ev.getClickedInventory().getTitle();
+			final String name = title.substring(title.indexOf("For ") + 4);
+
+			if (ev.getCurrentItem().getType().equals(Material.STAINED_GLASS_PANE)) {
+				String entityType = ev.getCurrentItem().getItemMeta().getLore().get(0);
+				String displayName = plugin.getMysteryMobSpawners().config.getString(entityType.toLowerCase() + "_spawner.display_name");
+				ItemStack replaceWith = ItemStacks.generateStack(Material.MOB_SPAWNER, displayName, 1, (short) 0, Arrays.asList(entityType));
+				ev.getClickedInventory().setItem(ev.getSlot(), replaceWith);
+				((Player) ev.getWhoClicked()).updateInventory();
+
+				plugin.getConf().config.set("MysteryMobs." + name + ".spawners." + entityType, null);
+				plugin.getConf().save();
+			} else if (ev.getCurrentItem().getType().equals(Material.MOB_SPAWNER)) {
+
+				new BukkitRunnable(){
+
+					@Override
+					public void run() {
+						String entityType = ev.getCurrentItem().getItemMeta().getLore().get(0);
+						ItemStack item = ItemStacks.generateStack(Material.MOB_SPAWNER, "100.0", 1, (short) 0, Arrays.asList(entityType));
+						AnvilSender.send(ev.getWhoClicked(), "Set Chance For Spawner", item);
+
+						plugin.getMmAnvils().put(ev.getWhoClicked().getOpenInventory().getTopInventory(), name);
+					}
+				}.runTaskLater(plugin, 1);
+			}
 		}
 	}
 
@@ -176,7 +217,7 @@ public class InventoryListener implements Listener {
 			return;
 		}
 
-		Group<ItemStack, String> g = plugin.getAnvils().remove(ev.getInventory());
+		Group<ItemStack, String> g = plugin.getFlareAnvils().remove(ev.getInventory());
 		if (g == null) {
 			return;
 		}

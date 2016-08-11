@@ -49,7 +49,8 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	HashMap<Player, String> playerFlares = new HashMap<Player, String>();
 	HashMap<Block, BukkitTask> partTimers = new HashMap<Block, BukkitTask>();
 	HashMap<Player, Integer> deathsLeft = new HashMap<Player, Integer>();
-	HashMap<Inventory, Group<ItemStack, String>> anvils = new HashMap<Inventory, Group<ItemStack, String>>();
+	HashMap<Inventory, Group<ItemStack, String>> flareAnvils = new HashMap<Inventory, Group<ItemStack, String>>();
+	HashMap<Inventory, String> mmAnvils = new HashMap<>();
 
 	public void onEnable() {
 		registerEvents();
@@ -204,12 +205,16 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		return Math.signum(d);
 	}
 
-	public HashMap<Inventory, Group<ItemStack, String>> getAnvils() {
-		return anvils;
-	}
-
 	public HashMap<Player, Integer> getDeathsLeft() {
 		return deathsLeft;
+	}
+
+	public HashMap<Inventory, Group<ItemStack, String>> getFlareAnvils() {
+		return flareAnvils;
+	}
+
+	public HashMap<Inventory, String> getMmAnvils() {
+		return mmAnvils;
 	}
 
 	public HashMap<Block, BukkitTask> getPartTimers() {

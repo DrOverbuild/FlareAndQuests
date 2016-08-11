@@ -9,6 +9,7 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
+import java.util.Arrays;
 import java.util.Set;
 
 /**
@@ -111,14 +112,16 @@ public class MMCommand extends BasePluginCommand {
 	public void openMysteryMobInventory(Player p, String name) {
 		plugin.getMysteryMobSpawners().load();
 		Set<String> keys = plugin.getMysteryMobSpawners().config.getConfigurationSection("spawners").getKeys(false);
-		Inventory inv = Bukkit.createInventory(p, getInventorySize(keys.size()), "Select Spawners For " + name);
+		Inventory inv = Bukkit.createInventory(null, getInventorySize(keys.size()), "Select Spawners For " + name);
 		for (String key : keys) {
 			String mobName = key.substring(0, key.lastIndexOf("_")).toUpperCase();
 
 			// Checking to ensure that only known mobs are listed.
 			try {
-				EntityType.valueOf(mobName);
-				inv.addItem(ItemStacks.generateStack(Material.MOB_SPAWNER, plugin.getMysteryMobSpawners().config.getString("spawners." + key + ".display_name")));
+				EntityType type = EntityType.valueOf(mobName);
+				inv.addItem(ItemStacks.generateStack(Material.MOB_SPAWNER,
+						plugin.getMysteryMobSpawners().config.getString("spawners." + key + ".display_name"),
+						1, (short) 0, Arrays.asList(type.name())));
 
 			} catch (IllegalArgumentException e) {
 
