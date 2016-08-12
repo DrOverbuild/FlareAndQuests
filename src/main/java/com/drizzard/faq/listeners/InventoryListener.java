@@ -74,7 +74,13 @@ public class InventoryListener implements Listener {
 				ev.getPlayer().sendMessage(G + "You're all done setting up the flare " + Y + name + G + "!");
 			}
 		} else if (activity.equals("MysteryMobs")) {
-
+			// Just tell user we saved their data without actually saving their
+			// data.
+			//
+			// JK, the data is saved when a change is made. See
+			// spawnersSelected(InventoryClickEvent).
+			String name = invTitle.substring(invTitle.indexOf("For ") + 4);
+			ev.getPlayer().sendMessage(G + "Successfully set the spawners for " + Y + name);
 		} else if (ev.getInventory() instanceof AnvilInventory && plugin.getFlareAnvils().containsKey(ev.getInventory())) {
 			AnvilInventory inv = (AnvilInventory) ev.getInventory();
 			inv.setContents(new ItemStack[2]);
@@ -170,6 +176,11 @@ public class InventoryListener implements Listener {
 		}
 	}
 
+	/**
+	 * Called by onInvClick(InventoryClickEvent) when the inventory name
+	 * contains "Select Spawners For", meaning the clicked inventory is for the
+	 * spawner selecton when configuring mystery mobs.
+	 */
 	private void spawnersSelected(final InventoryClickEvent ev) {
 		ev.setCancelled(true);
 
@@ -206,6 +217,11 @@ public class InventoryListener implements Listener {
 		}
 	}
 
+	/**
+	 * Called by onInvClick(InventoryClickEvent) when the inventory is an anvil
+	 * inventory. This method checks if the inventory is for setting a spawner
+	 * chance.
+	 */
 	private void spawnerChanceSet(InventoryClickEvent ev){
 		ItemStack clicked = ev.getCurrentItem();
 
@@ -250,7 +266,9 @@ public class InventoryListener implements Listener {
 	}
 
 	/**
-	 * Called by onInvClick(InventoryClickEvent) when the inventory is an anvil.
+	 * Called by onInvClick(InventoryClickEvent) when the inventory is an anvil
+	 * inventory. This method checks if the inventory is for setting a flare
+	 * item chance.
 	 */
 	private void itemChanceSet(InventoryClickEvent ev) {
 		ItemStack clicked = ev.getCurrentItem();
