@@ -20,11 +20,6 @@ public class MMCommand extends BasePluginCommand {
 		super(plugin);
 	}
 
-	private static int getInventorySize(int numberOfItems) {
-		int rows = (int) Math.ceil(((double) numberOfItems / 9.0));
-		return Math.min(rows * 9, 54);
-	}
-
 	@Override
 	public boolean executeCommand(CommandSender sender, String[] args) {
 		if (args[0].equalsIgnoreCase("list")) {
@@ -89,7 +84,7 @@ public class MMCommand extends BasePluginCommand {
 					p.getInventory().setItem(p.getInventory().getHeldItemSlot(), null);
 					p.updateInventory();
 
-					openMysteryMobInventory(p, args[1]);
+					plugin.openMysteryMobInventory(p, args[1]);
 				}
 			}
 
@@ -97,7 +92,7 @@ public class MMCommand extends BasePluginCommand {
 		} else if (args[0].equalsIgnoreCase("edit")) {
 
 			if (getConf().config.contains("MysteryMobs." + args[1])) {
-				openMysteryMobInventory(p, args[1]);
+				plugin.openMysteryMobInventory(p, args[1]);
 			} else {
 				p.sendMessage(DR + "There are no mystery mobs named " + args[1]);
 
@@ -109,27 +104,6 @@ public class MMCommand extends BasePluginCommand {
 		return false;
 	}
 
-	public void openMysteryMobInventory(Player p, String name) {
-		plugin.getMysteryMobSpawners().load();
-		Set<String> keys = plugin.getMysteryMobSpawners().config.getConfigurationSection("spawners").getKeys(false);
-		Inventory inv = Bukkit.createInventory(null, getInventorySize(keys.size()), "Select Spawners For " + name);
-		for (String key : keys) {
-			String mobName = key.substring(0, key.lastIndexOf("_")).toUpperCase();
-
-			// Checking to ensure that only known mobs are listed.
-			try {
-				EntityType type = EntityType.valueOf(mobName);
-				inv.addItem(ItemStacks.generateStack(Material.MOB_SPAWNER,
-						plugin.getMysteryMobSpawners().config.getString("spawners." + key + ".display_name"),
-						1, (short) 0, Arrays.asList(type.name())));
-
-			} catch (IllegalArgumentException e) {
-
-			}
-		}
-
-		p.openInventory(inv);
-	}
 
 	@Override
 	public void sendHelp(CommandSender sender) {

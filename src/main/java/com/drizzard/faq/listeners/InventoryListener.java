@@ -106,7 +106,10 @@ public class InventoryListener implements Listener {
 		} else if (ev.getInventory().getTitle().contains("Select Spawners For ")) {
 			spawnersSelected(ev);
 		} else if (ev.getInventory() instanceof AnvilInventory) {
+			// We run both of these methods because they make the check if the
+			// anvil is for configuration inside the methods.
 			itemChanceSet(ev);
+			spawnerChanceSet(ev);
 		}
 	}
 
@@ -179,12 +182,12 @@ public class InventoryListener implements Listener {
 
 			if (ev.getCurrentItem().getType().equals(Material.STAINED_GLASS_PANE)) {
 				String entityType = ev.getCurrentItem().getItemMeta().getLore().get(0);
-				String displayName = plugin.getMysteryMobSpawners().config.getString(entityType.toLowerCase() + "_spawner.display_name");
+				String displayName = plugin.getMysteryMobSpawners().config.getString("spawners." + entityType.toLowerCase() + ".display_name");
 				ItemStack replaceWith = ItemStacks.generateStack(Material.MOB_SPAWNER, displayName, 1, (short) 0, Arrays.asList(entityType));
 				ev.getClickedInventory().setItem(ev.getSlot(), replaceWith);
 				((Player) ev.getWhoClicked()).updateInventory();
 
-				plugin.getConf().config.set("MysteryMobs." + name + ".spawners." + entityType, null);
+				plugin.getConf().config.set("MysteryMobs." + name + ".spawners." + entityType.toLowerCase(), null);
 				plugin.getConf().save();
 			} else if (ev.getCurrentItem().getType().equals(Material.MOB_SPAWNER)) {
 
@@ -201,6 +204,49 @@ public class InventoryListener implements Listener {
 				}.runTaskLater(plugin, 1);
 			}
 		}
+	}
+
+	private void spawnerChanceSet(InventoryClickEvent ev){
+		ItemStack clicked = ev.getCurrentItem();
+
+		if (clicked == null || ev.getRawSlot() > 3) {
+			return;
+		}
+
+		if (clicked.getType().equals(Material.AIR)) {
+			return;
+		}
+
+		String mysteryMob = plugin.getMmAnvils().remove(ev.getInventory());
+		if (mysteryMob == null) {
+			return;
+		}
+
+		ev.setCancelled(true);
+
+		String newChance;
+		if(clicked.getItemMeta().hasDisplayName()){
+			newChance = clicked.getItemMeta().getDisplayName();
+		}else{
+			newChance = "100";
+		}
+
+		// Ensure the new chance is an actual number
+		try{
+			Double.parseDouble(newChance);
+		}catch (NumberFormatException e){
+			return;
+		}
+
+		String entityType = clicked.getItemMeta().getLore().get(0);
+
+		plugin.getConf().config.set("MysteryMobs." + mysteryMob + ".spawners." + entityType.toLowerCase(), newChance);
+		plugin.getConf().save();
+
+		ev.getInventory().setContents(new ItemStack[2]);
+
+		ev.getWhoClicked().closeInventory();
+		plugin.openMysteryMobInventory((Player) ev.getWhoClicked(), mysteryMob);
 	}
 
 	/**

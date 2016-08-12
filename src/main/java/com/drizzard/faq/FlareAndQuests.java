@@ -7,6 +7,7 @@ import com.drizzard.faq.listeners.PlayerListener;
 import com.drizzard.faq.util.ActionBar;
 import com.drizzard.faq.util.FireworkUtil;
 import com.drizzard.faq.util.Group;
+import com.drizzard.faq.util.ItemStacks;
 import com.massivecraft.factions.Board;
 import com.massivecraft.factions.FLocation;
 import com.massivecraft.factions.Faction;
@@ -14,8 +15,10 @@ import org.apache.commons.lang.exception.ExceptionUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
@@ -28,10 +31,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class FlareAndQuests extends JavaPlugin implements Listener {
 
@@ -94,11 +94,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	 */
 	public void checkSpawners() {
 		for (String key : mysteryMobSpawners.config.getConfigurationSection("spawners").getKeys(false)) {
-			String mobName = key.substring(0, key.lastIndexOf("_")).toUpperCase();
 			try {
-				EntityType.valueOf(mobName);
+				EntityType.valueOf(key.toUpperCase());
 			} catch (IllegalArgumentException e) {
-				getLogger().warning("Could not find mob \"" + mobName + "\"");
+				getLogger().warning("Could not find mob \"" + key.toLowerCase() + "\"");
 			}
 		}
 	}
@@ -109,6 +108,40 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		for (int i = 0; i < items.size(); i++)
 			inv.setItem(i, items.get(i));
 		player.openInventory(inv);
+	}
+
+	public void openMysteryMobInventory(Player p, String name) {
+		getMysteryMobSpawners().load();
+		getConf().load();
+		List<String> keys = new ArrayList<>(getMysteryMobSpawners().config.getConfigurationSection("spawners").getKeys(false));
+		Collections.sort(keys);
+		Inventory inv = Bukkit.createInventory(null, getInventorySize(keys.size()), "Select Spawners For " + name);
+
+		for (String key : keys) {
+			// Checking to ensure that only known mobs are listed.
+			try {
+				EntityType type = EntityType.valueOf(key.toUpperCase());
+
+				ItemStack item;
+				if(getConf().config.contains("MysteryMobs." + name + ".spawners." + type.name().toLowerCase())){
+					String chance = getConf().config.getString("MysteryMobs." + name + ".spawners." + type.name().toLowerCase());
+					item = ItemStacks.generateStack(Material.STAINED_GLASS_PANE,
+							getMysteryMobSpawners().config.getString("spawners." + key + ".display_name"),
+							1, (short) 13, Arrays.asList(type.name(), chance));
+				}else{
+					item = ItemStacks.generateStack(Material.MOB_SPAWNER,
+							getMysteryMobSpawners().config.getString("spawners." + key + ".display_name"),
+							1, (short) 0, Arrays.asList(type.name()));
+				}
+
+				inv.addItem(item);
+
+			} catch (IllegalArgumentException e) {
+
+			}
+		}
+
+		p.openInventory(inv);
 	}
 
 	public void spawnParticle(int part, Location loc, double offX, double offY, double offZ, int count, Collection<Player> ents) {
@@ -280,5 +313,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 	public boolean playerIsActive(Player p) {
 		return QIP.containsKey(p) || deathsLeft.containsKey(p) || playerFlares.containsKey(p);
+	}
+
+	private static int getInventorySize(int numberOfItems) {
+		int rows = (int) Math.ceil(((double) numberOfItems / 9.0));
+		return Math.min(rows * 9, 54);
 	}
 }
