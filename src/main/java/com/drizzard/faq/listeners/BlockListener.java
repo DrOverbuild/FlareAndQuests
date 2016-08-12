@@ -7,7 +7,9 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.scheduler.BukkitTask;
 
 /**
  * Created by jasper on 8/11/16.
@@ -35,6 +37,16 @@ public class BlockListener implements Listener{
 
 					}
 				}
+			}
+		}
+	}
+
+	@EventHandler
+	public void onBlockBreak(BlockBreakEvent ev){
+		if(ev.getBlock().getType().equals(Material.CHEST)) {
+			BukkitTask task = plugin.getPartTimers().remove(ev.getBlock());
+			if (task != null) {
+				task.cancel();
 			}
 		}
 	}
