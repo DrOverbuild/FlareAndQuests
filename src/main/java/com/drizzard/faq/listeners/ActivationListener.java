@@ -9,6 +9,7 @@ import com.drizzard.faq.util.SoundUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -19,7 +20,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by jasper on 8/10/16.
@@ -118,8 +121,10 @@ public class ActivationListener implements Listener {
 
 				if (plugin.getConf().config.contains("MysteryMobs")) {
 					for (String key : plugin.getConf().config.getConfigurationSection("MysteryMobs").getKeys(false)) {
-						if (ItemStacks.stackIsSimilar(ev.getItem(), plugin.getConf().config.getItemStack("MysteryMobes." + key + ".Activate"), false)) {
+						if (ItemStacks.stackIsSimilar(ev.getItem(), plugin.getConf().config.getItemStack("MysteryMobs." + key + ".Activate"), false)) {
 							// Matched to Mystery Mob
+							plugin.getLogger().info("Player is using mystery mob");
+
 							ev.setCancelled(true);
 
 							activateMysteryMob(ev.getPlayer(), key, ev.getItem());
@@ -268,6 +273,34 @@ public class ActivationListener implements Listener {
 		SoundUtil.playMMUseSound(plugin, player);
 
 		// TODO: Activate MM
+		String chosenSpawner = null;
+		List<String> allSpawners = new ArrayList<>();
+		allSpawners.addAll(plugin.getConf().config.getConfigurationSection("MysteryMobs." + key + ".spawners").getKeys(false));
+		Random random = new Random();
+
+		while(chosenSpawner == null){
+			int index = random.nextInt(allSpawners.size());
+			double chance = random.nextDouble() * 100d;
+			double selectedSpawnerChance;
+
+			try{
+				selectedSpawnerChance = Double.valueOf(plugin.getConf().config.getString("MysteryMobs." + key + ".spawners." + allSpawners.get(index)));
+			}catch (NumberFormatException e){
+				selectedSpawnerChance = 50;
+			}
+
+			if(chance < selectedSpawnerChance){
+				chosenSpawner = allSpawners.get(index);
+			}
+		}
+
+
+		player.getInventory().addItem(ItemStacks.generateStack(Material.MOB_SPAWNER,
+				plugin.getMysteryMobSpawners().config.getString("spawners." + chosenSpawner + ".display_name"),
+				1, (short) 0, Arrays.asList(chosenSpawner.toUpperCase())));
+
+		player.sendMessage(plugin.getTrans().format("mm-item-use", player.getLocation(), player, new Group<>("selectedspawner",
+				plugin.getMysteryMobSpawners().config.getString("spawners." + chosenSpawner + ".display_name"))));
 	}
 
 

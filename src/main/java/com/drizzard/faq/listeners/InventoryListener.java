@@ -85,6 +85,10 @@ public class InventoryListener implements Listener {
 			AnvilInventory inv = (AnvilInventory) ev.getInventory();
 			inv.setContents(new ItemStack[2]);
 			plugin.getFlareAnvils().remove(ev.getInventory());
+		} else if (ev.getInventory() instanceof AnvilInventory && plugin.getMmAnvils().containsKey(ev.getInventory())) {
+			AnvilInventory inv = (AnvilInventory) ev.getInventory();
+			inv.setContents(new ItemStack[2]);
+			plugin.getMmAnvils().remove(ev.getInventory());
 		} else if (ev.getInventory().getHolder() instanceof Chest) {
 			boolean inventoryIsEmpty = true;
 			for (ItemStack i : ev.getInventory().getContents()) {

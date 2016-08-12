@@ -2,6 +2,7 @@ package com.drizzard.faq;
 
 import com.drizzard.faq.commands.*;
 import com.drizzard.faq.listeners.ActivationListener;
+import com.drizzard.faq.listeners.BlockListener;
 import com.drizzard.faq.listeners.InventoryListener;
 import com.drizzard.faq.listeners.PlayerListener;
 import com.drizzard.faq.util.ActionBar;
@@ -86,6 +87,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		this.getServer().getPluginManager().registerEvents(new InventoryListener(this), this);
 		this.getServer().getPluginManager().registerEvents(new ActivationListener(this), this);
 		this.getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+		this.getServer().getPluginManager().registerEvents(new BlockListener(this), this);
 	}
 
 	/**
