@@ -188,7 +188,11 @@ public class InventoryListener implements Listener {
 	private void spawnersSelected(final InventoryClickEvent ev) {
 		ev.setCancelled(true);
 
-		if (ev.getClickedInventory().getHolder() == null) {
+		if(!ev.getClick().equals(ClickType.LEFT) && !ev.getClick().equals(ClickType.RIGHT)){
+			return;
+		}
+
+		if (ev.getClickedInventory() != null && ev.getClickedInventory().getHolder() == null) {
 			plugin.getMysteryMobSpawners().load();
 			plugin.getConf().load();
 
