@@ -28,6 +28,7 @@ public class FAQCommand extends BasePluginCommand {
         sender.sendMessage(BEG + "/rq " + SEP + "Display rank quest help page.");
         sender.sendMessage(BEG + "/flare " + SEP + "Display flare help page.");
         sender.sendMessage(BEG + "/witem " + SEP + "Display witem help page.");
-        sender.sendMessage(BEG + "/faq reload" + SEP + "This will reload the Config and Translations file");
+        sender.sendMessage(BEG + "/mm " + SEP + "Display MysteryMob help page.");
+        sender.sendMessage(BEG + "/faq reload" + SEP + "This will reload the Config and Translations file.");
     }
 }
