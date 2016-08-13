@@ -21,6 +21,7 @@ public class ConfigDefaults {
         defs.put("Keep-Inv Duration", 60);
 
         defs.put("Flare Drop Radius", 10.0);
+        defs.put("min-free-above-blocks", 20);
         defs.put("Flare Alert Radius", 10.0);
         defs.put("Minimum Flare Contents", 2);
         defs.put("Maximum Flare Contents", 6);

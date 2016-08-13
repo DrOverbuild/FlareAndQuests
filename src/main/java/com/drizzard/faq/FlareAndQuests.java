@@ -1,10 +1,7 @@
 package com.drizzard.faq;
 
 import com.drizzard.faq.commands.*;
-import com.drizzard.faq.listeners.ActivationListener;
-import com.drizzard.faq.listeners.BlockListener;
-import com.drizzard.faq.listeners.InventoryListener;
-import com.drizzard.faq.listeners.PlayerListener;
+import com.drizzard.faq.listeners.*;
 import com.drizzard.faq.util.ActionBar;
 import com.drizzard.faq.util.FireworkUtil;
 import com.drizzard.faq.util.Group;
@@ -19,7 +16,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
@@ -48,6 +44,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	Config mysteryMobSpawners;
 	HashMap<Player, RankQuest> QIP = new HashMap<Player, RankQuest>();
 	HashMap<Player, String> playerFlares = new HashMap<Player, String>();
+	HashMap<UUID, Flare> fallingFlares = new HashMap<>();
 	HashMap<Block, BukkitTask> partTimers = new HashMap<Block, BukkitTask>();
 	HashMap<Player, Integer> deathsLeft = new HashMap<Player, Integer>();
 	HashMap<Inventory, Group<ItemStack, String>> flareAnvils = new HashMap<Inventory, Group<ItemStack, String>>();
@@ -88,6 +85,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		this.getServer().getPluginManager().registerEvents(new ActivationListener(this), this);
 		this.getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
 		this.getServer().getPluginManager().registerEvents(new BlockListener(this), this);
+		this.getServer().getPluginManager().registerEvents(new EntityListener(this), this);
 	}
 
 	/**
@@ -244,6 +242,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		return deathsLeft;
 	}
 
+	public HashMap<UUID, Flare> getFallingFlares() {
+		return fallingFlares;
+	}
+
 	public HashMap<Inventory, Group<ItemStack, String>> getFlareAnvils() {
 		return flareAnvils;
 	}
@@ -281,6 +283,10 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	}
 
 	public boolean isWarzone(Location loc) {
+		if(loc == null){
+			return false;
+		}
+
 		if (serverHasFactions()) {
 			try {
 				// Attempt to use MassiveCraft Factions
