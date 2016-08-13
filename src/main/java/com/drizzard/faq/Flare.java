@@ -122,8 +122,6 @@ public class Flare {
 		c.getBlockInventory().setContents(conts);
 		c.update(true);
 
-		SoundUtil.playChestArrivalSound(plugin, this.getActivator());
-
 		getActivator().sendMessage(plugin.getTrans().format("Flare Arrived Message", chestBlock.getLocation(), getActivator()));
 
 		plugin.getPartTimers().put(chestBlock, new BukkitRunnable() {

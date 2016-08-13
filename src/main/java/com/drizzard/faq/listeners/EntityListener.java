@@ -3,25 +3,17 @@ package com.drizzard.faq.listeners;
 import com.drizzard.faq.Flare;
 import com.drizzard.faq.FlareAndQuests;
 import com.drizzard.faq.util.SoundUtil;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Created by jasper on 8/12/16.
@@ -57,8 +49,16 @@ public class EntityListener implements Listener {
 			Flare flare = plugin.getFallingFlares().remove(e.getUniqueId());
 			if(flare != null){
 				ev.getEntity().remove();
-				ev.getLocation().getBlock().getRelative(BlockFace.UP).setType(Material.AIR); // <- May not be necessary
-				flare.doLightningAnimation(ev.getLocation().getBlock().getRelative(BlockFace.UP));
+				e.remove();
+
+				Block chestBlock = ev.getLocation().getBlock();
+				while (!chestBlock.getType().equals(Material.AIR)){
+					chestBlock = chestBlock.getRelative(BlockFace.UP);
+				}
+
+				SoundUtil.playChestArrivalSound(plugin, flare.getActivator());
+
+				flare.doLightningAnimation(chestBlock);
 				return;
 			}
 		}
