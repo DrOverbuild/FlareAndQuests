@@ -84,8 +84,8 @@ public class Flare {
 		int count = 0;
 		Random rand = new Random();
 
-		int min = plugin.getConf().config.getInt("Minimum Flare Contents");
-		int max = plugin.getConf().config.getInt("Maximum Flare Contents");
+		int min = plugin.getConf().config.getInt("flare.min-contents");
+		int max = plugin.getConf().config.getInt("flare.max-contents");
 
 		if (list.size() < min)
 			min = list.size();
@@ -125,7 +125,7 @@ public class Flare {
 
 		plugin.getPartTimers().put(chestBlock, new BukkitRunnable() {
 			public void run() {
-				plugin.spawnParticle(plugin.getConf().config.getInt("Flare Chest Particle ID"),
+				plugin.spawnParticle(plugin.getConf().config.getInt("flare.chest-particle-id"),
 						chestBlock.getLocation().clone().add(0.5, 0.5, 0.5), 1, 1, 1, 5,
 						chestBlock.getWorld().getEntitiesByClass(Player.class));
 			}
@@ -135,11 +135,11 @@ public class Flare {
 	}
 
 	public void setFlareSpawn(){
-		double r = plugin.conf.config.getDouble("Flare Drop Radius");
-		int minFree = plugin.getConf().config.getInt("min-free-above-blocks", 20);
+		double r = plugin.conf.config.getDouble("flare.drop-radius");
+		int minFree = plugin.getConf().config.getInt("flare.min-free-above-blocks", 20);
 
 		int count = 0;
-		int max = plugin.conf.config.getInt("Flare Max Tries");
+		int max = plugin.conf.config.getInt("flare.max-tries");
 
 		while (!plugin.inside(flareSpawn, (Location) plugin.getConf().config.get("Flares." + name + ".First"),
 				(Location) plugin.getConf().config.get("Flares." + name + ".Second"))) {
@@ -165,7 +165,7 @@ public class Flare {
 			return;
 		}
 
-		double r = plugin.conf.config.getDouble("Flare Drop Radius");
+		double r = plugin.conf.config.getDouble("flare.drop-radius");
 
 		// TODO: Check if there is enough space to spawn flare
 
@@ -195,7 +195,7 @@ public class Flare {
 
 		SoundUtil.playFlareUseSound(plugin, player);
 
-		final int delay = plugin.getConf().config.getInt("Flare Arrival Delay", 0);
+		final int delay = plugin.getConf().config.getInt("flare.arrival-delay", 0);
 
 		if (delay <= 0) {
 			flare.dropFlare();

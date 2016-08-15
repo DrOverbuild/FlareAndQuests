@@ -15,18 +15,17 @@ public class ConfigDefaults {
     public static Config setConfigDefaults(FlareAndQuests plugin) {
         HashMap<String, Object> defs = new HashMap<String, Object>();
 
-        defs.put("Flare Max Tries", 100);
+        defs.put("flare.max-tries", 100);
+        defs.put("flare.drop-radius", 10.0);
+        defs.put("flare.alert-radius", 10.0);
+        defs.put("flare.min-free-above-blocks", 20);
+        defs.put("flare.min-contents", 2);
+        defs.put("flare.max-contents", 6);
+        defs.put("flare.arrival-delay", 0);
+        defs.put("flare.chest-particle-id", 24);
 
         defs.put("Deaths Allowed For Keep-Inv", 1);
         defs.put("Keep-Inv Duration", 60);
-
-        defs.put("Flare Drop Radius", 10.0);
-        defs.put("min-free-above-blocks", 20);
-        defs.put("Flare Alert Radius", 10.0);
-        defs.put("Minimum Flare Contents", 2);
-        defs.put("Maximum Flare Contents", 6);
-        defs.put("Flare Arrival Delay", 0);
-        defs.put("Flare Chest Particle ID", 24);
 
         defs.put("minimum-players.rq", 2);
         defs.put("minimum-players.flare", 2);
