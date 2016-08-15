@@ -6,6 +6,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
@@ -203,12 +204,22 @@ public class Flare {
 			plugin.playerFlares.put(player, name);
 
 			final String message2 = ChatColor.translateAlternateColorCodes('&', plugin.getTrans().config.getString("Flare Arriving In Action Bar Message"));
+			final int preFallParticle = plugin.getConf().config.getInt("flare.pre-fall-particle-id", 3);
 
 			new BukkitRunnable() {
 				int secondsLeft = delay;
 
 				public void run() {
 					ActionBar.sendActionBar(player, message2.replace("{time}", secondsLeft + ""));
+
+					Block b = flare.getFlareSpawn().getBlock();
+
+					while (b.getType().equals(Material.AIR)){
+						plugin.spawnParticle(preFallParticle, b.getLocation().clone().add(0.5, 0.5, 0.5),
+								0, 0, 0, 1, b.getWorld().getEntitiesByClass(Player.class));
+						b = b.getRelative(BlockFace.DOWN);
+					}
+
 					if (secondsLeft <= 0) {
 						plugin.playerFlares.remove(player);
 						flare.dropFlare();

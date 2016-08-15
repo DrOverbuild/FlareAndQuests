@@ -23,6 +23,7 @@ public class ConfigDefaults {
         defs.put("flare.max-contents", 6);
         defs.put("flare.arrival-delay", 0);
         defs.put("flare.chest-particle-id", 24);
+        defs.put("flare.pre-fall-particle-id", 3);
 
         defs.put("Deaths Allowed For Keep-Inv", 1);
         defs.put("Keep-Inv Duration", 60);
@@ -35,7 +36,6 @@ public class ConfigDefaults {
         timedActions.add("time:20 broadcast:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
         timedActions.add("time:10 broadcast:&4Player {player} has {left-seconds} seconds left until he finishes his rank quest!");
         timedActions.add("time:5 msg:{player} &eYou are almost done!");
-        defs.put("rq-timed-actions", timedActions);
 
         defs.put("fireworks.enabled", true);
         defs.put("fireworks.amount", 20);
@@ -44,6 +44,7 @@ public class ConfigDefaults {
         defs.put("fireworks.color", "RANDOM");
 
         defs.put("rq-player-health", 10);
+        defs.put("rq-timed-actions", timedActions);
 
         defs.put("sounds.rq-start", Sounds.ENDERDRAGON_GROWL.name());
         defs.put("sounds.rq-finish", Sounds.ORB_PICKUP.name());
