@@ -1,6 +1,7 @@
 package com.drizzard.faq;
 
 import com.drizzard.faq.util.ActionBar;
+import com.drizzard.faq.util.Group;
 import com.drizzard.faq.util.SoundUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -8,15 +9,14 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.EulerAngle;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Flare {
 	FlareAndQuests plugin;
@@ -35,6 +35,78 @@ public class Flare {
 		this.activator = activator;
 	}
 
+	public static void activateFlare(final ItemStack is, final Player player, final FlareAndQuests plugin, final String name) {
+		plugin.getConf().load();
+
+		if (plugin.playerFlares.containsKey(player)) {
+			player.sendMessage(plugin.getTrans().format("Flare In Use", null, player));
+			return;
+		}
+
+		final Flare flare = new Flare(player, plugin, name);
+
+		flare.setFlareSpawn();
+
+		if (flare.getFlareSpawn() == null) {
+			return;
+		}
+
+		double r = plugin.conf.config.getDouble("flare.drop-radius");
+
+		String[] message = plugin.getTrans().format("Flare Broadcast", player.getLocation(), player);
+		for (Entity ent : player.getNearbyEntities(r, r, r)) {
+			if (ent instanceof Player && ent.getLocation().distance(player.getLocation()) <= r) {
+				ent.sendMessage(message);
+			}
+		}
+		player.sendMessage(message);
+
+		if (is.getAmount() == 1) {
+			player.getInventory().setItem(player.getInventory().getHeldItemSlot(), null);
+		} else {
+			is.setAmount(is.getAmount() - 1);
+		}
+
+		player.updateInventory();
+
+		SoundUtil.playFlareUseSound(plugin, player);
+
+		final int delay = plugin.getConf().config.getInt("flare.arrival-delay", 0);
+
+		if (delay <= 0) {
+			flare.dropFlare();
+		} else {
+			plugin.playerFlares.put(player, name);
+
+			final String message2 = ChatColor.translateAlternateColorCodes('&', plugin.getTrans().config.getString("Flare Arriving In Action Bar Message"));
+			final int preFallParticle = plugin.getConf().config.getInt("flare.pre-fall-particle-id", 3);
+
+			new BukkitRunnable() {
+				int secondsLeft = delay;
+
+				public void run() {
+					ActionBar.sendActionBar(player, message2.replace("{time}", secondsLeft + ""));
+
+					Block b = flare.getFlareSpawn().getBlock();
+
+					while (b.getType().equals(Material.AIR)) {
+						plugin.spawnParticle(preFallParticle, b.getLocation().clone().add(0.5, 0.5, 0.5),
+								0, 0, 0, 1, b.getWorld().getEntitiesByClass(Player.class));
+						b = b.getRelative(BlockFace.DOWN);
+					}
+
+					if (secondsLeft <= 0) {
+						plugin.playerFlares.remove(player);
+						flare.dropFlare();
+						this.cancel();
+						return;
+					}
+					secondsLeft--;
+				}
+			}.runTaskTimer(plugin, 0, 20);
+		}
+	}
+
 	public Random getRand() {
 		return rand;
 	}
@@ -51,15 +123,15 @@ public class Flare {
 		return flareSpawn;
 	}
 
-	public void doLightningAnimation(final Block chestBlock){
-		new BukkitRunnable(){
+	public void doLightningAnimation(final Block chestBlock) {
+		new BukkitRunnable() {
 			int i = 2;
 
 			@Override
 			public void run() {
 				chestBlock.getWorld().strikeLightningEffect(chestBlock.getLocation());
 
-				if(i <= 1){
+				if (i <= 1) {
 					fillFlareChest(chestBlock);
 					this.cancel();
 				}
@@ -69,13 +141,13 @@ public class Flare {
 		}.runTaskTimer(plugin, 0, 10);
 	}
 
-	public void dropFlare(){
+	public void dropFlare() {
 		FallingBlock block = activator.getWorld().spawnFallingBlock(flareSpawn, Material.SAND, (byte) 0);
 		block.setHurtEntities(false);
 		plugin.getFallingFlares().put(block.getUniqueId(), this);
 	}
 
-	public void fillFlareChest(final Block chestBlock){
+	public void fillFlareChest(final Block chestBlock) {
 		chestBlock.setType(Material.CHEST);
 
 		Chest c = (Chest) chestBlock.getState();
@@ -135,100 +207,45 @@ public class Flare {
 
 	}
 
-	public void setFlareSpawn(){
+	public void setFlareSpawn() {
 		double r = plugin.conf.config.getDouble("flare.drop-radius");
 		int minFree = plugin.getConf().config.getInt("flare.min-free-above-blocks", 20);
 
-		int count = 0;
-		int max = plugin.conf.config.getInt("flare.max-tries");
+		final int currentX = activator.getLocation().getBlockX();
+		final int currentZ = activator.getLocation().getBlockZ();
+		final int y = activator.getLocation().getBlockY() + minFree;
 
-		while (!plugin.inside(flareSpawn, (Location) plugin.getConf().config.get("Flares." + name + ".First"),
-				(Location) plugin.getConf().config.get("Flares." + name + ".Second"))) {
-			double randX = (rand.nextDouble() * r * 2) - r;
-			double randZ = (rand.nextDouble() * r * 2) - r;
+		List<Block> availableSpawns = new ArrayList<>();
 
-			flareSpawn = activator.getLocation().add(randX, Math.abs((double) minFree), randZ);
+		for (int x = currentX - (int) r; x < currentX + (int) r; x++) {
+			for (int z = currentZ - (int) r; z < currentZ + (int) r; z++) {
+				Block xyz = activator.getWorld().getBlockAt(x, y, z);
+				if (xyz.getType().equals(Material.AIR) &&
+						plugin.inside(xyz.getLocation(), (Location) plugin.getConf().config.get("Flares." + name + ".First"),
+								(Location) plugin.getConf().config.get("Flares." + name + ".Second"))){
+					Block block = xyz;
 
-			count++;
-			if (count >= max) {
-				activator.sendMessage(plugin.getTrans().format("Flare Drop Failed Message", null, activator));
-				flareSpawn = null;
-				return;
-			}
-		}
-	}
+					while (block.getY() >= activator.getLocation().getBlockY()) {
+						if (!block.getType().equals(Material.AIR)) {
+							xyz = null;
+							break;
+						}
 
-	public static void activateFlare(final ItemStack is, final Player player, final FlareAndQuests plugin, final String name) {
-		plugin.getConf().load();
-
-		if (plugin.playerFlares.containsKey(player)) {
-			player.sendMessage(plugin.getTrans().format("Flare In Use", null, player));
-			return;
-		}
-
-		double r = plugin.conf.config.getDouble("flare.drop-radius");
-
-		// TODO: Check if there is enough space to spawn flare
-
-		final Flare flare = new Flare(player, plugin, name);
-
-		flare.setFlareSpawn();
-
-		if(flare.getFlareSpawn() == null){
-			return;
-		}
-
-		String[] message = plugin.getTrans().format("Flare Broadcast", player.getLocation(), player);
-		for (Entity ent : player.getNearbyEntities(r, r, r)) {
-			if (ent instanceof Player && ent.getLocation().distance(player.getLocation()) <= r) {
-				ent.sendMessage(message);
-			}
-		}
-		player.sendMessage(message);
-
-		if (is.getAmount() == 1) {
-			player.getInventory().setItem(player.getInventory().getHeldItemSlot(), null);
-		} else {
-			is.setAmount(is.getAmount() - 1);
-		}
-
-		player.updateInventory();
-
-		SoundUtil.playFlareUseSound(plugin, player);
-
-		final int delay = plugin.getConf().config.getInt("flare.arrival-delay", 0);
-
-		if (delay <= 0) {
-			flare.dropFlare();
-		} else {
-			plugin.playerFlares.put(player, name);
-
-			final String message2 = ChatColor.translateAlternateColorCodes('&', plugin.getTrans().config.getString("Flare Arriving In Action Bar Message"));
-			final int preFallParticle = plugin.getConf().config.getInt("flare.pre-fall-particle-id", 3);
-
-			new BukkitRunnable() {
-				int secondsLeft = delay;
-
-				public void run() {
-					ActionBar.sendActionBar(player, message2.replace("{time}", secondsLeft + ""));
-
-					Block b = flare.getFlareSpawn().getBlock();
-
-					while (b.getType().equals(Material.AIR)){
-						plugin.spawnParticle(preFallParticle, b.getLocation().clone().add(0.5, 0.5, 0.5),
-								0, 0, 0, 1, b.getWorld().getEntitiesByClass(Player.class));
-						b = b.getRelative(BlockFace.DOWN);
+						block = block.getRelative(BlockFace.DOWN);
 					}
 
-					if (secondsLeft <= 0) {
-						plugin.playerFlares.remove(player);
-						flare.dropFlare();
-						this.cancel();
-						return;
+					if (xyz != null) {
+						availableSpawns.add(xyz);
 					}
-					secondsLeft--;
 				}
-			}.runTaskTimer(plugin, 0, 20);
+			}
 		}
+
+		if(availableSpawns.size() == 0){
+			activator.sendMessage(plugin.getTrans().format("Flare Not Enough Space", null, activator, new Group<>("free-blocks", "" + minFree)));
+			return;
+		}
+
+		flareSpawn = availableSpawns.get(rand.nextInt(availableSpawns.size())).getLocation();
 	}
 }
