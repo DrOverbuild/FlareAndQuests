@@ -143,7 +143,11 @@ public class Flare {
 
 	public void dropFlare() {
 		FallingBlock block = activator.getWorld().spawnFallingBlock(flareSpawn, Material.SAND, (byte) 0);
-		block.setHurtEntities(false);
+
+		try{
+			block.setHurtEntities(false); // This method doesn't work in versions of Spigot before 1.8.7
+		} catch (NoSuchMethodError error){}
+
 		plugin.getFallingFlares().put(block.getUniqueId(), this);
 	}
 
