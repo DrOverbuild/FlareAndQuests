@@ -174,7 +174,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		int dA = conf.config.getInt("Deaths Allowed For Keep-Inv");
 		int dD = conf.config.getInt("Keep-Inv Duration");
 
-		player.sendMessage(getTrans().format("Keep-Inventory Start Message", player.getLocation(), player,
+		player.sendMessage(getTrans().format("rq.keep-inv.start", player.getLocation(), player,
 				new Group<>("duration", dD + ""), new Group<>("deaths", dA + "")));
 		//player.sendMessage(G+"You now have "+Y+dD+G+" seconds or "+Y+dA+G+" deaths of keep-inventory.");
 
@@ -184,7 +184,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 				if (deathsLeft.containsKey(player)) {
 					deathsLeft.remove(player);
 
-					player.sendMessage(getTrans().format("Keep-Inventory Expire Message", player));
+					player.sendMessage(getTrans().format("rq.keep-inv.expire", player));
 
 					//player.sendMessage(G+"Your keep-inventory period has expired.");
 				}
@@ -200,7 +200,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 					return;
 				}
 
-				String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("Keep-Inventory Actionbar Message")).replace("{left}", t[0] + "");
+				String message = ChatColor.translateAlternateColorCodes('&', trans.config.getString("rq.keep-inv.actionbar")).replace("{left}", t[0] + "");
 				if (!message.toLowerCase().equals("none"))
 					ActionBar.sendActionBar(player, message);
 				t[0]--;

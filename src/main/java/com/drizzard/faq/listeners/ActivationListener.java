@@ -137,22 +137,22 @@ public class ActivationListener implements Listener {
 
 	private void activateFlare(Player player, String key, ItemStack itemStack) {
 		if (plugin.playerIsActive(player)) {
-			player.sendMessage(plugin.getTrans().format("Cannot Activate Flare While Doing Other Function", null, player));
+			player.sendMessage(plugin.getTrans().format("other-function-active.flare", null, player));
 			return;
 		}
 
 		int minPlayers = plugin.getConf().config.getInt("minimum-players.flare");
 		if (plugin.getServer().getOnlinePlayers().size() < minPlayers) {
-			player.sendMessage(plugin.getTrans().format("Not Enough Players", new Group<>("min-online", minPlayers + "")));
+			player.sendMessage(plugin.getTrans().format("not-enough-players", new Group<>("min-online", minPlayers + "")));
 			return;
 		}
 
 		if (!plugin.inside(player.getLocation(), (Location) plugin.getConf().config.get("Flares." + key + ".First"), (Location) plugin.getConf().config.get("Flares." + key + ".Second"))) {
 			if (plugin.serverHasFactions()) {
-				String[] message = plugin.getTrans().format("Not in Warzone Message", player.getLocation(), player);
+				String[] message = plugin.getTrans().format("not-in-warzone", player.getLocation(), player);
 				player.sendMessage(message);
 			} else {
-				player.sendMessage(plugin.getTrans().format("Not in Region Message", null, player));
+				player.sendMessage(plugin.getTrans().format("not-in-region", null, player));
 			}
 			return;
 		} else {
@@ -163,22 +163,22 @@ public class ActivationListener implements Listener {
 	private void activateWitem(Player player, String key, ItemStack itemStack) {
 		int minPlayers = plugin.getConf().config.getInt("minimum-players.witem");
 		if (plugin.getServer().getOnlinePlayers().size() < minPlayers) {
-			player.sendMessage(plugin.getTrans().format("Not Enough Players", new Group<>("min-online", minPlayers + "")));
+			player.sendMessage(plugin.getTrans().format("not-enough-players", new Group<>("min-online", minPlayers + "")));
 			return;
 		}
 
 		if (plugin.playerIsActive(player)) {
-			player.sendMessage(plugin.getTrans().format("Cannot Activate Witem While Doing Other Function", null, player));
+			player.sendMessage(plugin.getTrans().format("other-function-active.witem", null, player));
 			return;
 		}
 
 
 		if (!plugin.inside(player.getLocation(), (Location) plugin.getConf().config.get("Witems." + key + ".First"), (Location) plugin.getConf().config.get("Witems." + key + ".Second"))) {
 			if (plugin.serverHasFactions()) {
-				String[] message = plugin.getTrans().format("Not in Warzone Message", player.getLocation(), player);
+				String[] message = plugin.getTrans().format("not-in-warzone", player.getLocation(), player);
 				player.sendMessage(message);
 			} else {
-				player.sendMessage(plugin.getTrans().format("Not in Region Message", null, player));
+				player.sendMessage(plugin.getTrans().format("not-in-region", null, player));
 			}
 
 			return;
@@ -206,30 +206,30 @@ public class ActivationListener implements Listener {
 	private void activateRankQuest(Player player, String key, ItemStack itemStack) {
 		int minPlayers = plugin.getConf().config.getInt("minimum-players.rq");
 		if (plugin.getServer().getOnlinePlayers().size() < minPlayers) {
-			player.sendMessage(plugin.getTrans().format("Not Enough Players", new Group<>("min-online", minPlayers + "")));
+			player.sendMessage(plugin.getTrans().format("not-enough-players", new Group<>("min-online", minPlayers + "")));
 			return;
 		}
 
 		if (plugin.playerIsActive(player)) {
-			player.sendMessage(plugin.getTrans().format("Cannot Activate Rank Quest While Doing Other Function", null, player));
+			player.sendMessage(plugin.getTrans().format("other-function-active.rq", null, player));
 			return;
 		}
 
 		if (itemStack.getAmount() > 1) {
-			player.sendMessage(plugin.getTrans().format("Cannot Activate Stacked Rank Quests Message", null, player));
+			player.sendMessage(plugin.getTrans().format("rq.activation-error.stacked-rq", null, player));
 		} else if (plugin.getQIP().containsKey(player)) {
-			player.sendMessage(plugin.getTrans().format("Already Doing Quest Message", null, player));
+			player.sendMessage(plugin.getTrans().format("rq.activation-error.currently-doing-quest", null, player));
 		} else if (!plugin.inside(player.getLocation(), (Location) plugin.getConf().config.get("Quests." + key + ".First"), (Location) plugin.getConf().config.get("Quests." + key + ".Second"))) {
 			if (plugin.serverHasFactions()) {
-				String[] message = plugin.getTrans().format("Not in Warzone Message", null, player);
+				String[] message = plugin.getTrans().format("not-in-warzone", null, player);
 				player.sendMessage(message);
 			} else {
-				player.sendMessage(plugin.getTrans().format("Not in Region Message", null, player));
+				player.sendMessage(plugin.getTrans().format("not-in-region", null, player));
 			}
 
 			//player.sendMessage(DR+"You must be plugin.inside the proper region!");
 		} else if (plugin.getDeathsLeft().containsKey(player)) {
-			player.sendMessage(plugin.getTrans().format("Cannot Activate While in Keep Inv Message", null, player));
+			player.sendMessage(plugin.getTrans().format("rq.activation-error.in-keep-inv", null, player));
 		} else {
 			plugin.getQIP().put(player, new RankQuest(player.getInventory().getHeldItemSlot(), player, plugin.getConf().config.getInt("Quests." + key + ".Duration"), plugin, key));
 		}
@@ -258,7 +258,7 @@ public class ActivationListener implements Listener {
 	
 	private void activateMysteryMob(Player player, String key, ItemStack itemStack){
 		if (plugin.playerIsActive(player)) {
-			player.sendMessage(plugin.getTrans().format("Cannot Activate Mystery Mob While Doing Other Function", null, player));
+			player.sendMessage(plugin.getTrans().format("other-function-active.mm", null, player));
 			return;
 		}
 

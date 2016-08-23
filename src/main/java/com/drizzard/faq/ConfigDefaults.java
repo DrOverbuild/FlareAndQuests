@@ -1,5 +1,6 @@
 package com.drizzard.faq;
 
+import com.drizzard.faq.util.ConfigUtils;
 import com.drizzard.faq.util.Sounds;
 
 import java.util.ArrayList;
@@ -60,36 +61,43 @@ public class ConfigDefaults {
 	public static Config setTranslationsDefaults(FlareAndQuests plugin) {
 		HashMap<String, Object> defsT = new HashMap<String, Object>();
 
-		defsT.put("RQ Start Broadcast", "&e{player} &7has started a rank quest!  ({x}, {y}, {z})");
-		defsT.put("RQ Complete Broadcast", "&e{player} &7has completed their rank quest!  ({x}, {y}, {z})");
-		defsT.put("RQ Lost Broadcast", "&e{player} &7has lost their rank quest!  ({x}, {y}, {z})");
-		defsT.put("RQ Reset Broadcast", "&e{player} &7has reset their rank quest!  ({x}, {y}, {z})");
-		defsT.put("RQ Quit Broadcast", "&e{player} &7left, so their rank quest was reset!  ({x}, {y}, {z})");
-		defsT.put("Action Bar Message", "&b&lRank Quest: &e{left} &7seconds");
+		defsT.put("not-in-region", "&4You must be inside the proper region!");
+		defsT.put("not-in-warzone", "&4You must be in a Warzone!");
+		defsT.put("not-enough-players", "&cYou can''t use that item right now! There must be at least {min-online} players online.");
 
-		defsT.put("Not in Warzone Message", "&4You must be in a Warzone!");
-		defsT.put("Already Doing Quest Message", "&4You are already doing a rank quest!");
-		defsT.put("Not in Region Message", "&4You must be inside the proper region!");
-		defsT.put("Keep-Inventory Start Message", "&7You now have &e{duration} &7seconds or &e{deaths} &7deaths of keep-inventory.");
-		defsT.put("Keep-Inventory Expire Message", "&7Your keep-inventory period has expired.");
-		defsT.put("Keep-Inventory Actionbar Message", "&b&lKeep-Inventory: &e{time} &7seconds");
-		defsT.put("Flare Drop Failed Message", "&4Drop failed.");
-		defsT.put("Flare Arriving In Action Bar Message", "&7Supplies arriving in: {time} seconds");
-		defsT.put("Flare Arrived Message", "&7Your supplies have arrived! ({x}, {y}, {z})");
-		defsT.put("Flare In Use", "&cYou can only use one flare at a time!");
-		defsT.put("Flare Given Upon Join Message", "&7You have been given a flare because you disconnected whilst waiting for a flare.");
-		defsT.put("Flare Not Enough Space", "&cThere is not enough space to spawn a flare! The space must be at least {free-blocks} tall.");
-		defsT.put("Not Enough Players", "&cYou can't use that item right now! There must be at least {min-online} players online.");
-		defsT.put("Cannot Activate Stacked Rank Quests Message", "&4You cannot activate more than one rank quest at the same time!");
-		defsT.put("Cannot Activate While in Keep Inv Message", "&4You cannot activate a rank quest while in a keep inventory period!");
-		defsT.put("Cannot Activate Rank Quest While Doing Other Function", "&4You cannot activate a rank quest while doing another function!");
-		defsT.put("Cannot Activate Flare While Doing Other Function", "&4You cannot activate a flare while doing another function!");
-		defsT.put("Cannot Activate Witem While Doing Other Function", "&4You cannot activate a witem while doing another function!");
-		defsT.put("Cannot Activate Mystery Mob While Doing Other Function", "&4You cannot activate a mystery mob while doing another function!");
-		defsT.put("Flare Broadcast", "&e{player} &7has used a flare!");
+		defsT.put("flare.broadcast", "&e{player} &7has used a flare!");
+		defsT.put("flare.arrived", "&7Your supplies have arrived! ({x}, {y}, {z})");
+		defsT.put("flare.in-use", "&cYou can only use one flare at a time!");
+		defsT.put("flare.given-upon-join", "&7You have been given a flare because you disconnected whilst waiting for a flare.");
+		defsT.put("flare.drop-failed", "&4Drop failed.");
+		defsT.put("flare.actionbar", "&b&lSupplies arriving in: &e{time} &7seconds");
+		defsT.put("flare.no-space", "&cThere is not enough space to spawn a flare! The space must be at least {free-blocks} tall.");
+
+		defsT.put("rq.actionbar", "&b&lRank Quest: &e{left} &7seconds");
+		defsT.put("rq.keep-inv.actionbar", "&b&lKeep-Inventory: &e{time} &7seconds");
+		defsT.put("rq.keep-inv.start", "&7You now have &e{duration} &7seconds or &e{deaths} &7deaths of keep-inventory.");
+		defsT.put("rq.keep-inv.expire", "&7Your keep-inventory period has expired.");
+		defsT.put("rq.activation-error.currently-doing-quest", "&4You are already doing a rank quest!");
+		defsT.put("rq.activation-error.stacked-rq", "&4You cannot activate more than one rank quest at the same time!");
+		defsT.put("rq.activation-error.in-keep-inv", "&4You cannot activate a rank quest while in a keep inventory period!");
+		defsT.put("rq.broadcasts.started", "&e{player} &7has started a rank quest!  ({x}, {y}, {z})");
+		defsT.put("rq.broadcasts.completed", "&e{player} &7has completed their rank quest!  ({x}, {y}, {z})");
+		defsT.put("rq.broadcasts.lost", "&e{player} &7has lost their rank quest!  ({x}, {y}, {z})");
+		defsT.put("rq.broadcasts.reset", "&e{player} &7has reset their rank quest!  ({x}, {y}, {z})");
+		defsT.put("rq.broadcasts.quit", "&e{player} &7left, so their rank quest was reset!  ({x}, {y}, {z})");
+
+		defsT.put("other-function-active.rq", "&4You cannot activate a rank quest while doing another function!");
+		defsT.put("other-function-active.flare", "&4You cannot activate a flare while doing another function!");
+		defsT.put("other-function-active.witem", "&4You cannot activate a witem while doing another function!");
+		defsT.put("other-function-active.mm", "&4You cannot activate a mystery mob while doing another function!");
+
 		defsT.put("mm-item-use", "Congratulations! You have used a mystery mob item and got a {selectedspawner}!");
 
-		return new Config(plugin, defsT, "translations");
+		Config config = new Config(plugin, defsT, "translations");
+
+		ConfigUtils.updateMessagesConfig(config);
+
+		return config;
 	}
 
 	public static Config setMysteryMobDefaults(FlareAndQuests plugin) {

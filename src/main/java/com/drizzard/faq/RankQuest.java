@@ -63,7 +63,7 @@ public class RankQuest implements Listener {
 		one = (Location) plugin.conf.config.get("Quests." + name + ".First");
 		two = (Location) plugin.conf.config.get("Quests." + name + ".Second");
 
-		String[] message = plugin.getTrans().format("RQ Start Broadcast", owner.getLocation(), owner);
+		String[] message = plugin.getTrans().format("rq.broadcasts.start", owner.getLocation(), owner);
 //		String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Start Broadcast")).replace("{player}", owner.getName());
 		for (Player p : Bukkit.getOnlinePlayers()) {
 			p.sendMessage(message);
@@ -109,7 +109,7 @@ public class RankQuest implements Listener {
 
 					SoundUtil.playRQFinishSound(plugin, owner);
 
-					String[] message = plugin.getTrans().format("RQ Complete Broadcast", owner.getLocation(), owner);
+					String[] message = plugin.getTrans().format("rq.broadcasts.start", owner.getLocation(), owner);
 					for (Player p : Bukkit.getOnlinePlayers()) {
 						p.sendMessage(message);
 					}
@@ -182,7 +182,7 @@ public class RankQuest implements Listener {
 					owner.updateInventory();
 				}
 				plugin.conf.load();
-				String[] message = plugin.getTrans().format("RQ Lost Broadcast", owner.getLocation(), owner);
+				String[] message = plugin.getTrans().format("rq.broadcasts.lost", owner.getLocation(), owner);
 				for (Player p : Bukkit.getOnlinePlayers()) {
 					p.sendMessage(message);
 				}
@@ -207,7 +207,7 @@ public class RankQuest implements Listener {
 		if (ev.getPlayer().equals(owner) && !plugin.inside(ev.getTo(), one, two)) {
 			ItemStack is = owner.getInventory().getItem(slot);
 			plugin.conf.load();
-			String[] message = plugin.getTrans().format("RQ Reset Broadcast", owner.getLocation(), owner);
+			String[] message = plugin.getTrans().format("rq.broadcasts.reset", owner.getLocation(), owner);
 			for (Player p : Bukkit.getOnlinePlayers()) {
 				p.sendMessage(message);
 			}
@@ -227,7 +227,7 @@ public class RankQuest implements Listener {
 		if (ev.getPlayer().equals(owner) && !plugin.inside(ev.getTo(), one, two)) {
 			ItemStack is = owner.getInventory().getItem(slot);
 			plugin.conf.load();
-			String[] message = plugin.getTrans().format("RQ Reset Broadcast", owner.getLocation(), owner);
+			String[] message = plugin.getTrans().format("rq.broadcasts.reset", owner.getLocation(), owner);
 //			String message = ChatColor.translateAlternateColorCodes('&', plugin.trans.config.getString("RQ Reset Broadcast")).replace("{player}", owner.getName());
 			for (Player p : Bukkit.getOnlinePlayers()) {
 				p.sendMessage(message);
@@ -255,7 +255,7 @@ public class RankQuest implements Listener {
 				owner.updateInventory();
 			}
 			plugin.conf.load();
-			String[] message = plugin.getTrans().format("RQ Quit Broadcast", owner.getLocation(), owner);
+			String[] message = plugin.getTrans().format("rq.broadcasts.reset", owner.getLocation(), owner);
 			for (Player p : Bukkit.getOnlinePlayers()) {
 				p.sendMessage(message);
 			}
@@ -276,7 +276,7 @@ public class RankQuest implements Listener {
 				is.setItemMeta(IM);
 				owner.updateInventory();
 			}
-			String[] message = plugin.getTrans().format("RQ Lost Broadcast", owner.getLocation(), owner);
+			String[] message = plugin.getTrans().format("rq.broadcasts.lost", owner.getLocation(), owner);
 			for (Player p : Bukkit.getOnlinePlayers()) {
 				p.sendMessage(message);
 			}

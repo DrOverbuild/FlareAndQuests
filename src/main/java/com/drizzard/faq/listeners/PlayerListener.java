@@ -32,7 +32,7 @@ public class PlayerListener implements Listener {
 			if (num <= 0) {
 				plugin.getDeathsLeft().remove(ev.getEntity());
 
-				ev.getEntity().sendMessage(plugin.getTrans().format("Keep-Inventory Expire Message", null, ev.getEntity()));
+				ev.getEntity().sendMessage(plugin.getTrans().format("rq.keep-inv.expire", null, ev.getEntity()));
 			} else
 				plugin.getDeathsLeft().put(ev.getEntity(), num);
 		}
@@ -56,7 +56,7 @@ public class PlayerListener implements Listener {
 			// This is easier than rewriting the code to give a flare to a player
 			plugin.getCommand("flare").getExecutor().onCommand(plugin.getServer().getConsoleSender(), plugin.getCommand("flare"), "flare",
 					new String[]{"give", flare, ev.getPlayer().getName()});
-			ev.getPlayer().sendMessage(plugin.getTrans().format("Flare Given Upon Join Message", null, ev.getPlayer()));
+			ev.getPlayer().sendMessage(plugin.getTrans().format("flare.given-upon-join", null, ev.getPlayer()));
 			plugin.getPlayerData().config.set("players." + ev.getPlayer().getUniqueId().toString() + ".flare", null);
 			plugin.getPlayerData().save();
 		}

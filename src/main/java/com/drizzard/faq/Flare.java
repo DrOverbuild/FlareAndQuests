@@ -39,7 +39,7 @@ public class Flare {
 		plugin.getConf().load();
 
 		if (plugin.playerFlares.containsKey(player)) {
-			player.sendMessage(plugin.getTrans().format("Flare In Use", null, player));
+			player.sendMessage(plugin.getTrans().format("flare.in-use", null, player));
 			return;
 		}
 
@@ -53,7 +53,7 @@ public class Flare {
 
 		double r = plugin.conf.config.getDouble("flare.drop-radius");
 
-		String[] message = plugin.getTrans().format("Flare Broadcast", player.getLocation(), player);
+		String[] message = plugin.getTrans().format("flare.broadcast", player.getLocation(), player);
 		for (Entity ent : player.getNearbyEntities(r, r, r)) {
 			if (ent instanceof Player && ent.getLocation().distance(player.getLocation()) <= r) {
 				ent.sendMessage(message);
@@ -78,7 +78,7 @@ public class Flare {
 		} else {
 			plugin.playerFlares.put(player, name);
 
-			final String message2 = ChatColor.translateAlternateColorCodes('&', plugin.getTrans().config.getString("Flare Arriving In Action Bar Message"));
+			final String message2 = ChatColor.translateAlternateColorCodes('&', plugin.getTrans().config.getString("flare.actionbar"));
 			final int preFallParticle = plugin.getConf().config.getInt("flare.pre-fall-particle-id", 3);
 
 			new BukkitRunnable() {
@@ -198,7 +198,7 @@ public class Flare {
 		c.getBlockInventory().setContents(conts);
 		c.update(true);
 
-		getActivator().sendMessage(plugin.getTrans().format("Flare Arrived Message", chestBlock.getLocation(), getActivator()));
+		getActivator().sendMessage(plugin.getTrans().format("flare.arrived", chestBlock.getLocation(), getActivator()));
 
 		plugin.getPartTimers().put(chestBlock, new BukkitRunnable() {
 			public void run() {
@@ -246,7 +246,7 @@ public class Flare {
 		}
 
 		if(availableSpawns.size() == 0){
-			activator.sendMessage(plugin.getTrans().format("Flare Not Enough Space", null, activator, new Group<>("free-blocks", "" + minFree)));
+			activator.sendMessage(plugin.getTrans().format("flare.no-space", null, activator, new Group<>("free-blocks", "" + minFree)));
 			return;
 		}
 
