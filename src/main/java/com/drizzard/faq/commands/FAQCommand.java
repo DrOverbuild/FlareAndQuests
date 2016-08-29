@@ -29,6 +29,7 @@ public class FAQCommand extends BasePluginCommand {
         sender.sendMessage(BEG + "/flare " + SEP + "Display flare help page.");
         sender.sendMessage(BEG + "/witem " + SEP + "Display witem help page.");
         sender.sendMessage(BEG + "/mm " + SEP + "Display MysteryMob help page.");
-        sender.sendMessage(BEG + "/faq reload" + SEP + "This will reload the Config and Translations file.");
+	    sender.sendMessage(BEG + "/glow " + SEP + "Add a glow effect to the item in your hand.");
+        sender.sendMessage(BEG + "/faq reload" + SEP + "Reload the Config and Translations file.");
     }
 }

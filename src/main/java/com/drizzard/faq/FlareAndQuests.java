@@ -77,6 +77,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		getCommand("flare").setExecutor(new FLARECommand(this));
 		getCommand("witem").setExecutor(new WITEMCommand(this));
 		getCommand("mm").setExecutor(new MMCommand(this));
+		getCommand("glow").setExecutor(new GlowCommand());
 	}
 
 	public void registerEvents() {
