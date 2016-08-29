@@ -54,6 +54,10 @@ public class ConfigDefaults {
 		defs.put("sounds.mm-use", Sounds.BLAZE_HIT.name());
 
 		defs.put("always-use-regions", false);
+		
+		List<String> alwaysUsableWorlds = new ArrayList<String>();
+		alwaysUsableWorlds.add("example1");
+		defs.put("always-usable-worlds", alwaysUsableWorlds);
 
 		return new Config(plugin, defs, "config");
 	}

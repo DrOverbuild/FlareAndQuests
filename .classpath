@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="lib" path="lib/Factions.jar"/>
+	<classpathentry kind="lib" path="lib/MassiveCraftFactions/Factions.jar"/>
+	<classpathentry kind="lib" path="lib/MassiveCraftFactions/MassiveCore.jar"/>
+	<classpathentry kind="lib" path="lib/spigot110.jar"/>
+	<classpathentry kind="lib" path="lib/spigot17.jar"/>
+	<classpathentry kind="lib" path="lib/spigot18.jar"/>
+	<classpathentry kind="lib" path="lib/spigot19.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
