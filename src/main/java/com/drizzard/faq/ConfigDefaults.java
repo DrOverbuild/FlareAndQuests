@@ -65,7 +65,7 @@ public class ConfigDefaults {
 	public static Config setTranslationsDefaults(FlareAndQuests plugin) {
 		HashMap<String, Object> defsT = new HashMap<String, Object>();
 
-		defsT.put("not-in-region", "&4You must be inside the proper region!");
+		defsT.put("not-in-region", "&4You must be locationChecksOut the proper region!");
 		defsT.put("not-in-warzone", "&4You must be in a Warzone!");
 		defsT.put("not-enough-players", "&cYou can''t use that item right now! There must be at least {min-online} players online.");
 

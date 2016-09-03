@@ -214,7 +214,17 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 		}.runTaskTimer(this, 0, 20);
 	}
 
-	public boolean inside(Location loc, Location one, Location two) {
+	/**
+	 * Checks if a given location (loc) is in one of the always active worlds,
+	 * in the warzone (when applicable), or is inside two other locations (one,
+	 * two). This is used to make sure an item is activated within its proper
+	 * region.
+	 * @param loc
+	 * @param one
+	 * @param two
+	 * @return
+	 */
+	public boolean locationChecksOut(Location loc, Location one, Location two) {
 		if (loc == null) {
 			return false;
 		}

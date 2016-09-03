@@ -10,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -148,7 +147,7 @@ public class ActivationListener implements Listener {
 			return;
 		}
 		
-		if (!plugin.inside(player.getLocation(), (Location) plugin.getConf().config.get("Flares." + key + ".First"), (Location) plugin.getConf().config.get("Flares." + key + ".Second"))) {
+		if (!plugin.locationChecksOut(player.getLocation(), (Location) plugin.getConf().config.get("Flares." + key + ".First"), (Location) plugin.getConf().config.get("Flares." + key + ".Second"))) {
 			if (plugin.serverHasFactions()) {
 				String[] message = plugin.getTrans().format("not-in-warzone", player.getLocation(), player);
 				player.sendMessage(message);
@@ -175,7 +174,7 @@ public class ActivationListener implements Listener {
 			return;
 		}
 		
-		if (!plugin.inside(player.getLocation(), (Location) plugin.getConf().config.get("Witems." + key + ".First"), (Location) plugin.getConf().config.get("Witems." + key + ".Second"))) {
+		if (!plugin.locationChecksOut(player.getLocation(), (Location) plugin.getConf().config.get("Witems." + key + ".First"), (Location) plugin.getConf().config.get("Witems." + key + ".Second"))) {
 			if (plugin.serverHasFactions()) {
 				String[] message = plugin.getTrans().format("not-in-warzone", player.getLocation(), player);
 				player.sendMessage(message);
@@ -183,7 +182,7 @@ public class ActivationListener implements Listener {
 				player.sendMessage(plugin.getTrans().format("not-in-region", null, player));
 			}
 			return;
-			//player.sendMessage(DR+"You must be plugin.inside the proper region!");
+			//player.sendMessage(DR+"You must be plugin.locationChecksOut the proper region!");
 		}
 
 		if (itemStack.getAmount() == 1) {
@@ -223,7 +222,7 @@ public class ActivationListener implements Listener {
 		
 			player.sendMessage(plugin.getTrans().format("rq.activation-error.currently-doing-quest", null, player));
 		
-		} else if (!plugin.inside(player.getLocation(), (Location) plugin.getConf().config.get("Quests." + key + ".First"), (Location) plugin.getConf().config.get("Quests." + key + ".Second"))) {
+		} else if (!plugin.locationChecksOut(player.getLocation(), (Location) plugin.getConf().config.get("Quests." + key + ".First"), (Location) plugin.getConf().config.get("Quests." + key + ".Second"))) {
 			
 			if (plugin.serverHasFactions()) {
 				String[] message = plugin.getTrans().format("not-in-warzone", null, player);
@@ -232,7 +231,7 @@ public class ActivationListener implements Listener {
 				player.sendMessage(plugin.getTrans().format("not-in-region", null, player));
 			}
 
-			//player.sendMessage(DR+"You must be plugin.inside the proper region!");
+			//player.sendMessage(DR+"You must be plugin.locationChecksOut the proper region!");
 		} else if (plugin.getDeathsLeft().containsKey(player)) {
 			player.sendMessage(plugin.getTrans().format("rq.activation-error.in-keep-inv", null, player));
 		} else {

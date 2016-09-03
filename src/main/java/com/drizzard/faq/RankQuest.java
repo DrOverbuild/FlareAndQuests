@@ -204,7 +204,7 @@ public class RankQuest implements Listener {
 
 	@EventHandler
 	public void onMove(PlayerMoveEvent ev) {
-		if (ev.getPlayer().equals(owner) && !plugin.inside(ev.getTo(), one, two)) {
+		if (ev.getPlayer().equals(owner) && !plugin.locationChecksOut(ev.getTo(), one, two)) {
 			ItemStack is = owner.getInventory().getItem(slot);
 			plugin.conf.load();
 			String[] message = plugin.getTrans().format("rq.broadcasts.reset", owner.getLocation(), owner);
@@ -224,7 +224,7 @@ public class RankQuest implements Listener {
 
 	@EventHandler
 	public void onTeleport(PlayerTeleportEvent ev) {
-		if (ev.getPlayer().equals(owner) && !plugin.inside(ev.getTo(), one, two)) {
+		if (ev.getPlayer().equals(owner) && !plugin.locationChecksOut(ev.getTo(), one, two)) {
 			ItemStack is = owner.getInventory().getItem(slot);
 			plugin.conf.load();
 			String[] message = plugin.getTrans().format("rq.broadcasts.reset", owner.getLocation(), owner);

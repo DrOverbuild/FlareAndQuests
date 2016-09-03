@@ -225,7 +225,7 @@ public class Flare {
 			for (int z = currentZ - (int) r; z < currentZ + (int) r; z++) {
 				Block xyz = activator.getWorld().getBlockAt(x, y, z);
 				if (xyz.getType().equals(Material.AIR) &&
-						plugin.inside(xyz.getLocation(), (Location) plugin.getConf().config.get("Flares." + name + ".First"),
+						plugin.locationChecksOut(xyz.getLocation(), (Location) plugin.getConf().config.get("Flares." + name + ".First"),
 								(Location) plugin.getConf().config.get("Flares." + name + ".Second"))){
 					Block block = xyz;
 

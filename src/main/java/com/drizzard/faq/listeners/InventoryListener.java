@@ -117,7 +117,7 @@ public class InventoryListener implements Listener {
 			spawnersSelected(ev);
 		} else if (ev.getInventory() instanceof AnvilInventory) {
 			// We run both of these methods because they make the check if the
-			// anvil is for configuration inside the methods.
+			// anvil is for configuration locationChecksOut the methods.
 			itemChanceSet(ev);
 			spawnerChanceSet(ev);
 		}
