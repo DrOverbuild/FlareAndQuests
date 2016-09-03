@@ -50,6 +50,11 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	HashMap<Inventory, Group<ItemStack, String>> flareAnvils = new HashMap<Inventory, Group<ItemStack, String>>();
 	HashMap<Inventory, String> mmAnvils = new HashMap<>();
 
+	private static int getInventorySize(int numberOfItems) {
+		int rows = (int) Math.ceil(((double) numberOfItems / 9.0));
+		return Math.min(rows * 9, 54);
+	}
+
 	public void onEnable() {
 		registerEvents();
 
@@ -124,12 +129,12 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 				EntityType type = EntityType.valueOf(key.toUpperCase());
 
 				ItemStack item;
-				if(getConf().config.contains("MysteryMobs." + name + ".spawners." + type.name().toLowerCase())){
+				if (getConf().config.contains("MysteryMobs." + name + ".spawners." + type.name().toLowerCase())) {
 					String chance = getConf().config.getString("MysteryMobs." + name + ".spawners." + type.name().toLowerCase());
 					item = ItemStacks.generateStack(Material.STAINED_GLASS_PANE,
 							getMysteryMobSpawners().config.getString("spawners." + key + ".display_name"),
 							1, (short) 13, Arrays.asList(type.name(), chance));
-				}else{
+				} else {
 					item = ItemStacks.generateStack(Material.MOB_SPAWNER,
 							getMysteryMobSpawners().config.getString("spawners." + key + ".display_name"),
 							1, (short) 0, Arrays.asList(type.name()));
@@ -210,13 +215,22 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	}
 
 	public boolean inside(Location loc, Location one, Location two) {
+		if (loc == null) {
+			return false;
+		}
+
+		List<String> usableWorlds = getConf().config.getStringList("always-usable-worlds");
+		if (usableWorlds.contains(loc.getWorld().getName())) {
+			return true;
+		}
 
 		if (serverHasFactions()) {
 			return isWarzone(loc);
 		} else {
 
-			if (one == null || two == null)
+			if (one == null || two == null) {
 				return false;
+			}
 
 			boolean worlds = loc.getWorld().equals(one.getWorld()) && loc.getWorld().equals(two.getWorld());
 
@@ -284,7 +298,7 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 	}
 
 	public boolean isWarzone(Location loc) {
-		if(loc == null){
+		if (loc == null) {
 			return false;
 		}
 
@@ -322,10 +336,5 @@ public class FlareAndQuests extends JavaPlugin implements Listener {
 
 	public boolean playerIsActive(Player p) {
 		return QIP.containsKey(p) || deathsLeft.containsKey(p) || playerFlares.containsKey(p);
-	}
-
-	private static int getInventorySize(int numberOfItems) {
-		int rows = (int) Math.ceil(((double) numberOfItems / 9.0));
-		return Math.min(rows * 9, 54);
 	}
 }

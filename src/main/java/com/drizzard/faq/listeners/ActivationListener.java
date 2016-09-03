@@ -147,11 +147,8 @@ public class ActivationListener implements Listener {
 			player.sendMessage(plugin.getTrans().format("not-enough-players", new Group<>("min-online", minPlayers + "")));
 			return;
 		}
-		World world = ((Location)plugin.getConf().config.get("Flares." + key + ".First")).getWorld();
 		
-		List<String> usableWorlds = plugin.getConf().config.getStringList("always-usable-worlds");
-		
-		if (!usableWorlds.contains(world.getName()) && !plugin.inside(player.getLocation(), (Location) plugin.getConf().config.get("Flares." + key + ".First"), (Location) plugin.getConf().config.get("Flares." + key + ".Second"))) {
+		if (!plugin.inside(player.getLocation(), (Location) plugin.getConf().config.get("Flares." + key + ".First"), (Location) plugin.getConf().config.get("Flares." + key + ".Second"))) {
 			if (plugin.serverHasFactions()) {
 				String[] message = plugin.getTrans().format("not-in-warzone", player.getLocation(), player);
 				player.sendMessage(message);
@@ -177,12 +174,8 @@ public class ActivationListener implements Listener {
 			player.sendMessage(plugin.getTrans().format("other-function-active.witem", null, player));
 			return;
 		}
-
-		World world = ((Location)plugin.getConf().config.get("Witems." + key + ".First")).getWorld();
 		
-		List<String> usableWorlds = plugin.getConf().config.getStringList("always-usable-worlds");
-		
-		if (!usableWorlds.contains(world.getName()) && !plugin.inside(player.getLocation(), (Location) plugin.getConf().config.get("Witems." + key + ".First"), (Location) plugin.getConf().config.get("Witems." + key + ".Second"))) {
+		if (!plugin.inside(player.getLocation(), (Location) plugin.getConf().config.get("Witems." + key + ".First"), (Location) plugin.getConf().config.get("Witems." + key + ".Second"))) {
 			if (plugin.serverHasFactions()) {
 				String[] message = plugin.getTrans().format("not-in-warzone", player.getLocation(), player);
 				player.sendMessage(message);
@@ -221,10 +214,6 @@ public class ActivationListener implements Listener {
 			player.sendMessage(plugin.getTrans().format("other-function-active.rq", null, player));
 			return;
 		}
-
-		World world = ((Location)plugin.getConf().config.get("Quests." + key + ".First")).getWorld();
-		
-		List<String> usableWorlds = plugin.getConf().config.getStringList("always-usable-worlds");
 		
 		if (itemStack.getAmount() > 1) {
 			
@@ -234,7 +223,7 @@ public class ActivationListener implements Listener {
 		
 			player.sendMessage(plugin.getTrans().format("rq.activation-error.currently-doing-quest", null, player));
 		
-		} else if (!usableWorlds.contains(world.getName()) && !plugin.inside(player.getLocation(), (Location) plugin.getConf().config.get("Quests." + key + ".First"), (Location) plugin.getConf().config.get("Quests." + key + ".Second"))) {
+		} else if (!plugin.inside(player.getLocation(), (Location) plugin.getConf().config.get("Quests." + key + ".First"), (Location) plugin.getConf().config.get("Quests." + key + ".Second"))) {
 			
 			if (plugin.serverHasFactions()) {
 				String[] message = plugin.getTrans().format("not-in-warzone", null, player);
