@@ -32,6 +32,10 @@ public class GlowCommand implements CommandExecutor {
 			return true;
 		}
 
+		if(ItemStacks.itemHasGlowEffect(player.getItemInHand())){
+			player.sendMessage(BasePluginCommand.G + "Item is already glowing!");
+		}
+
 		player.setItemInHand(ItemStacks.addGlowEffect(player.getItemInHand()));
 
 		return true;
