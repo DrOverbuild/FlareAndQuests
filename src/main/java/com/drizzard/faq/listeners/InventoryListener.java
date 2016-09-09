@@ -59,11 +59,16 @@ public class InventoryListener implements Listener {
 			List<ItemStack> items = new ArrayList<ItemStack>();
 			for (ItemStack i : ev.getInventory().getContents()) {
 				if (i != null && i.getType() != Material.AIR) {
-					items.add(i);
+					if(ItemStacks.itemHasGlowEffect(i)){
+						items.add(ItemStacks.addGlowEffect(i));
+					}else {
+						items.add(i);
+					}
 				}
 			}
 			String name = invTitle.substring(invTitle.indexOf("For ") + 4);
-			plugin.getConf().config.set(activity + "." + name + "" + configKey, items);
+			plugin.getConf().config.set(activity + "." + name + "." + configKey, items);
+
 			plugin.getConf().save();
 
 			if (activity.equals("Quests")) {
@@ -315,6 +320,11 @@ public class InventoryListener implements Listener {
 		target.setItemMeta(im);
 
 		plugin.getConf().load();
+
+		if(ItemStacks.itemHasGlowEffect(target)){
+			target = ItemStacks.addGlowEffect(target);
+		}
+
 		List<ItemStack> items = (List<ItemStack>) plugin.getConf().config.getList("Flares." + name + ".Contents", new ArrayList<ItemStack>());
 		items.add(target);
 		plugin.getConf().config.set("Flares." + name + ".Contents", items);

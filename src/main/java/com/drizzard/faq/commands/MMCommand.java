@@ -8,6 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
 import java.util.Set;
@@ -55,7 +56,8 @@ public class MMCommand extends BasePluginCommand {
 				}
 
 				for (int i = 0; i < numberOfItems; i++) {
-					target.getInventory().addItem(getConf().config.getItemStack("MysteryMobs." + args[2] + ".Activate"));
+					ItemStack stack = getConf().config.getItemStack("MysteryMobs." + args[2] + ".Activate");
+					target.getInventory().addItem(stack);
 				}
 				target.updateInventory();
 
@@ -79,7 +81,13 @@ public class MMCommand extends BasePluginCommand {
 				if (getConf().config.contains("MysteryMobs." + args[1])) {
 					p.sendMessage(DR + "There is already a mystery mob named " + R + args[1]);
 				} else {
-					getConf().config.set("MysteryMobs." + args[1] + ".Activate", p.getItemInHand());
+					ItemStack stack = p.getItemInHand();
+
+					if(ItemStacks.itemHasGlowEffect(stack)){
+						stack = ItemStacks.addGlowEffect(stack);
+					}
+
+					getConf().config.set("MysteryMobs." + args[1] + ".Activate", stack);
 					getConf().save();
 					p.getInventory().setItem(p.getInventory().getHeldItemSlot(), null);
 					p.updateInventory();

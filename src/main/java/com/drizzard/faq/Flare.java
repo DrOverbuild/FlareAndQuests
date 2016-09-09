@@ -2,6 +2,7 @@ package com.drizzard.faq;
 
 import com.drizzard.faq.util.ActionBar;
 import com.drizzard.faq.util.Group;
+import com.drizzard.faq.util.ItemStacks;
 import com.drizzard.faq.util.SoundUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -16,7 +17,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class Flare {
 	FlareAndQuests plugin;
@@ -144,9 +147,10 @@ public class Flare {
 	public void dropFlare() {
 		FallingBlock block = activator.getWorld().spawnFallingBlock(flareSpawn, Material.SAND, (byte) 0);
 
-		try{
+		try {
 			block.setHurtEntities(false); // This method doesn't work in versions of Spigot before 1.8.7
-		} catch (NoSuchMethodError error){}
+		} catch (NoSuchMethodError error) {
+		}
 
 		plugin.getFallingFlares().put(block.getUniqueId(), this);
 	}
@@ -226,7 +230,7 @@ public class Flare {
 				Block xyz = activator.getWorld().getBlockAt(x, y, z);
 				if (xyz.getType().equals(Material.AIR) &&
 						plugin.locationChecksOut(xyz.getLocation(), (Location) plugin.getConf().config.get("Flares." + name + ".First"),
-								(Location) plugin.getConf().config.get("Flares." + name + ".Second"))){
+								(Location) plugin.getConf().config.get("Flares." + name + ".Second"))) {
 					Block block = xyz;
 
 					while (block.getY() >= activator.getLocation().getBlockY()) {
@@ -245,7 +249,7 @@ public class Flare {
 			}
 		}
 
-		if(availableSpawns.size() == 0){
+		if (availableSpawns.size() == 0) {
 			activator.sendMessage(plugin.getTrans().format("flare.no-space", null, activator, new Group<>("free-blocks", "" + minFree)));
 			return;
 		}

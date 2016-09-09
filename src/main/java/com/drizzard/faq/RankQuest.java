@@ -2,6 +2,7 @@ package com.drizzard.faq;
 
 import com.drizzard.faq.util.ActionBar;
 import com.drizzard.faq.util.FireworkUtil;
+import com.drizzard.faq.util.ItemStacks;
 import com.drizzard.faq.util.SoundUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -102,7 +103,9 @@ public class RankQuest implements Listener {
 							is.setItemMeta(IM);
 						}
 					}*/
-					owner.getInventory().addItem(plugin.conf.config.getItemStack("Quests." + name + ".Voucher"));
+
+					ItemStack stack = plugin.getConf().config.getItemStack("Quests." + name + ".Voucher");
+					owner.getInventory().addItem(stack);
 					owner.updateInventory();
 
 					FireworkUtil.fireworks(plugin, owner);

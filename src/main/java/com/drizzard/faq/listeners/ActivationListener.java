@@ -276,7 +276,6 @@ public class ActivationListener implements Listener {
 
 		SoundUtil.playMMUseSound(plugin, player);
 
-		// TODO: Activate MM
 		String chosenSpawner = null;
 		List<String> allSpawners = new ArrayList<>();
 		allSpawners.addAll(plugin.getConf().config.getConfigurationSection("MysteryMobs." + key + ".spawners").getKeys(false));

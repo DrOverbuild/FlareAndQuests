@@ -110,7 +110,8 @@ public class WITEMCommand extends BasePluginCommand {
                 }
 
                 for (int i = 0; i < numberOfItems; i++) {
-                    target.getInventory().addItem(getConf().config.getItemStack("Witems." + args[2] + ".Activate"));
+                    ItemStack stack = getConf().config.getItemStack("Witems." + args[2] + ".Activate");
+                    target.getInventory().addItem(stack);
                 }
                 target.updateInventory();
 
@@ -138,7 +139,13 @@ public class WITEMCommand extends BasePluginCommand {
                 if (getConf().config.contains("Witems." + args[1]))
                     p.sendMessage(DR + "There is already a witem named " + R + args[1]);
                 else {
-                    getConf().config.set("Witems." + args[1] + ".Activate", p.getItemInHand());
+                    ItemStack stack = p.getItemInHand();
+
+                    if(ItemStacks.itemHasGlowEffect(stack)){
+                        stack = ItemStacks.addGlowEffect(stack);
+                    }
+
+                    getConf().config.set("Witems." + args[1] + ".Activate", stack);
                     getConf().save();
                     //player.getInventory().remove(player.getItemInHand());
                     p.getInventory().setItem(p.getInventory().getHeldItemSlot(), null);

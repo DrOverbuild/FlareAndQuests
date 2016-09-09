@@ -6,6 +6,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 
 /**
  * Created by jasper on 8/28/16.
@@ -33,11 +34,13 @@ public class GlowCommand implements CommandExecutor {
 		}
 
 		if(ItemStacks.itemHasGlowEffect(player.getItemInHand())){
-			player.sendMessage(BasePluginCommand.G + "Item is already glowing!");
+			player.sendMessage(BasePluginCommand.G + "Item is already glowing (Item has empty \"ench\" NBT tag)");
+		}else if (player.getItemInHand().getItemMeta().hasItemFlag(ItemFlag.HIDE_ENCHANTS)){
+			player.sendMessage(BasePluginCommand.G + "Item is already glowing (Item has HIDE_ENCHANTS item flag)");
+		}else {
+			player.setItemInHand(ItemStacks.addGlowEffect(player.getItemInHand()));
+			player.sendMessage(BasePluginCommand.G + "Applied glow effect to the item in your hand");
 		}
-
-		player.setItemInHand(ItemStacks.addGlowEffect(player.getItemInHand()));
-
 		return true;
 	}
 }

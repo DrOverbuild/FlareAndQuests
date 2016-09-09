@@ -1,7 +1,6 @@
 package com.drizzard.faq.util;
 
 import com.drizzard.faq.nms.NMSHelper;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -120,7 +119,6 @@ public class ItemStacks {
 			Class<?> craftItemStackClass = Class.forName("org.bukkit.craftbukkit." + version + ".inventory.CraftItemStack");
 			Class<?> nbtTagCompoundClass = Class.forName("net.minecraft.server." + version + ".NBTTagCompound");
 			Class<?> nbtTagListClass = Class.forName("net.minecraft.server." + version + ".NBTTagList");
-			Class<?> nbtBaseClass = Class.forName("net.minecraft.server." + version + ".NBTBase");
 
 			Object nmsStack = craftItemStackClass.getMethod("asNMSCopy", ItemStack.class).invoke(null, itemStack);
 			Object tag;
@@ -138,9 +136,10 @@ public class ItemStacks {
 				return false;
 			}
 
-			ench = nbtTagCompoundClass.getMethod("getList", String.class, int.class).invoke(tag, "ench", 0);
+			ench = nbtTagCompoundClass.getMethod("getList", String.class, int.class).invoke(tag, "ench", 10);
 			Boolean enchIsEmpty = (Boolean) nbtTagListClass.getMethod("isEmpty").invoke(ench);
-			return  enchIsEmpty;
+
+			return enchIsEmpty;
 
 //			net.minecraft.server.v1_8_R3.ItemStack nmsItem = CraftItemStack.asNMSCopy(itemStack);
 //			NBTTagCompound tag = nmsItem.getTag();
